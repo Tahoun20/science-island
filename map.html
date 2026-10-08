@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Science Island · Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="common.css">
+<style>
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:16px;align-items:start}
+.mapWrap{position:relative;width:100%;max-width:min(680px, calc((100vh - 120px) * 1224 / 1285));margin:0 auto;aspect-ratio:1224/1285;border-radius:26px;
+  box-shadow:0 10px 34px rgba(31,61,87,.22);background:url(assets/map_island.jpg) center/cover #8fd3ee;container-type:inline-size}
+.stop{position:absolute;transform:translate(-50%,-50%);text-decoration:none;color:var(--navy)}
+.stop .dot{width:clamp(48px,11vw,76px);aspect-ratio:1;border-radius:50%;background:var(--paper);border:5px solid #f08a6c;display:grid;place-items:center;
+  font-size:clamp(22px,5vw,34px);box-shadow:0 6px 14px rgba(31,61,87,.25);position:relative;transition:transform .15s}
+@supports (width:1cqw){ .stop .dot{width:clamp(40px,11.5cqw,76px);font-size:clamp(18px,5.2cqw,34px);border-width:clamp(3px,.8cqw,5px)} }
+.stop:hover .dot,.stop:focus-visible .dot{transform:scale(1.08)}
+.stop:focus-visible{outline:none}
+.stop:focus-visible .dot{outline:4px solid #fff;outline-offset:3px}
+.stop.done .dot{border-color:var(--ok)}
+.stop.next .dot{animation:pulse 1.4s infinite}
+.stop .n{position:absolute;top:-6px;left:-6px;width:24px;height:24px;border-radius:50%;background:var(--navy);color:#fff;font-size:13px;font-weight:900;display:grid;place-items:center}
+.stop .badge{position:absolute;top:-6px;right:-8px;min-width:24px;height:24px;padding:0 6px;border-radius:99px;background:var(--coral);color:#fff;font-size:13px;font-weight:900;display:grid;place-items:center}
+.stop .lab{position:absolute;white-space:nowrap;background:var(--card);border-radius:12px;padding:4px 10px;font-weight:900;font-size:clamp(11px,2.4cqw,14px);text-align:center;line-height:1.25;box-shadow:0 3px 8px rgba(31,61,87,.18)}
+.stop.below .lab{top:calc(100% + 4px);left:50%;transform:translateX(-50%)}
+.stop.right .lab{left:calc(100% + 6px);top:50%;transform:translateY(-50%)}
+.stop.left .lab{right:calc(100% + 6px);top:50%;transform:translateY(-50%)}
+.stop .lab small{display:block;color:#b7791f;font-size:12.5px;letter-spacing:1px}
+.stop .lab small .off{color:#d8cdb5}
+.side{display:flex;flex-direction:column;gap:12px}
+.coachCard{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.coachCard img{height:160px}
+.coachCard .bubble{width:100%}
+.lvl{display:flex;flex-direction:column;gap:6px}
+.lvl .t{display:flex;justify-content:space-between;gap:8px;font-weight:900;font-size:15px}
+.lvl small{font-weight:800;color:var(--ink);font-size:13px}
+.hello{font-weight:900;font-size:15px;color:var(--ink)}
+@keyframes pulse{0%,100%{box-shadow:0 6px 14px rgba(31,61,87,.25),0 0 0 0 rgba(255,255,255,.9)}50%{box-shadow:0 6px 14px rgba(31,61,87,.25),0 0 0 12px rgba(255,255,255,0)}}
+@media (max-width:820px){
+  .grid{grid-template-columns:1fr}
+  .side{display:contents}
+  .coachCard{order:-1}
+  .lvl{order:2}
+  .coachCard{flex-direction:row;text-align:left;align-items:center}
+  .coachCard img{height:84px}
+  .coachCard .btn{display:none}
+  .mapWrap{max-width:100%}
+}
+@media (max-height:520px) and (orientation:landscape){
+  .app{padding:6px 12px 12px;gap:6px}
+  .brand p{display:none}
+  .grid{grid-template-columns:minmax(0,1fr) 240px}
+  .side{order:0}
+  .mapWrap{max-width:calc((100vh - 70px) * 1224 / 1285)}
+  .coachCard img{height:64px}
+  .stop .lab{font-size:11px;padding:3px 7px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <a class="brand" href="index.html" title="Change player">
+      <div class="logo" aria-hidden="true">🏝️</div>
+      <div><h1>Science Island</h1><p>Grade 5 · Languages · Chapter 1: Bones and Muscles</p></div>
+    </a>
+    <div class="hud">
+      <span class="pill" id="streakPill" title="Daily streak">🔥 <b id="streak">0</b></span>
+      <span class="pill" title="Stars">⭐ <b id="stars">0</b> / 6</span>
+      <button class="icon" id="mute" type="button" aria-label="Sound" aria-pressed="false" title="Sound on/off">♪</button>
+      <a class="icon" href="index.html" aria-label="Change player" title="Change player">👤</a>
+    </div>
+  </header>
+  <main class="grid">
+    <div class="mapWrap" id="map" role="list" aria-label="Island map with five stops"></div>
+    <aside class="side">
+      <div class="card coachCard">
+        <img id="parrot" src="assets/parrot_point.png" alt="Koko the parrot">
+        <div class="bubble" id="bubble"></div>
+        <a class="btn primary" id="go" href="arm.html">Go ▸</a>
+      </div>
+      <div class="card lvl">
+        <div class="hello" id="hello"></div>
+        <div class="t"><span id="lvlTitle"></span><span id="lvlXp"></span></div>
+        <div class="xpbar" aria-hidden="true"><i id="lvlBar"></i></div>
+        <small id="lvlNext"></small>
+      </div>
+    </aside>
+  </main>
+</div>
+<script src="firebase-config.js"></script>
+<script src="questions.js"></script>
+<script src="common.js"></script>
+<script>
+(async () => {
+  'use strict';
+  const me = SI.requirePlayer(); if (!me) return;
+  const $ = s => document.querySelector(s);
+  const P = SI.prof(), now = Date.now();
+  const arm = P.arm || {}, quest = P.quest || {}, daily = SI.dailyState();
+  const due = Object.values(P.cards || {}).filter(c => c.due <= now).length;
+  const lv = SI.levelInfo(SI.xp());
+
+  $('#hello').textContent = `Hi, ${me.name}!`;
+  $('#lvlTitle').textContent = `Level ${lv.n} · ${lv.title}`;
+  $('#lvlXp').textContent = `${lv.xp} XP`;
+  $('#lvlBar').style.width = Math.round(lv.pct * 100) + '%';
+  $('#lvlNext').textContent = lv.to ? `${lv.to - lv.xp} XP to ${lv.next}` : 'Top level reached!';
+  $('#streak').textContent = daily.streak;
+  $('#stars').textContent = (arm.stars || 0) + (quest.stars || 0);
+
+  const mute = $('#mute');
+  const paint = () => { mute.setAttribute('aria-pressed', SI.isMuted()); mute.setAttribute('aria-label', SI.isMuted() ? 'Sound off' : 'Sound on'); };
+  mute.onclick = () => { SI.setMuted(!SI.isMuted()); paint(); }; paint();
+
+  const stars = n => '★'.repeat(n) + `<span class="off">${'★'.repeat(3 - n)}</span>`;
+  const STOPS = [
+    { x: 59.6, y: 82.9, side: 'left', icon: '🦾', name: 'Arm Mechanic', href: 'arm.html', done: !!arm.stars, sub: stars(arm.stars || 0),
+      hint: 'See how your muscles pull your bones!' },
+    { x: 54.6, y: 67.1, side: 'right', icon: '⭐', name: 'Chapter Quest', href: 'quiz.html#quest', done: !!quest.stars, sub: stars(quest.stars || 0),
+      hint: '20 questions on the whole chapter. Your best score goes on the Champions board!' },
+    { x: 41.3, y: 51.4, side: 'right', icon: '⚡', name: 'Daily 5', href: 'quiz.html#daily', done: daily.done, sub: daily.done ? '✓ done today' : (daily.streak ? `🔥 ${daily.streak} days` : 'once a day'),
+      hint: '5 quick questions every day. Keep your fire streak going!' },
+    { x: 39.6, y: 38.1, side: 'left', icon: '🔁', name: 'Review', href: 'quiz.html#review', badge: due, done: false, sub: due ? `${due} waiting` : 'all clear',
+      hint: due ? `${due} tricky question${due > 1 ? 's are' : ' is'} waiting for you.` : 'Koko saves your tricky questions here.' },
+    { x: 68.2, y: 12.5, side: 'below', icon: '🏆', name: 'Champions', href: 'champions.html', done: false, sub: '&nbsp;',
+      hint: 'See this week’s top players!' }
+  ];
+  let next = !arm.stars ? 0 : !quest.stars ? 1 : !daily.done ? 2 : due ? 3 : 4;
+  const map = $('#map');
+  STOPS.forEach((s, i) => {
+    const a = document.createElement('a');
+    a.className = `stop ${s.side}` + (s.done ? ' done' : '') + (i === next ? ' next' : '');
+    a.href = s.href; a.setAttribute('role', 'listitem'); a.style.left = s.x + '%'; a.style.top = s.y + '%';
+    a.setAttribute('aria-label', `Stop ${i + 1}: ${s.name}`);
+    a.innerHTML = `<span class="dot"><span class="n">${i + 1}</span>${s.icon}${s.badge ? `<span class="badge">${s.badge}</span>` : ''}</span>
+      <span class="lab">${s.name}<small id="sub${i}">${s.sub}</small></span>`;
+    map.appendChild(a);
+  });
+  const s = STOPS[next];
+  $('#bubble').innerHTML = `${next === 0 ? `Welcome, <b>${SI.esc(me.name)}</b>! ` : `Great work, <b>${SI.esc(me.name)}</b>! `}Next stop: <b>${s.name}</b>. ${s.hint}`;
+  $('#go').href = s.href;
+
+  // Champions label: my rank this week
+  try { const m = await SI.LB.me(); if (m) $('#sub4').textContent = `you are #${m.rank}`; } catch (e) {}
+})();
+</script>
+</body>
+</html>

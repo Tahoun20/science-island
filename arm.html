@@ -215,7 +215,7 @@ body{
       <div class="pill" id="stagePill">Stage 1 of 3</div>
       <div class="pill" id="scorePill">Score <b id="score">0</b></div>
       <button class="icon" id="mute" aria-label="Sound" aria-pressed="false" title="Sound on/off">♪</button>
-      <a class="icon" href="./" aria-label="Back to the map" title="Back to the map" style="display:grid;place-items:center;text-decoration:none">⌂</a>
+      <a class="icon" href="map.html" aria-label="Back to the map" title="Back to the map" style="display:grid;place-items:center;text-decoration:none">⌂</a>
     </div>
   </header>
 
@@ -313,7 +313,7 @@ body{
 
     <aside class="card coach">
       <div class="coachRow">
-        <img id="robot" src="assets/robot_wave.png" alt="Gizmo, the robot coach">
+        <img id="robot" src="assets/parrot_wave.png" alt="Koko the parrot">
         <div class="bubble" id="bubble" aria-live="polite"></div>
       </div>
       <div class="actions" id="actions"></div>
@@ -322,6 +322,7 @@ body{
   </main>
 </div>
 
+<script src="common.js"></script>
 <script>
 (() => {
 'use strict';
@@ -582,39 +583,27 @@ function throwBall() {
   });
 }
 
-/* ---------- sound ---------- */
+/* ---------- sound + per-player progress (shared module) ---------- */
 const store = {
-  load() { try { return JSON.parse(localStorage.getItem('armMechanic.v1')) || {}; } catch (e) { return {}; } },
-  save(o) { try { localStorage.setItem('armMechanic.v1', JSON.stringify(o)); } catch (e) {} }
+  load() { return Object.assign({}, SI.prof().arm || {}); },
+  save(o) { SI.updateProf(p => { p.arm = o; }); }
 };
-let muted = !!store.load().muted, ac = null;
-function tone(f, d = .12, type = 'sine', v = .08, delay = 0) {
-  if (muted) return;
-  try {
-    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
-    if (ac.state === 'suspended') ac.resume();
-    const t = ac.currentTime + delay, o = ac.createOscillator(), g = ac.createGain();
-    o.type = type; o.frequency.setValueAtTime(f, t);
-    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + .02); g.gain.exponentialRampToValueAtTime(.0001, t + d);
-    o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + d + .03);
-  } catch (e) {}
-}
 const sfx = {
-  ok() { tone(660, .12); tone(880, .2, 'sine', .08, .1); },
-  bad() { tone(220, .25, 'triangle', .09); },
-  win() { [523, 659, 784, 1046].forEach((f, i) => tone(f, .2, 'sine', .08, i * .11)); },
-  tick() { tone(520, .05, 'sine', .04); }
+  ok() { SI.sfx.ok(); SI.voice('ok'); },
+  bad() { SI.sfx.bad(); SI.voice('bad'); },
+  win() { SI.sfx.win(); },
+  tick() { SI.sfx.tick(); }
 };
 const muteBtn = el('mute');
-function paintMute() { muteBtn.setAttribute('aria-pressed', muted); muteBtn.setAttribute('aria-label', muted ? 'Sound off' : 'Sound on'); }
-muteBtn.onclick = () => { muted = !muted; const s = store.load(); s.muted = muted; store.save(s); paintMute(); };
+function paintMute() { const m = SI.isMuted(); muteBtn.setAttribute('aria-pressed', m); muteBtn.setAttribute('aria-label', m ? 'Sound off' : 'Sound on'); }
+muteBtn.onclick = () => { SI.setMuted(!SI.isMuted()); paintMute(); };
 paintMute();
 
 /* ---------- coach, score, helpers ---------- */
 const POSES = ['wave', 'think', 'celebrate', 'thumbs', 'sad', 'point'];
-POSES.forEach(p => { new Image().src = `assets/robot_${p}.png`; });
+POSES.forEach(p => { new Image().src = `assets/parrot_${p}.png`; });
 const robot = $('#robot'), bubble = $('#bubble'), actions = $('#actions');
-function pose(name) { robot.src = `assets/robot_${name}.png`; robot.classList.remove('hop'); void robot.offsetWidth; robot.classList.add('hop'); }
+function pose(name) { robot.src = `assets/parrot_${name}.png`; robot.classList.remove('hop'); void robot.offsetWidth; robot.classList.add('hop'); }
 function say(html, p) { bubble.innerHTML = html; if (p) pose(p); }
 function mk(tag, cls, html) { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
 function btn(text, cls = '') { const b = mk('button', 'btn ' + cls, text); b.type = 'button'; return b; }
@@ -840,17 +829,18 @@ function results() {
   const prev = store.load();
   const best = Math.max(prev.best || 0, score);
   store.save({ ...prev, best, stars: Math.max(prev.stars || 0, stars), plays: (prev.plays || 0) + 1 });
-  sfx.win(); confetti(60);
+  const gain = SI.addXP(score);
+  sfx.win(); SI.voice('finish'); confetti(60);
   const o = mk('div', 'overlay');
   o.innerHTML = `<div class="panel">
-    <img class="hero" src="assets/robot_celebrate.png" alt="">
-    <h2>Chapter complete!</h2>
+    <img class="hero" src="assets/parrot_celebrate.png" alt="">
+    <h2>Arm Mechanic done!</h2>
     <div class="stars" aria-label="${stars} of 3 stars">${'★'.repeat(stars)}<span class="off">${'★'.repeat(3 - stars)}</span></div>
-    <div class="stats"><span>Score: ${score}</span><span>Best: ${best}</span></div>
+    <div class="stats"><span>Score: ${score}</span><span>Best: ${best}</span><span>+${gain.gained} XP · Level ${gain.after.n}</span></div>
     <p>Muscles <b>contract</b> and <b>pull</b> the bones to move your body. Come back tomorrow to keep it fresh!</p>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-      <a class="btn primary big" href="quiz.html#lesson1" style="text-decoration:none">Muscles quiz ▸</a>
-      <a class="btn" href="./" style="text-decoration:none;display:inline-grid;place-items:center">Back to map</a>
+      <a class="btn primary big" href="quiz.html#quest" style="text-decoration:none">Chapter Quest ▸</a>
+      <a class="btn" href="map.html" style="text-decoration:none;display:inline-grid;place-items:center">Map</a>
       <button class="btn" id="again" type="button">Play again</button>
     </div>
   </div>`;
@@ -863,9 +853,9 @@ function intro() {
     const s = store.load();
     const o = mk('div', 'overlay');
     o.innerHTML = `<div class="panel">
-      <img class="hero" src="assets/robot_wave.png" alt="">
+      <img class="hero" src="assets/parrot_wave.png" alt="">
       <h2>Arm Mechanic</h2>
-      <p>Meet Gizmo! Help it find out how <b>muscles</b> move the <b>bones</b> in your arm.</p>
+      <p>Hi, <b>${SI.esc(SI.player().name)}</b>! Help Koko find out how <b>muscles</b> move the <b>bones</b> in your arm.</p>
       <div class="skins"><span>Arm colour:</span>${SKINS.map((c, i) => `<button type="button" class="sw" data-i="${i}" aria-label="Skin tone ${i + 1}" aria-pressed="${i === (s.skin || 0)}" style="background:${c[0]}"></button>`).join('')}</div>
       ${s.best ? `<div class="stats"><span>Best score: ${s.best}</span><span>Stars: ${'★'.repeat(s.stars || 0)}${'☆'.repeat(3 - (s.stars || 0))}</span></div>` : ''}
       <button class="btn primary big" id="start" type="button">Start</button>
@@ -881,10 +871,11 @@ function intro() {
 }
 
 async function main() {
+  if (!SI.requirePlayer()) return;
   setUI({ chips: true, meters: true, controls: true });
   applySkin(store.load().skin || 0);
   setTheta(0);
-  say(`Hi! I’m Gizmo.`, 'wave');
+  say(`Hi! I’m Koko the parrot.`, 'wave');
   await intro();
   await stage1();
   await stage2();

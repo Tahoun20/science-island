@@ -1,160 +1,158 @@
-/* Grade 5 Science · Chapter 1 Bones and Muscles · question bank
-   Built from the NotebookLM draft, with the reviewed fixes (Q7, Q10, Q12, Q18, Q21, Q24, Q32, Q34)
-   and plausible distractors.
-   src: "book"  = from the school book (core and Boss questions)
-        "bonus" = enrichment from an outside guide, shown with a Bonus badge
-   type: mc | tf | fill | order | match | tap
-   style (display hint for mc): odd | spot | story
-   answer: mc/fill/tf -> index of the right option; order -> item indexes in the right order;
-           match -> right-column index for each left item; tap -> target id
+/* Grade 5 Science (Languages) · Chapter 1 Bones and Muscles
+   20 core ideas from the school book (Point!, Warm Up, Try, Exercise).
+   Each idea has 2-3 phrasings ("variants"). Every game picks one phrasing per idea,
+   so a student meets the same idea from a different angle each time.
+   boss: true -> the idea is asked at the end in the Boss round.
+   type: mc | tf | fill | order | match | tap ; style (mc only): odd | spot | story
+   answer: mc/fill/tf -> option index (tf: 0 = True, 1 = False); order -> item indexes in order;
+           match -> right index for each left item; tap -> target id
 */
-window.LESSONS = {
-  1: { title: 'Muscles', sub: 'Contract and relax' },
-  2: { title: 'Bones and Joints', sub: '1-2 Structure of Bones' },
-  3: { title: 'The Skeleton', sub: '1-3 Whole Body Skeleton' }
-};
+window.CHAPTER = { id: 'g5-lang-ch1', title: 'Bones and Muscles', grade: 'Grade 5', track: 'Languages' };
 
-window.QUESTIONS = [
-  /* ---------- Lesson 1: Muscles ---------- */
-  { id: 1, lesson: 1, concept: 'Muscles are soft', level: 'easy', type: 'tf', mode: 'timed', seconds: 10, src: 'book',
-    q: 'Muscles are soft parts inside our bodies.', answer: 0,
-    explain: 'Bones are hard and strong. Muscles are soft.' },
-  { id: 2, lesson: 1, concept: 'Muscles pull', level: 'easy', type: 'mc', mode: 'timed', seconds: 15, src: 'book',
-    q: 'How do muscles move our bones?',
-    options: ['By pulling them', 'By pushing them', 'By making them soft', 'Bones move by themselves'], answer: 0,
-    explain: 'Muscles can only pull. They never push.' },
-  { id: 3, lesson: 1, concept: 'Contracting muscle', level: 'easy', type: 'fill', mode: 'timed', seconds: 15, src: 'book',
-    q: 'When a muscle contracts, it becomes shorter and ___.',
-    options: ['harder', 'softer', 'longer'], answer: 0,
-    explain: 'A contracting muscle gets short, thick and hard.' },
-  { id: 4, lesson: 1, concept: 'Bending the arm', level: 'easy', type: 'tap', mode: 'timed', seconds: 20, src: 'book',
-    diagram: 'armBent', q: 'Tap the muscle that becomes hard when you bend your arm.', answer: 'in',
-    explain: 'When you bend your arm, the inner muscle (biceps) contracts.' },
-  { id: 5, lesson: 1, concept: 'Two muscles take turns', level: 'medium', type: 'match', mode: 'normal', src: 'book',
-    q: 'Match each action to what the inner muscle (biceps) does.',
-    left: ['Bending the arm', 'Stretching the arm'], right: ['Contracts and gets hard', 'Relaxes and gets soft'], answer: [0, 1],
-    explain: 'Bend: the inner muscle contracts. Stretch: the inner muscle relaxes.' },
-  { id: 6, lesson: 1, concept: 'Relaxing muscle', level: 'medium', type: 'mc', style: 'spot', mode: 'normal', src: 'book',
-    q: '“When a muscle relaxes, it becomes shorter and hard.” Choose the right fix.',
-    options: ['longer and softer', 'shorter and softer', 'longer and harder'], answer: 0,
-    explain: 'A relaxing muscle gets longer and softer.' },
-  { id: 7, lesson: 1, concept: 'How a muscle moves a bone', level: 'medium', type: 'order', mode: 'normal', src: 'book',
-    q: 'Omar lifts his school bag. Put what happens in order.',
-    items: ['The arm bends', 'The inner muscle contracts', 'The forearm bone is pulled up'], answer: [1, 2, 0],
-    explain: 'The muscle contracts, it pulls the bone, and then the arm bends.' },
-  { id: 8, lesson: 1, concept: 'Contracting muscle', level: 'medium', type: 'mc', style: 'odd', mode: 'normal', src: 'book',
-    q: 'Which word does NOT describe a contracting muscle?',
-    options: ['Shorter', 'Harder', 'Pulling', 'Softer'], answer: 3,
-    explain: 'A contracting muscle is short, hard and pulling. A relaxing muscle is soft.' },
-  { id: 9, lesson: 1, concept: 'Bending the arm', level: 'medium', type: 'mc', style: 'story', mode: 'normal', src: 'book',
-    q: 'Omar bends his arm to lift his heavy school bag. What are his arm muscles doing?',
-    options: ['Inner muscle contracts, outer muscle relaxes', 'Outer muscle contracts, inner muscle relaxes', 'Both muscles contract', 'Both muscles push the bone'], answer: 0,
-    explain: 'Bending the arm: the inner muscle contracts and the outer muscle relaxes.' },
-  { id: 10, lesson: 1, concept: 'Stretching the arm', level: 'medium', type: 'tap', mode: 'normal', src: 'book',
-    diagram: 'armStraight', q: 'Omar straightens his arm to push a door open. Tap the muscle that is contracting.', answer: 'out',
-    explain: 'When you stretch your arm, the outer muscle (triceps) contracts.' },
-  { id: 11, lesson: 1, concept: 'Why two muscles?', level: 'hard', type: 'mc', mode: 'boss', src: 'book',
-    q: 'Why does the arm need two muscles to bend and stretch?',
-    options: ['A muscle can only pull, so another muscle must pull the other way', 'One muscle rests while the other grows', 'One muscle pushes and the other pulls', 'Two muscles make the bone softer'], answer: 0,
-    explain: 'Muscles only pull. One pulls to bend, the other pulls to stretch.' },
-  { id: 12, lesson: 1, concept: 'Bend and stretch', level: 'hard', type: 'mc', style: 'story', mode: 'boss', src: 'book',
-    q: 'Mona bends her arm to bring a cup to her mouth. Then she pushes a heavy door open with a straight arm. Which muscle contracts in each step?',
-    options: ['Inner muscle, then outer muscle', 'Outer muscle, then inner muscle', 'Inner muscle both times', 'Outer muscle both times'], answer: 0,
-    explain: 'Bending uses the inner muscle. Pushing with a straight arm uses the outer muscle.' },
+window.IDEAS = [
+  /* ---------- Muscles ---------- */
+  { id: 'M1', lesson: 1, concept: 'Bones are hard, muscles are soft',
+    explain: 'The body has hard, strong bones and soft muscles.',
+    variants: [
+      { type: 'tf', mode: 'timed', seconds: 10, level: 'easy', q: 'Muscles are soft parts inside our bodies.', answer: 0 },
+      { type: 'fill', mode: 'timed', seconds: 15, level: 'easy', q: 'The human body has hard, strong ___ and soft muscles.', options: ['bones', 'skin', 'hair'], answer: 0 },
+      { type: 'match', mode: 'normal', level: 'medium', q: 'Match each part to how it feels.', left: ['Bones', 'Muscles'], right: ['Hard and strong', 'Soft'], answer: [0, 1] }
+    ] },
+  { id: 'M2', lesson: 1, concept: 'Muscles pull bones',
+    explain: 'Muscles move the body by pulling the bones. They never push.',
+    variants: [
+      { type: 'mc', mode: 'timed', seconds: 15, level: 'easy', q: 'How do muscles move our bones?', options: ['By pulling them', 'By pushing them', 'By making them soft', 'Bones move by themselves'], answer: 0 },
+      { type: 'tf', mode: 'timed', seconds: 10, level: 'easy', q: 'Muscles move the body by pushing the bones.', answer: 1 },
+      { type: 'mc', style: 'spot', mode: 'normal', level: 'medium', q: '“Muscles push the bones to help us move.” Choose the right fix.', options: ['Muscles pull the bones to help us move', 'Muscles push the skin to help us move', 'Bones push the muscles to help us move'], answer: 0 }
+    ] },
+  { id: 'M3', lesson: 1, concept: 'Muscles contract and relax',
+    explain: 'The body moves because muscles contract and relax. A contracting muscle pulls the bone.',
+    variants: [
+      { type: 'fill', mode: 'timed', seconds: 15, level: 'easy', q: 'Muscles pull bones and move the body by ___.', options: ['contracting', 'relaxing', 'expanding'], answer: 0 },
+      { type: 'mc', mode: 'normal', level: 'medium', q: 'Why can the human body move?', options: ['Because muscles contract and relax', 'Because bones bend in the middle', 'Because bones contract like muscles', 'Because the skin pulls the bones'], answer: 0 },
+      { type: 'order', mode: 'normal', level: 'medium', q: 'Omar lifts his school bag. Put what happens in order.', items: ['The arm bends', 'The inner muscle contracts', 'The forearm bone is pulled up'], answer: [1, 2, 0] }
+    ] },
+  { id: 'M4', lesson: 1, concept: 'A contracting muscle gets hard',
+    explain: 'When a muscle contracts, it becomes short, thick and hard.',
+    variants: [
+      { type: 'mc', mode: 'timed', seconds: 15, level: 'easy', q: 'When you bend your arm, what happens to the inner muscle (the biceps)?', options: ['It contracts and becomes thick and hard', 'It relaxes and becomes thin', 'It turns into bone', 'Nothing happens to it'], answer: 0 },
+      { type: 'mc', style: 'odd', mode: 'normal', level: 'medium', q: 'Which word does NOT describe a contracting muscle?', options: ['Shorter', 'Harder', 'Pulling', 'Softer'], answer: 3 },
+      { type: 'mc', style: 'story', mode: 'normal', level: 'medium', q: 'Mona bends her arm strongly and touches her biceps with her other hand. How does it feel?', options: ['Hard', 'Soft', 'Hollow', 'Bendy like rubber'], answer: 0 }
+    ] },
+  { id: 'M5', lesson: 1, concept: 'Bending the arm',
+    explain: 'When you bend your arm, the inner muscle contracts and the outer muscle relaxes.',
+    variants: [
+      { type: 'tap', diagram: 'armBent', mode: 'timed', seconds: 20, level: 'easy', q: 'Tap the muscle that becomes hard when you bend your arm.', answer: 'in' },
+      { type: 'mc', style: 'story', mode: 'normal', level: 'medium', q: 'Omar bends his arm to lift his heavy school bag. What are his arm muscles doing?', options: ['Inner muscle contracts, outer muscle relaxes', 'Outer muscle contracts, inner muscle relaxes', 'Both muscles contract', 'Both muscles push the bone'], answer: 0 },
+      { type: 'match', mode: 'normal', level: 'medium', q: 'You bend your arm. Match each muscle to what it does.', left: ['Inner muscle (biceps)', 'Outer muscle (triceps)'], right: ['Contracts', 'Relaxes'], answer: [0, 1] }
+    ] },
+  { id: 'M6', lesson: 1, concept: 'Stretching the arm',
+    explain: 'When you stretch your arm, the outer muscle contracts and the inner muscle relaxes.',
+    variants: [
+      { type: 'mc', mode: 'normal', level: 'medium', q: 'Which is correct when you stretch your arm?', options: ['The outer muscle contracts, and the inner muscle relaxes', 'The inner muscle contracts, and the outer muscle relaxes', 'Both muscles relax', 'Both muscles contract'], answer: 0 },
+      { type: 'tap', diagram: 'armStraight', mode: 'normal', level: 'medium', q: 'Omar straightens his arm to push a door open. Tap the muscle that is contracting.', answer: 'out' },
+      { type: 'tf', mode: 'timed', seconds: 10, level: 'easy', q: 'When you stretch your arm, the outer muscle relaxes.', answer: 1 }
+    ] },
+  { id: 'M7', lesson: 1, boss: true, concept: 'Two muscles work in turns',
+    explain: 'Muscles can only pull. One muscle pulls to bend the arm, the other pulls to stretch it.',
+    variants: [
+      { type: 'mc', mode: 'boss', level: 'hard', q: 'Why does the arm need two muscles to bend and stretch?', options: ['A muscle can only pull, so another muscle must pull the other way', 'One muscle rests while the other grows', 'One muscle pushes and the other pulls', 'Two muscles make the bone softer'], answer: 0 },
+      { type: 'mc', style: 'story', mode: 'boss', level: 'hard', q: 'Mona bends her arm to bring a cup to her mouth. Then she pushes a heavy door open with a straight arm. Which muscle contracts in each step?', options: ['Inner muscle, then outer muscle', 'Outer muscle, then inner muscle', 'Inner muscle both times', 'Outer muscle both times'], answer: 0 },
+      { type: 'mc', mode: 'boss', level: 'hard', q: 'You bend and stretch your arm again and again. What are the two muscles doing?', options: ['Working in turns: when one contracts, the other relaxes', 'Both contracting at the same time', 'Both relaxing at the same time', 'Only the inner muscle is working'], answer: 0 }
+    ] },
 
-  /* ---------- Lesson 2: Bones and Joints ---------- */
-  { id: 13, lesson: 2, concept: 'Joint', level: 'easy', type: 'fill', mode: 'timed', seconds: 10, src: 'book',
-    q: 'A ___ is the place where bones meet and allow movement.',
-    options: ['joint', 'muscle', 'cartilage'], answer: 0,
-    explain: 'Bones connect at joints. That is where the body bends.' },
-  { id: 14, lesson: 2, concept: 'Bones are hard', level: 'easy', type: 'tf', mode: 'timed', seconds: 10, src: 'book',
-    q: 'Bones can bend anywhere in the middle.', answer: 1,
-    explain: 'Bones are very hard. Only the joints can bend.' },
-  { id: 15, lesson: 2, concept: 'Cartilage', level: 'easy', type: 'mc', mode: 'timed', seconds: 15, src: 'book',
-    q: 'What does cartilage do in a joint?',
-    options: ['It is a cushion so bones do not rub together', 'It pulls the bones', 'It makes the bones longer', 'It makes the bones soft'], answer: 0,
-    explain: 'Cartilage is a cushion. It stops bones rubbing and wearing out.' },
-  { id: 16, lesson: 2, concept: 'Joints move in different ways', level: 'easy', type: 'tap', mode: 'timed', seconds: 15, src: 'book',
-    diagram: 'armJoints', q: 'Tap the joint that can bend in ONLY one direction.', answer: 'elbow',
-    explain: 'The elbow bends in one direction. The shoulder can turn around.' },
-  { id: 17, lesson: 2, concept: 'Joints move in different ways', level: 'medium', type: 'match', mode: 'normal', src: 'bonus',
-    q: 'Match each joint to how it moves.',
-    left: ['Knee joint', 'Shoulder joint'], right: ['Bends in one direction only', 'Moves in many directions'], answer: [0, 1],
-    explain: 'The knee bends one way, like the elbow. The shoulder moves in many directions.' },
-  { id: 18, lesson: 2, concept: 'Joints move in different ways', level: 'medium', type: 'mc', style: 'odd', mode: 'normal', src: 'bonus',
-    q: 'Which joint is the odd one out?',
-    options: ['Knee joint', 'Elbow joint', 'Shoulder joint', 'Finger joint'], answer: 2,
-    explain: 'Knee, elbow and finger joints bend one way. The shoulder moves in many directions.' },
-  { id: 19, lesson: 2, concept: 'Cartilage', level: 'medium', type: 'mc', style: 'spot', mode: 'normal', src: 'book',
-    q: '“Cartilage is a hard bone that makes bones rub together.” Choose the right fix.',
-    options: ['Cartilage is a soft cushion that stops bones rubbing', 'Cartilage is a muscle that pulls bones', 'Cartilage is a bone that bends in the middle'], answer: 0,
-    explain: 'Cartilage is a cushion between bones.' },
-  { id: 20, lesson: 2, concept: 'Joints in the leg', level: 'medium', type: 'mc', style: 'story', mode: 'normal', src: 'bonus',
-    q: 'Youssef kicks a football. Which joint bends to swing his lower leg?',
-    options: ['Knee joint', 'Shoulder joint', 'Wrist joint', 'Elbow joint'], answer: 0,
-    explain: 'The knee joint bends and stretches the leg.' },
-  { id: 21, lesson: 2, concept: 'Finger joints', level: 'medium', type: 'mc', mode: 'normal', src: 'bonus',
-    q: 'Count the bending places in the fingers of one hand, including the knuckles. How many are there?',
-    options: ['5', '10', '14', '20'], answer: 2,
-    explain: 'Each finger has 3 bending places and the thumb has 2: 4 × 3 + 2 = 14.' },
-  { id: 22, lesson: 2, concept: 'Joints of the arm', level: 'medium', type: 'order', mode: 'normal', src: 'book',
-    q: 'Put these arm joints in order from top to bottom.',
-    items: ['Wrist', 'Shoulder', 'Elbow'], answer: [1, 2, 0],
-    explain: 'Shoulder at the top, then elbow, then wrist.' },
-  { id: 23, lesson: 2, concept: 'Cartilage', level: 'hard', type: 'mc', mode: 'boss', src: 'book',
-    q: 'What would happen if our joints had NO cartilage?',
-    options: ['The bones would rub together and wear out', 'The bones would bend in the middle', 'The muscles would stop pulling', 'We would have more joints'], answer: 0,
-    explain: 'Without the cushion, bones rub directly against each other and wear out.' },
-  { id: 24, lesson: 2, concept: 'Joints move in different ways', level: 'hard', type: 'mc', style: 'story', mode: 'boss', src: 'book',
-    q: 'Ali’s elbow bends only one way, but his shoulder can turn in a circle. Why?',
-    options: ['The place of the joint decides how it can move', 'The elbow has no cartilage', 'The shoulder has no bones', 'All joints really move the same way'], answer: 0,
-    explain: 'The direction and range of bending depend on where the joint is.' },
+  /* ---------- 1-2 Structure of Bones ---------- */
+  { id: 'B1', lesson: 2, concept: 'Bones support the body',
+    explain: 'Bones are very hard. They support the body. Only the joints can bend.',
+    variants: [
+      { type: 'tf', mode: 'timed', seconds: 10, level: 'easy', q: 'Bones are very hard and support the body.', answer: 0 },
+      { type: 'tf', mode: 'timed', seconds: 10, level: 'easy', q: 'Bones can bend anywhere in the middle.', answer: 1 },
+      { type: 'fill', mode: 'timed', seconds: 15, level: 'easy', q: 'Bones are very ___ and support the body.', options: ['hard', 'soft', 'thin'], answer: 0 }
+    ] },
+  { id: 'B2', lesson: 2, concept: 'Bones protect organs',
+    explain: 'Bones protect important organs like the brain and the heart.',
+    variants: [
+      { type: 'mc', mode: 'timed', seconds: 15, level: 'easy', q: 'What do bones protect?', options: ['Important organs like the brain and heart', 'Only the hair', 'Only the skin', 'Bones do not protect anything'], answer: 0 },
+      { type: 'mc', style: 'story', mode: 'normal', level: 'medium', q: 'Youssef bumps his head on a door, but his brain is safe. What protected it?', options: ['The skull bones', 'The cartilage', 'The arm muscles', 'The ribs'], answer: 0 },
+      { type: 'tf', mode: 'timed', seconds: 10, level: 'easy', q: 'Bones support the body and also protect it.', answer: 0 }
+    ] },
+  { id: 'B3', lesson: 2, concept: 'Bones cannot move by themselves',
+    explain: 'Bones cannot contract. Muscles contract and pull the bones.',
+    variants: [
+      { type: 'mc', style: 'odd', mode: 'normal', level: 'medium', q: 'Which of these is NOT a role of bones?', options: ['Supports the body firmly', 'Protects important organs like the brain and heart', 'Can contract and move by itself, like muscles'], answer: 2 },
+      { type: 'tf', mode: 'timed', seconds: 10, level: 'easy', q: 'Bones can contract and relax like muscles.', answer: 1 },
+      { type: 'mc', style: 'spot', mode: 'normal', level: 'medium', q: '“Bones move the body by contracting.” Choose the right fix.', options: ['Muscles move the body by contracting and pulling the bones', 'Bones move the body by relaxing', 'The skin moves the body by contracting'], answer: 0 }
+    ] },
+  { id: 'B4', lesson: 2, concept: 'Joint',
+    explain: 'A joint is the place where bones connect. The body bends at joints.',
+    variants: [
+      { type: 'fill', mode: 'timed', seconds: 10, level: 'easy', q: 'The place where two bones meet and allow movement is called a ___.', options: ['joint', 'muscle', 'rib'], answer: 0 },
+      { type: 'tap', diagram: 'armJoints', mode: 'timed', seconds: 15, level: 'easy', q: 'Tap the joint between the upper arm and the forearm.', answer: 'elbow' },
+      { type: 'mc', mode: 'normal', level: 'medium', q: 'Which of these is a joint?', options: ['The knee', 'The skull', 'The ribs', 'The biceps'], answer: 0 }
+    ] },
+  { id: 'B5', lesson: 2, concept: 'Cartilage',
+    explain: 'Joints have cartilage. It is a cushion so bones do not rub against each other and wear out.',
+    variants: [
+      { type: 'fill', mode: 'timed', seconds: 15, level: 'easy', q: 'Joints have ___, which acts as a cushion so bones do not rub against each other.', options: ['cartilage', 'muscle', 'skin'], answer: 0 },
+      { type: 'mc', mode: 'normal', level: 'medium', q: 'What do you call the part in joints that acts as a cushion?', options: ['Cartilage', 'Skull', 'Biceps', 'Rib'], answer: 0 },
+      { type: 'mc', mode: 'normal', level: 'hard', q: 'What would happen if our joints had NO cartilage?', options: ['The bones would rub together and wear out', 'The bones would bend in the middle', 'The muscles would stop pulling', 'We would have more joints'], answer: 0 }
+    ] },
+  { id: 'B6', lesson: 2, boss: true, concept: 'Joints move in different ways',
+    explain: 'Where a joint is decides how it can move. The elbow bends one way. The shoulder can turn around.',
+    variants: [
+      { type: 'mc', mode: 'boss', level: 'hard', q: 'Which statement correctly explains the movement of joints?', options: ['The direction and range of bending are decided by the location of the joint', 'All joints in the body can rotate in any direction', 'Joints cannot move at all', 'Only the elbow can move'], answer: 0 },
+      { type: 'mc', style: 'story', mode: 'boss', level: 'hard', q: 'Ali’s elbow bends only one way, but his shoulder can turn in a circle. Why?', options: ['The place of the joint decides how it can move', 'The elbow has no cartilage', 'The shoulder has no bones', 'All joints really move the same way'], answer: 0 },
+      { type: 'tap', diagram: 'armJoints', mode: 'boss', level: 'hard', q: 'Tap the joint that can bend in ONLY one direction.', answer: 'elbow' }
+    ] },
+  { id: 'B7', lesson: 2, concept: 'Joints in our body',
+    explain: 'Shoulders, elbows, wrists, fingers, the waist, knees and ankles all bend at joints.',
+    variants: [
+      { type: 'order', mode: 'normal', level: 'medium', q: 'Put these arm joints in order from top to bottom.', items: ['Wrist', 'Shoulder', 'Elbow'], answer: [1, 2, 0] },
+      { type: 'mc', style: 'odd', mode: 'normal', level: 'medium', q: 'Which one is NOT a joint?', options: ['Elbow', 'Knee', 'Wrist', 'Skull'], answer: 3 },
+      { type: 'match', mode: 'normal', level: 'medium', q: 'Match each joint to where it is.', left: ['Elbow', 'Knee', 'Wrist'], right: ['In the middle of the arm', 'In the middle of the leg', 'Between the arm and the hand'], answer: [0, 1, 2] }
+    ] },
 
-  /* ---------- Lesson 3: The Skeleton ---------- */
-  { id: 25, lesson: 3, concept: 'Number of bones', level: 'easy', type: 'mc', mode: 'timed', seconds: 10, src: 'book',
-    q: 'About how many bones make up the human skeleton?',
-    options: ['26', '106', '206', '306'], answer: 2,
-    explain: 'The body is made of about 206 connected bones.' },
-  { id: 26, lesson: 3, concept: 'Skull', level: 'easy', type: 'tf', mode: 'timed', seconds: 10, src: 'book',
-    q: 'The skull protects the brain like a helmet.', answer: 0,
-    explain: 'The skull wraps around the soft brain like a helmet.' },
-  { id: 27, lesson: 3, concept: 'Ribs', level: 'easy', type: 'fill', mode: 'timed', seconds: 15, src: 'book',
-    q: 'The ribs protect the heart and the ___.',
-    options: ['lungs', 'stomach', 'brain'], answer: 0,
-    explain: 'The ribs make a cage around the heart and lungs.' },
-  { id: 28, lesson: 3, concept: 'Backbone', level: 'easy', type: 'tap', mode: 'timed', seconds: 15, src: 'book',
-    diagram: 'skeleton', q: 'Tap the backbone.', answer: 'backbone',
-    explain: 'The backbone is the pillar of the body. It holds the whole body up.' },
-  { id: 29, lesson: 3, concept: 'Bones protect', level: 'medium', type: 'match', mode: 'normal', src: 'book',
-    q: 'Match each part to what it protects.',
-    left: ['Skull', 'Ribs'], right: ['The brain', 'The heart and lungs'], answer: [0, 1],
-    explain: 'Skull: brain. Ribs: heart and lungs.' },
-  { id: 30, lesson: 3, concept: 'Ribs', level: 'medium', type: 'mc', style: 'odd', mode: 'normal', src: 'book',
-    q: 'Which one does NOT describe the ribs?',
-    options: ['Thin bones', 'A cage shape', 'In the chest', 'Bumpy bones down the middle of the back'], answer: 3,
-    explain: 'The bumpy bones down the back are the backbone, not the ribs.' },
-  { id: 31, lesson: 3, concept: 'Backbone', level: 'medium', type: 'mc', style: 'spot', mode: 'normal', src: 'book',
-    q: '“The backbone is one big bone, so we cannot bend our back.” Choose the right fix.',
-    options: ['The backbone is many small connected bones, so we can bend', 'The backbone is a muscle, so we can bend', 'The backbone is cartilage, so it is soft'], answer: 0,
-    explain: 'Many small bones let us bend forward, backward, left and right.' },
-  { id: 32, lesson: 3, concept: 'Ribs', level: 'medium', type: 'mc', style: 'story', mode: 'normal', src: 'book',
-    q: 'Kareem takes a deep breath and touches his chest. What does he feel?',
-    options: ['Many thin bones lined up sideways', 'One big flat bone', 'Bumpy bones lined up from top to bottom', 'No bones at all'], answer: 0,
-    explain: 'Those thin bones lined up sideways are the ribs.' },
-  { id: 33, lesson: 3, concept: 'Jobs of the skeleton', level: 'medium', type: 'mc', style: 'odd', mode: 'normal', src: 'book',
-    q: 'Which is NOT a job of the skeleton?',
-    options: ['Supporting the body', 'Protecting organs', 'Contracting and relaxing like a muscle', 'Giving the body its shape'], answer: 2,
-    explain: 'Bones support, protect and give shape. Only muscles contract and relax.' },
-  { id: 34, lesson: 3, concept: 'Parts of the skeleton', level: 'medium', type: 'order', mode: 'normal', src: 'book',
-    q: 'Put these in order from the top of the body to the bottom.',
-    items: ['Ribs', 'Knee joint', 'Skull'], answer: [2, 0, 1],
-    explain: 'Skull in the head, ribs in the chest, knee in the leg.' },
-  { id: 35, lesson: 3, concept: 'Protect and move', level: 'hard', type: 'mc', mode: 'boss', src: 'book',
-    q: 'Why does the skeleton have a hard skull AND a backbone made of many small bones?',
-    options: ['To protect the brain and still let us bend', 'To make the body lighter', 'So muscles can push the bones', 'So the skull can bend'], answer: 0,
-    explain: 'The skull protects. The many small backbone bones let us bend.' },
-  { id: 36, lesson: 3, concept: 'Backbone', level: 'hard', type: 'mc', style: 'story', mode: 'boss', src: 'book',
-    q: 'Adam bends forward to tie his shoes, then twists to see his friend. What if his backbone were ONE solid bone?',
-    options: ['He could not bend or twist his back', 'His brain would not be protected', 'His ribs would fall off', 'His muscles would push instead of pull'], answer: 0,
-    explain: 'The backbone bends because it is made of many small connected bones.' }
+  /* ---------- 1-3 Whole Body Skeleton ---------- */
+  { id: 'S1', lesson: 3, concept: 'The skeleton',
+    explain: 'The skeleton is made of many bones that combine to make the shape of the whole body.',
+    variants: [
+      { type: 'fill', mode: 'timed', seconds: 15, level: 'easy', q: 'Many bones combine to make the shape of the whole body. This is called the ___.', options: ['skeleton', 'muscle', 'joint'], answer: 0 },
+      { type: 'mc', mode: 'normal', level: 'medium', q: 'What is the skeleton?', options: ['Many bones connected together to make the shape of the body', 'One big bone in the back', 'All the muscles of the body', 'The skin that covers the body'], answer: 0 },
+      { type: 'tf', mode: 'timed', seconds: 10, level: 'easy', q: 'The skeleton gives the whole body its shape.', answer: 0 }
+    ] },
+  { id: 'S2', lesson: 3, concept: 'About 206 bones',
+    explain: 'The human body is made of about 206 connected bones.',
+    variants: [
+      { type: 'mc', mode: 'timed', seconds: 10, level: 'easy', q: 'About how many bones make up the human skeleton?', options: ['26', '106', '206', '306'], answer: 2 },
+      { type: 'tf', mode: 'timed', seconds: 10, level: 'easy', q: 'The human body is made of about 206 connected bones.', answer: 0 },
+      { type: 'fill', mode: 'timed', seconds: 15, level: 'easy', q: 'The human body is made of about ___ connected bones.', options: ['206', '16', '2006'], answer: 0 }
+    ] },
+  { id: 'S3', lesson: 3, concept: 'Skull',
+    explain: 'The skull wraps and protects the soft brain like a helmet.',
+    variants: [
+      { type: 'tf', mode: 'timed', seconds: 10, level: 'easy', q: 'The skull protects the brain like a helmet.', answer: 0 },
+      { type: 'tap', diagram: 'skeleton', mode: 'timed', seconds: 15, level: 'easy', q: 'Tap the part that protects the brain.', answer: 'skull' },
+      { type: 'mc', style: 'story', mode: 'normal', level: 'medium', q: 'Touch your head. It feels hard everywhere. Why?', options: ['A strong bone, the skull, protects the brain', 'There are many muscles there', 'It is made of cartilage', 'The ribs are there'], answer: 0 }
+    ] },
+  { id: 'S4', lesson: 3, concept: 'Ribs',
+    explain: 'The ribs protect the heart and lungs in a cage-like shape.',
+    variants: [
+      { type: 'fill', mode: 'timed', seconds: 15, level: 'easy', q: 'The ribs protect the heart and the ___.', options: ['lungs', 'stomach', 'brain'], answer: 0 },
+      { type: 'tap', diagram: 'skeleton', mode: 'timed', seconds: 15, level: 'easy', q: 'Tap the bones that protect the heart and lungs.', answer: 'ribs' },
+      { type: 'mc', style: 'story', mode: 'normal', level: 'medium', q: 'Kareem takes a deep breath and touches his chest. What does he feel?', options: ['Many thin bones lined up sideways', 'One big flat bone', 'Bumpy bones lined up from top to bottom', 'No bones at all'], answer: 0 }
+    ] },
+  { id: 'S5', lesson: 3, concept: 'Backbone supports the body',
+    explain: 'The backbone is the pillar of the body. It supports the whole body.',
+    variants: [
+      { type: 'tap', diagram: 'skeleton', mode: 'timed', seconds: 15, level: 'easy', q: 'Tap the backbone.', answer: 'backbone' },
+      { type: 'match', mode: 'normal', level: 'medium', q: 'Match each part to its job.', left: ['Skull', 'Ribs', 'Backbone'], right: ['Protects the brain', 'Protects the heart and lungs', 'Supports the whole body'], answer: [0, 1, 2] },
+      { type: 'mc', style: 'odd', mode: 'normal', level: 'medium', q: 'Which one does NOT describe the ribs?', options: ['Thin bones', 'A cage shape', 'In the chest', 'The pillar that supports the whole body'], answer: 3 }
+    ] },
+  { id: 'S6', lesson: 3, boss: true, concept: 'The backbone bends',
+    explain: 'The backbone is made of many small connected bones, so we can bend forward, backward, left and right.',
+    variants: [
+      { type: 'mc', style: 'spot', mode: 'boss', level: 'hard', q: '“The backbone is one big bone, so we cannot bend our back.” Choose the right fix.', options: ['The backbone is many small connected bones, so we can bend', 'The backbone is a muscle, so we can bend', 'The backbone is cartilage, so it is soft'], answer: 0 },
+      { type: 'mc', style: 'story', mode: 'boss', level: 'hard', q: 'Adam bends forward to tie his shoes, then bends to the left to see his friend. What if his backbone were ONE solid bone?', options: ['He could not bend his back', 'His brain would not be protected', 'His ribs would fall off', 'His muscles would push instead of pull'], answer: 0 },
+      { type: 'mc', mode: 'boss', level: 'hard', q: 'Why does the skeleton have a hard skull AND a backbone made of many small bones?', options: ['To protect the brain and still let us bend', 'To make the body lighter', 'So muscles can push the bones', 'So the skull can bend'], answer: 0 }
+    ] }
 ];
