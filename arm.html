@@ -190,6 +190,15 @@ body{
   .hero{height:90px}
   .panel h2{font-size:24px}
 }
+
+/* phones: fit the visible screen (svh excludes the browser bars) and keep the buttons above the meters */
+@media (max-width:820px){
+  .stageCard{display:flex;flex-direction:column}
+  .stageCard svg{max-height:max(190px, calc(100vh - 400px));max-height:max(190px, calc(100svh - 400px))}
+  .controls{order:2;margin-top:8px}
+  .meters{order:3;margin-top:8px}
+  .bubble{font-size:14.5px}
+}
 </style>
 </head>
 <body>
@@ -206,7 +215,7 @@ body{
       <div class="pill" id="stagePill">Stage 1 of 3</div>
       <div class="pill" id="scorePill">Score <b id="score">0</b></div>
       <button class="icon" id="mute" aria-label="Sound" aria-pressed="false" title="Sound on/off">♪</button>
-      <a class="icon" href="index.html" aria-label="Back to the map" title="Back to the map" style="display:grid;place-items:center;text-decoration:none">⌂</a>
+      <a class="icon" href="./" aria-label="Back to the map" title="Back to the map" style="display:grid;place-items:center;text-decoration:none">⌂</a>
     </div>
   </header>
 
@@ -841,7 +850,7 @@ function results() {
     <p>Muscles <b>contract</b> and <b>pull</b> the bones to move your body. Come back tomorrow to keep it fresh!</p>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
       <a class="btn primary big" href="quiz.html#lesson1" style="text-decoration:none">Muscles quiz ▸</a>
-      <a class="btn" href="index.html" style="text-decoration:none;display:inline-grid;place-items:center">Back to map</a>
+      <a class="btn" href="./" style="text-decoration:none;display:inline-grid;place-items:center">Back to map</a>
       <button class="btn" id="again" type="button">Play again</button>
     </div>
   </div>`;
