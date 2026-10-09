@@ -18,6 +18,29 @@
     store.update(s => { s.players = s.players || {}; s.players[id] = { name: p.name, grade: p.grade || 'g5', track: p.track || 'lang' }; s.current = id; });
     return player();
   }
+  /* ---------- language: an Arabic-track player sees the site in Arabic, right to left ----------
+     T(en, ar) picks the text for the current player; static HTML carries data-ar (inner HTML),
+     data-ar-label (aria-label + title) and data-ar-ph (placeholder), swapped in by applyLang(). */
+  const isAr = () => ((player() || {}).track === 'ar');
+  const T = (en, ar) => (isAr() && ar != null ? ar : en);
+  const chTitle = c => (c ? (isAr() && c.titleAr) || c.title : '');
+  const RTL_CSS = `
+html[dir=rtl] body{font-family:"Cairo","Nunito",system-ui,-apple-system,"Segoe UI",sans-serif}
+html[dir=rtl] .opt,html[dir=rtl] .choice,html[dir=rtl] .lvlbox,html[dir=rtl] .ch,html[dir=rtl] .coachCard{text-align:right}
+html[dir=rtl] .opt .num{margin-left:0;margin-right:auto}
+html[dir=rtl] .story{border-left:0;border-right:6px solid #9fdcc4}
+html[dir=rtl] .badge,html[dir=rtl] .colhead,html[dir=rtl] .banner small,html[dir=rtl] .you{text-transform:none;letter-spacing:0}
+html[dir=rtl] .float{right:auto;left:10px}
+html[dir=rtl] .timer span{right:auto;left:8px}`;
+  function applyLang() {
+    const h = document.documentElement;
+    if (!isAr() || h.hasAttribute('data-bilingual')) return;   // the home page stays bilingual
+    h.lang = 'ar'; h.dir = 'rtl'; h.classList.add('ar-track');
+    if (!document.getElementById('rtlCss')) { const st = document.createElement('style'); st.id = 'rtlCss'; st.textContent = RTL_CSS; document.head.appendChild(st); }
+    document.querySelectorAll('[data-ar]').forEach(e => { e.innerHTML = e.dataset.ar; });
+    document.querySelectorAll('[data-ar-label]').forEach(e => { e.setAttribute('aria-label', e.dataset.arLabel); if (e.hasAttribute('title')) e.title = e.dataset.arLabel; });
+    document.querySelectorAll('[data-ar-ph]').forEach(e => { e.placeholder = e.dataset.arPh; });
+  }
   function usePlayer(id) { store.update(s => { if ((s.players || {})[id]) s.current = id; }); return player(); }
   function requirePlayer() { const p = player(); if (!p || !p.name) { location.href = HOME; return null; } return p; }
   /* per-player progress shared by all chapters: xp, daily streak, the chapter being played (cur) */
@@ -36,9 +59,11 @@
   function requireChapter(id) {
     if (id) setChapter(id);
     const c = chapter();
-    if (!c || !c.ready) { location.href = CHAPTERS_PAGE; return null; }
+    if (!chReady(c)) { location.href = CHAPTERS_PAGE; return null; }
     return c;
   }
+  /* open for this player: marked ready, and for the Arabic track it also needs its Arabic questions */
+  function chReady(c) { return !!(c && c.ready && (!isAr() || c.questionsAr)); }
   function chProf(id) { id = id || chapterId(); return ((prof().ch || {})[id]) || {}; }
   function updateChProf(fn, id) {
     id = id || chapterId(); if (!id) return {};
@@ -56,11 +81,12 @@
   function loadQuestions() {
     const c = chapter();
     return new Promise((res, rej) => {
-      if (!c || !c.questions) return rej(new Error('This chapter has no questions yet.'));
+      const src = c && ((isAr() && c.questionsAr) || c.questions);   // Arabic-track players get the Arabic file
+      if (!src) return rej(new Error('This chapter has no questions yet.'));
       window.IDEAS = undefined;
-      const el = document.createElement('script'); el.src = c.questions;
-      el.onload = () => (Array.isArray(window.IDEAS) ? res(window.IDEAS) : rej(new Error('No questions in ' + c.questions)));
-      el.onerror = () => rej(new Error('Could not load ' + c.questions));
+      const el = document.createElement('script'); el.src = src;
+      el.onload = () => (Array.isArray(window.IDEAS) ? res(window.IDEAS) : rej(new Error('No questions in ' + src)));
+      el.onerror = () => rej(new Error('Could not load ' + src));
       document.head.appendChild(el);
     });
   }
@@ -98,10 +124,11 @@
 
   /* ---------- XP and levels ---------- */
   const LEVELS = [[0, 'Bone Rookie'], [300, 'Joint Explorer'], [800, 'Muscle Mover'], [1500, 'Skeleton Pro'], [2500, 'Science Hero'], [4000, 'Island Legend']];
+  const LEVELS_AR = ['مبتدئ العظام', 'مستكشف المفاصل', 'محرّك العضلات', 'محترف الهيكل', 'بطل العلوم', 'أسطورة الجزيرة'];
   function levelInfo(xp) {
     let i = 0; LEVELS.forEach((l, k) => { if (xp >= l[0]) i = k; });
-    const nxt = LEVELS[i + 1];
-    return { n: i + 1, title: LEVELS[i][1], xp, from: LEVELS[i][0], to: nxt ? nxt[0] : null, pct: nxt ? (xp - LEVELS[i][0]) / (nxt[0] - LEVELS[i][0]) : 1, next: nxt ? nxt[1] : null };
+    const nxt = LEVELS[i + 1], nm = k => T(LEVELS[k][1], LEVELS_AR[k]);
+    return { n: i + 1, title: nm(i), xp, from: LEVELS[i][0], to: nxt ? nxt[0] : null, pct: nxt ? (xp - LEVELS[i][0]) / (nxt[0] - LEVELS[i][0]) : 1, next: nxt ? nm(i + 1) : null };
   }
   const xp = () => prof().xp || 0;
   function addXP(n) { let b = 0, a = 0; updateProf(p => { b = p.xp || 0; p.xp = b + Math.max(0, Math.round(n)); a = p.xp; }); return { before: levelInfo(b), after: levelInfo(a), gained: a - b }; }
@@ -653,6 +680,7 @@
   const rate = { due: rateDue, ask: rateAsk, guard: rateGuard, flush: rateFlush, CHOICES: RATE_CHOICES, WANTS: RATE_WANTS };
 
   window.SI = { HOME, CHAPTERS_PAGE, store, players, player, addPlayer, usePlayer, requirePlayer, prof, updateProf,
-    chapters, chapterById, chapterId, chapter, setChapter, requireChapter, chProf, updateChProf, chapterStars, applyTheme, loadQuestions, checkName, LEVELS, levelInfo, xp, addXP, today, dailyState, completeDaily,
-    weekKey, weekEndsIn, isMuted, setMuted, sfx, voice, speak, LB, rate, esc, NAME: 'Koko' };
+    chapters, chapterById, chapterId, chapter, setChapter, requireChapter, chProf, updateChProf, chapterStars, chReady, applyTheme, loadQuestions, checkName, LEVELS, levelInfo, xp, addXP, today, dailyState, completeDaily,
+    weekKey, weekEndsIn, isMuted, setMuted, sfx, voice, speak, LB, rate, esc, NAME: 'Koko', isAr, T, chTitle, applyLang };
+  applyLang();
 })();

@@ -145,6 +145,7 @@ body{
   #robot{height:96px}
   .bubble{font-size:16px;min-height:64px}
   .bubble::before{left:-12px;top:auto;bottom:22px;margin:0;border-top:0;border-bottom:3px solid #cfe3ee}
+  html[dir=rtl] .bubble::before{left:auto;right:-12px;border-left:0;border-bottom:0;border-right:3px solid #cfe3ee;border-top:3px solid #cfe3ee}
   .qtext{font-size:20px}
   .brand p{display:none}
   .cols{grid-template-columns:1fr}
@@ -245,15 +246,15 @@ body{
 <noscript>Please turn on JavaScript to play.</noscript>
 <div class="app">
   <header class="top">
-    <a class="brand" href="map.html" title="Back to the map">
+    <a class="brand" href="map.html" title="Back to the map" data-ar-label="رجوع للخريطة">
       <div class="logo" aria-hidden="true">🗺️</div>
       <div><h1 id="title">Question Quest</h1><p id="subtitle">Science Island</p></div>
     </a>
     <div class="hud">
       <div class="pill" id="countPill">1 / 12</div>
-      <div class="pill" id="scorePill">Score <b id="score">0</b></div>
-      <button class="icon" id="mute" type="button" aria-label="Sound" aria-pressed="false" title="Sound on/off">♪</button>
-      <a class="icon" href="map.html" aria-label="Back to the map" title="Back to the map">⌂</a>
+      <div class="pill" id="scorePill"><span data-ar="النقاط">Score</span> <b id="score">0</b></div>
+      <button class="icon" id="mute" type="button" aria-label="Sound" aria-pressed="false" title="Sound on/off" data-ar-label="الصوت">♪</button>
+      <a class="icon" href="map.html" aria-label="Back to the map" title="Back to the map" data-ar-label="رجوع للخريطة">⌂</a>
     </div>
   </header>
 
@@ -271,7 +272,7 @@ body{
     </section>
     <aside class="card coach">
       <div class="coachRow">
-        <img id="robot" src="assets/parrot_wave.png" alt="Koko the parrot">
+        <img id="robot" src="assets/parrot_wave.png" alt="Koko the parrot" data-ar-label="الببغاء كوكو">
         <div class="bubble" id="bubble"></div>
       </div>
     </aside>
@@ -291,7 +292,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const mk = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
-const esc = SI.esc;
+const esc = SI.esc, T = SI.T, AR = SI.isAr();
 
 /* ---------- per-player review schedule (Leitner boxes), sound, mute ---------- */
 const CH = SI.chapter() || {};                             // the chapter being played (questions come from CH.questions)
@@ -313,7 +314,7 @@ function dueCards() {
 }
 const sfx = SI.sfx;
 const muteBtn = $('#mute');
-const paintMute = () => { const m = SI.isMuted(); muteBtn.setAttribute('aria-pressed', m); muteBtn.setAttribute('aria-label', m ? 'Sound off' : 'Sound on'); };
+const paintMute = () => { const m = SI.isMuted(); muteBtn.setAttribute('aria-pressed', m); muteBtn.setAttribute('aria-label', m ? T('Sound off', 'الصوت مغلق') : T('Sound on', 'الصوت شغال')); };
 muteBtn.onclick = () => { SI.setMuted(!SI.isMuted()); paintMute(); };
 paintMute();
 
@@ -343,7 +344,7 @@ function addScore(n) {
   const p = $('#scorePill'); p.classList.remove('pop'); void p.offsetWidth; p.classList.add('pop');
   const f = mk('span', 'float', '+' + n); p.appendChild(f); setTimeout(() => f.remove(), 1000);
 }
-function nextBtn(label = 'Next ▸') {
+function nextBtn(label = T('Next ▸', 'التالي ◂')) {
   return new Promise(res => {
     const a = $('#actions'); a.innerHTML = '';
     const b = mk('button', 'btn primary', label); b.type = 'button';
@@ -411,8 +412,8 @@ function armSVG(theta, kind, label) {
     <circle cx="190" cy="256" r="21" fill="none" stroke="#6fb3cf" stroke-width="7"/><circle cx="190" cy="256" r="21" fill="none" stroke="#c3e8f4" stroke-width="3.6"/>
     ${kind !== 'muscles' ? '' : `<g fill="none" stroke-linecap="round"><path d="${tOut}" stroke="#bfa465" stroke-width="9"/><path d="${tOut}" stroke="#fbf0cf" stroke-width="5.5"/>
       <path d="${tIn}" stroke="#bfa465" stroke-width="9"/><path d="${tIn}" stroke="#fbf0cf" stroke-width="5.5"/></g>`}
-    ${kind === 'muscles' ? mus(A_OUT, Qout, 'out', 'Outer muscle') + mus(A_IN, Qin, 'in', 'Inner muscle')
-      : ring({ x: 192, y: 100 }, 27, 'shoulder', 'Shoulder joint') + ring(E, 29, 'elbow', 'Elbow joint') + ring(L(0, 138), 22, 'wrist', 'Wrist joint')}
+    ${kind === 'muscles' ? mus(A_OUT, Qout, 'out', T('Outer muscle', 'العضلة الخلفية')) + mus(A_IN, Qin, 'in', T('Inner muscle', 'العضلة الأمامية'))
+      : ring({ x: 192, y: 100 }, 27, 'shoulder', T('Shoulder joint', 'مفصل الكتف')) + ring(E, 29, 'elbow', T('Elbow joint', 'مفصل الكوع')) + ring(L(0, 138), 22, 'wrist', T('Wrist joint', 'مفصل المعصم'))}
   </svg>`;
 }
 function skeletonSVG() {
@@ -430,20 +431,20 @@ function skeletonSVG() {
   }
   let spine = '';
   for (let i = 0; i < 15; i++) spine += `<rect x="94" y="${70 + i * 9}" width="12" height="7" rx="3" ${b}/>`;
-  return `<svg class="diagram" viewBox="0 0 200 340" role="img" aria-label="A skeleton">
+  return `<svg class="diagram" viewBox="0 0 200 340" role="img" aria-label="${T('A skeleton', 'هيكل عظمي')}">
     ${limb('66,80 54,146 48,206')} ${limb('134,80 146,146 152,206')}
     <ellipse cx="46" cy="220" rx="8" ry="12" ${b}/><ellipse cx="154" cy="220" rx="8" ry="12" ${b}/>
     ${limb('86,228 82,284 84,328')} ${limb('114,228 118,284 116,328')}
     <circle cx="82" cy="284" r="6" ${b}/><circle cx="118" cy="284" r="6" ${b}/>
     <ellipse cx="80" cy="334" rx="11" ry="5" ${b}/><ellipse cx="120" cy="334" rx="11" ry="5" ${b}/>
     <path d="M100 76 L66 80 M100 76 L134 80" ${bs}/><path d="M100 76 L66 80 M100 76 L134 80" ${bf}/>
-    <g class="hot" data-id="ribs" role="button" tabindex="0" aria-label="Ribs">
+    <g class="hot" data-id="ribs" role="button" tabindex="0" aria-label="${T('Ribs', 'الضلوع')}">
       <ellipse class="ring" cx="100" cy="122" rx="46" ry="42"/>${ribs}
       <rect x="96" y="86" width="8" height="52" rx="4" ${b}/></g>
     <path d="M70 206 Q100 196 130 206 Q134 226 116 236 Q100 226 84 236 Q66 226 70 206Z" ${b}/>
-    <g class="hot" data-id="backbone" role="button" tabindex="0" aria-label="Backbone">
+    <g class="hot" data-id="backbone" role="button" tabindex="0" aria-label="${T('Backbone', 'العمود الفقري')}">
       <rect class="ring" x="86" y="62" width="28" height="150" rx="12"/>${spine}</g>
-    <g class="hot" data-id="skull" role="button" tabindex="0" aria-label="Skull">
+    <g class="hot" data-id="skull" role="button" tabindex="0" aria-label="${T('Skull', 'الجمجمة')}">
       <circle class="ring" cx="100" cy="36" r="34"/>
       <path d="M100 8 C122 8 128 26 126 40 C125 50 118 56 114 58 L113 66 L87 66 L86 58 C82 56 75 50 74 40 C72 26 78 8 100 8Z" ${b}/>
       <ellipse cx="90" cy="38" rx="7" ry="8" fill="#5b4a35"/><ellipse cx="110" cy="38" rx="7" ry="8" fill="#5b4a35"/>
@@ -452,23 +453,25 @@ function skeletonSVG() {
   </svg>`;
 }
 const DIAGRAMS = {
-  armBent: () => armSVG(125, 'muscles', 'A bent arm with two muscles'),
-  armStraight: () => armSVG(0, 'muscles', 'A straight arm with two muscles'),
-  armJoints: () => armSVG(0, 'joints', 'An arm with three joints circled'),
+  armBent: () => armSVG(125, 'muscles', T('A bent arm with two muscles', 'ذراع مثني فيه عضلتان')),
+  armStraight: () => armSVG(0, 'muscles', T('A straight arm with two muscles', 'ذراع مفرود فيه عضلتان')),
+  armJoints: () => armSVG(0, 'joints', T('An arm with three joints circled', 'ذراع عليه ثلاثة مفاصل داخل دوائر')),
   skeleton: () => skeletonSVG()
 };
 
 /* ---------- one question ---------- */
-const TYPE_LABEL = { tf: 'True or false', fill: 'Fill the gap', order: 'Put in order', match: 'Match the pairs', tap: 'Tap the picture', mc: 'Choose', odd: 'Odd one out', spot: 'Spot the mistake', story: 'Mini story' };
+const TYPE_LABEL = AR
+  ? { tf: 'صح أم خطأ', fill: 'أكمل الفراغ', order: 'رتّب', match: 'صِل', tap: 'اضغط على الصورة', mc: 'اختر', odd: 'الكلمة الشاذة', spot: 'اكتشف الخطأ', story: 'قصة قصيرة' }
+  : { tf: 'True or false', fill: 'Fill the gap', order: 'Put in order', match: 'Match the pairs', tap: 'Tap the picture', mc: 'Choose', odd: 'Odd one out', spot: 'Spot the mistake', story: 'Mini story' };
 const PTS = { easy: 10, medium: 15, hard: 25 };
 let timerStop = null;
 
 function header(q, idx, total, results) {
   const b = $('#badges'); b.innerHTML = '';
   b.appendChild(mk('span', 'badge', TYPE_LABEL[q.style] || TYPE_LABEL[q.type]));
-  if (q.mode === 'timed') b.appendChild(mk('span', 'badge timed', `⏱ ${q.seconds}s`));
-  if (q.mode === 'boss') b.appendChild(mk('span', 'badge boss', '★ Boss'));
-  if (q.src === 'bonus') b.appendChild(mk('span', 'badge bonus', 'Bonus'));
+  if (q.mode === 'timed') b.appendChild(mk('span', 'badge timed', `⏱ ${q.seconds}${T('s', ' ث')}`));
+  if (q.mode === 'boss') b.appendChild(mk('span', 'badge boss', T('★ Boss', '★ التحدي الكبير')));
+  if (q.src === 'bonus') b.appendChild(mk('span', 'badge bonus', T('Bonus', 'إضافي')));
   const p = $('#progress'); p.innerHTML = '';
   for (let i = 0; i < total; i++) p.appendChild(mk('i', results[i] === true ? 'ok' : results[i] === false ? 'no' : i === idx ? 'now' : ''));
   $('#countPill').textContent = `${idx + 1} / ${total}`;
@@ -480,7 +483,7 @@ function startTimer(sec, onEnd) {
   const iv = setInterval(() => {
     const left = 1 - (performance.now() - t0) / (sec * 1000);
     bar.style.width = Math.max(0, left * 100) + '%'; bar.classList.toggle('low', left < .3);
-    const s = Math.ceil(Math.max(0, left) * sec); lab.textContent = s + 's';
+    const s = Math.ceil(Math.max(0, left) * sec); lab.textContent = s + T('s', ' ث');
     if (s < lastSec && s <= 3 && s > 0) sfx.beep(); lastSec = s;
     if (left <= 0) stop(true);
   }, 50);
@@ -516,12 +519,12 @@ function ask(q) {
     const optBtn = (html, key) => { const b = mk('button', 'btn opt', (key ? `<span class="k">${key}</span>` : '') + `<span>${html}</span>`); b.type = 'button'; return b; };
 
     if (q.type === 'mc' || q.type === 'fill' || q.type === 'tf') {
-      const opts = q.type === 'tf' ? ['True', 'False'] : q.options;
+      const opts = q.type === 'tf' ? [T('True', 'صح'), T('False', 'خطأ')] : q.options;
       const order = q.type === 'tf' ? [0, 1] : shuffle(opts.map((_, i) => i));
       const wrap = mk('div', 'choices' + (q.type === 'tf' ? ' two tf' : q.type === 'fill' ? ' two' : ''));
       const maxTries = (!timed && q.type === 'mc' && opts.length > 2) ? 2 : 1;
       const btns = order.map((oi, k) => {
-        const b = optBtn(q.type === 'tf' ? (oi === 0 ? '✓ True' : '✗ False') : esc(opts[oi]), q.type === 'tf' ? '' : 'ABCD'[k]);
+        const b = optBtn(q.type === 'tf' ? (oi === 0 ? T('✓ True', '✓ صح') : T('✗ False', '✗ خطأ')) : esc(opts[oi]), q.type === 'tf' ? '' : T('ABCD', 'أبجد')[k]);
         b.dataset.oi = oi;
         b.onclick = () => {
           if (finished) return;
@@ -533,7 +536,7 @@ function ask(q) {
           } else {
             b.classList.add('bad'); b.disabled = true; sfx.bad();
             if (tries >= maxTries) { reveal(); finish(false, false); }
-            else say('Not quite. Try once more!', 'think');
+            else say(T('Not quite. Try once more!', 'قرّبت! جرّب مرة كمان.'), 'think');
           }
         };
         wrap.appendChild(b); return b;
@@ -565,8 +568,8 @@ function ask(q) {
         undo.disabled = !picked.length;
       });
       const tools = mk('div', 'tools');
-      const undo = mk('button', 'btn', '↺ Start over'); undo.type = 'button'; undo.disabled = true;
-      const check = mk('button', 'btn primary', 'Check ✓'); check.type = 'button'; check.disabled = true;
+      const undo = mk('button', 'btn', T('↺ Start over', '↺ ابدأ من جديد')); undo.type = 'button'; undo.disabled = true;
+      const check = mk('button', 'btn primary', T('Check ✓', 'تحقق ✓')); check.type = 'button'; check.disabled = true;
       undo.onclick = () => { if (!finished) { picked.length = 0; check.disabled = true; paint(); } };
       check.onclick = () => {
         if (finished) return;
@@ -578,7 +581,7 @@ function ask(q) {
       };
       reveal = () => {
         undo.disabled = check.disabled = true; tools.hidden = true; btns.forEach(b => b.disabled = true);
-        const right = mk('div', 'explain no', '<b>Right order:</b> ' + q.answer.map((ii, k) => `${k + 1}. ${esc(q.items[ii])}`).join(' &nbsp;→&nbsp; '));
+        const right = mk('div', 'explain no', T('<b>Right order:</b> ', '<b>الترتيب الصحيح:</b> ') + q.answer.map((ii, k) => `${k + 1}. ${esc(q.items[ii])}`).join(T(' &nbsp;→&nbsp; ', ' &nbsp;←&nbsp; ')));
         area.appendChild(right);
       };
       tools.append(undo, check);
@@ -590,14 +593,14 @@ function ask(q) {
       const pairs = {}; let selLeft = null;
       const cols = mk('div', 'cols');
       const lc = mk('div', 'choices'), rc = mk('div', 'choices');
-      lc.appendChild(mk('div', 'colhead', 'Tap one here…')); rc.appendChild(mk('div', 'colhead', '…then its partner here'));
+      lc.appendChild(mk('div', 'colhead', T('Tap one here…', 'اضغط على واحدة هنا…'))); rc.appendChild(mk('div', 'colhead', T('…then its partner here', '…وبعدين على ما يناسبها هنا')));
       const lb = q.left.map((t, i) => { const b = optBtn(esc(t) + '</span><span class="num">'); b.dataset.li = i; b.onclick = () => { if (finished) return; selLeft = i; sfx.tick(); paint(); }; lc.appendChild(b); return b; });
       const rview = shuffle(q.right.map((_, i) => i));
       const rb = {};
       rview.forEach(ri => {
         const b = optBtn(esc(q.right[ri]) + '</span><span class="num">'); b.dataset.ri = ri;
         b.onclick = () => {
-          if (finished || selLeft === null) { if (selLeft === null && !finished) say('First tap an item on the left.', 'point'); return; }
+          if (finished || selLeft === null) { if (selLeft === null && !finished) say(T('First tap an item on the left.', 'اضغط الأول على كلمة من العمود الأول.'), 'point'); return; }
           for (const k in pairs) if (pairs[k] === ri) delete pairs[k];
           pairs[selLeft] = ri; selLeft = null; sfx.tick(); paint();
           check.disabled = Object.keys(pairs).length !== q.left.length;
@@ -610,7 +613,7 @@ function ask(q) {
         for (const k in pairs) { const num = rb[pairs[k]].querySelector('.num'); num.textContent = +k + 1; num.style.background = COLORS[k]; }
       };
       const tools = mk('div', 'tools');
-      const check = mk('button', 'btn primary', 'Check ✓'); check.type = 'button'; check.disabled = true;
+      const check = mk('button', 'btn primary', T('Check ✓', 'تحقق ✓')); check.type = 'button'; check.disabled = true;
       check.onclick = () => {
         if (finished) return;
         let ok = true; lb.forEach(b => b.classList.remove('sel'));
@@ -621,7 +624,7 @@ function ask(q) {
       };
       reveal = () => {
         check.disabled = true; tools.hidden = true; [...lb, ...Object.values(rb)].forEach(b => b.disabled = true);
-        area.appendChild(mk('div', 'explain no', '<b>Right pairs:</b> ' + q.left.map((t, i) => `${esc(t)} → ${esc(q.right[q.answer[i]])}`).join(' &nbsp;·&nbsp; ')));
+        area.appendChild(mk('div', 'explain no', T('<b>Right pairs:</b> ', '<b>التوصيل الصحيح:</b> ') + q.left.map((t, i) => `${esc(t)} ${T('→', '←')} ${esc(q.right[q.answer[i]])}`).join(' &nbsp;·&nbsp; ')));
       };
       cols.append(lc, rc); tools.appendChild(check);
       area.append(cols, tools);
@@ -648,24 +651,24 @@ function ask(q) {
 }
 
 /* ---------- session ---------- */
-const PRAISE = ['Great job!', 'Super!', 'You got it!', 'Brilliant!', 'Well done!', 'Fantastic!', 'Awesome!'];
+const PRAISE = AR ? ['شغل عظيم!', 'ممتاز!', 'صح عليك!', 'رائع!', 'أحسنت!', 'برافو!', 'جامد!'] : ['Great job!', 'Super!', 'You got it!', 'Brilliant!', 'Well done!', 'Fantastic!', 'Awesome!'];
 let streak = 0, best = 0;
 
 async function mysteryBox() {
   return new Promise(res => {
     const prize = [20, 30, 30, 50][Math.floor(Math.random() * 4)];
     const o = mk('div', 'overlay', `<div class="panel">
-      <h2>Mystery box!</h2><p>5 right answers in a row. Tap the box!</p>
-      <button class="box" type="button" aria-label="Open the mystery box">🎁</button>
+      <h2>${T('Mystery box!', 'صندوق المفاجآت!')}</h2><p>${T('5 right answers in a row. Tap the box!', '٥ إجابات صح ورا بعض. اضغط على الصندوق!')}</p>
+      <button class="box" type="button" aria-label="${T('Open the mystery box', 'افتح صندوق المفاجآت')}">🎁</button>
       <div class="prize" hidden>+${prize}</div>
-      <div class="row acts"><button class="btn primary" type="button" hidden>Keep going ▸</button></div></div>`);
+      <div class="row acts"><button class="btn primary" type="button" hidden>${T('Keep going ▸', 'كمّل ◂')}</button></div></div>`);
     document.body.appendChild(o);
     const box = $('.box', o), go = $('.btn', o), pr = $('.prize', o);
     box.focus();
     box.onclick = () => {
       if (box.dataset.done) return; box.dataset.done = 1;
       box.textContent = '✨'; box.style.animation = 'none'; pr.hidden = false; go.hidden = false;
-      sfx.win(); SI.voice('box'); confetti(40); addScore(prize); say(`Wow! You won <b>${prize}</b> bonus points!`, 'celebrate');
+      sfx.win(); SI.voice('box'); confetti(40); addScore(prize); say(T(`Wow! You won <b>${prize}</b> bonus points!`, `واو! كسبت <b>${prize}</b> نقطة زيادة!`), 'celebrate');
       go.focus();
     };
     go.onclick = () => { o.remove(); res(); };
@@ -689,12 +692,12 @@ async function playList(list, label) {
   for (let i = 0; i < list.length; i++) {
     const q = list[i];
     if (q.mode === 'boss' && list[i - 1] && list[i - 1].mode !== 'boss') {
-      sfx.boss(); SI.voice('boss'); await banner('Get ready', 'Boss Round!', 'boss');
-      say('Boss questions mix two ideas. Take your time!', 'point');
+      sfx.boss(); SI.voice('boss'); await banner(T('Get ready', 'استعد'), T('Boss Round!', 'التحدي الكبير!'), 'boss');
+      say(T('Boss questions mix two ideas. Take your time!', 'أسئلة التحدي الكبير بتجمع فكرتين. خد وقتك!'), 'point');
     } else if (i === 0) {
-      say(label === 'review' ? 'Let’s practise the tricky ones again!' : label === 'daily' ? 'Five quick ones. Let’s go!' : 'Read carefully and have fun!', 'point');
+      say(label === 'review' ? T('Let’s practise the tricky ones again!', 'يلّا نراجع الأسئلة الصعبة تاني!') : label === 'daily' ? T('Five quick ones. Let’s go!', 'خمسة سريعين. يلّا بينا!') : T('Read carefully and have fun!', 'اقرأ كويس واستمتع!'), 'point');
     } else {
-      say(q.mode === 'timed' ? 'Quick one! Watch the timer.' : q.style === 'story' ? 'Read the story first.' : 'You can do it!', 'think');
+      say(q.mode === 'timed' ? T('Quick one! Watch the timer.', 'سؤال سريع! خلّي بالك من الوقت.') : q.style === 'story' ? T('Read the story first.', 'اقرأ القصة الأول.') : T('You can do it!', 'إنت تقدر!'), 'think');
     }
     header(q, i, list.length, results);
     window.__cur = q;
@@ -708,7 +711,7 @@ async function playList(list, label) {
       best = Math.max(best, streak);
       let pts = label === 'retry' ? 5 : r.firstTry ? PTS[q.level] + (q.mode === 'boss' ? 5 : 0) : 5;
       let extra = '';
-      if (q.mode === 'timed' && r.firstTry) { const sp = Math.round(r.left * 10); pts += sp; if (sp) extra += ` ⚡ +${sp} speed`; }
+      if (q.mode === 'timed' && r.firstTry) { const sp = Math.round(r.left * 10); pts += sp; if (sp) extra += ` ⚡ +${sp} ${T('speed', 'سرعة')}`; }
       if (streak >= 3 && r.firstTry) { pts += 5; extra += ` <span class="streak">🔥 ×${streak}</span>`; }
       addScore(pts); sfx.ok(); SI.voice(streak >= 3 && streak % 3 === 0 ? 'streak' : 'ok');
       confetti(q.mode === 'boss' ? 40 : 14);
@@ -716,12 +719,12 @@ async function playList(list, label) {
       ex.className = 'explain ok'; ex.innerHTML = `✓ ${esc(q.explain)}`; ex.hidden = false;
     } else {
       streak = 0; sfx.bad(); SI.voice('bad'); missed.push(q);
-      say(r.timeout ? 'Time’s up! Here is the answer.' : 'Good try! Look at the right answer.', 'sad');
-      ex.className = 'explain no'; ex.innerHTML = `${r.timeout ? '⏱ Time’s up. ' : ''}${esc(q.explain)}`; ex.hidden = false;
+      say(r.timeout ? T('Time’s up! Here is the answer.', 'الوقت خلص! دي الإجابة.') : T('Good try! Look at the right answer.', 'محاولة حلوة! بص على الإجابة الصح.'), 'sad');
+      ex.className = 'explain no'; ex.innerHTML = `${r.timeout ? T('⏱ Time’s up. ', '⏱ الوقت خلص. ') : ''}${esc(q.explain)}`; ex.hidden = false;
       const card = $('#qcard'); card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
     }
     header(q, i, list.length, results);
-    await nextBtn(i === list.length - 1 ? 'Finish ▸' : 'Next ▸');
+    await nextBtn(i === list.length - 1 ? T('Finish ▸', 'إنهاء ◂') : T('Next ▸', 'التالي ◂'));
     if (r.firstTry && streak > 0 && streak % 5 === 0) await mysteryBox();
   }
   return { results, missed, firstRight };
@@ -755,9 +758,9 @@ function buildReview() {
 
 function levelBlock(gain) {
   const L = gain.after;
-  return `<div class="lvlbox"><div class="lvlrow"><b>Level ${L.n} · ${L.title}</b><span>+${gain.gained} XP</span></div>
+  return `<div class="lvlbox"><div class="lvlrow"><b>${T('Level', 'المستوى')} ${L.n} · ${L.title}</b><span>+${gain.gained} XP</span></div>
     <div class="xpbar"><i style="width:${Math.round(L.pct * 100)}%"></i></div>
-    <small>${L.to ? `${L.to - L.xp} XP to ${L.next}` : 'Top level reached!'}</small></div>`;
+    <small>${L.to ? T(`${L.to - L.xp} XP to ${L.next}`, `باقي ${L.to - L.xp} XP للوصول إلى ${L.next}`) : T('Top level reached!', 'وصلت لأعلى مستوى!')}</small></div>`;
 }
 
 async function results(kind, res, total, extraXP = 0) {
@@ -771,36 +774,36 @@ async function results(kind, res, total, extraXP = 0) {
   const levelUp = gain.after.n > gain.before.n;
   sfx.win(); confetti(60); SI.voice('finish');
   const me = SI.player();
-  say(stars === 3 ? `Amazing, ${esc(me.name)}! You are a real expert on ${esc(CH.title)}!` : `Nice work, ${esc(me.name)}! Play again to get more stars.`, 'celebrate');
-  const titles = { quest: 'Quest complete!', daily: 'Daily 5 done!', review: 'Review done!' };
+  say(stars === 3 ? T(`Amazing, ${esc(me.name)}! You are a real expert on ${esc(CH.title)}!`, `مذهل يا ${esc(me.name)}! إنت خبير حقيقي في ${esc(SI.chTitle(CH))}!`) : T(`Nice work, ${esc(me.name)}! Play again to get more stars.`, `شغل حلو يا ${esc(me.name)}! العب تاني علشان تاخد نجوم أكتر.`), 'celebrate');
+  const titles = AR ? { quest: 'خلّصت التحدي!', daily: 'خلّصت خماسية اليوم!', review: 'خلّصت المراجعة!' } : { quest: 'Quest complete!', daily: 'Daily 5 done!', review: 'Review done!' };
   const o = mk('div', 'overlay', `<div class="panel">
     <img class="hero" src="assets/parrot_${stars >= 2 ? 'celebrate' : 'thumbs'}.png" alt="">
     <h2>${titles[kind]}</h2>
-    ${kind === 'quest' ? `<div class="stars" aria-label="${stars} of 3 stars">${'★'.repeat(stars)}<span class="off">${'★'.repeat(3 - stars)}</span></div>` : ''}
-    <div class="stats"><span>Score: ${score}</span><span>Right first time: ${res.firstRight} / ${total}</span>${kind === 'quest' ? `<span>Best: ${bestScore}</span>` : ''}${extraXP ? `<span>🔥 Daily bonus +${extraXP}</span>` : ''}</div>
+    ${kind === 'quest' ? `<div class="stars" aria-label="${T(`${stars} of 3 stars`, `${stars} من ٣ نجوم`)}">${'★'.repeat(stars)}<span class="off">${'★'.repeat(3 - stars)}</span></div>` : ''}
+    <div class="stats"><span>${T('Score', 'النقاط')}: ${score}</span><span>${T('Right first time', 'صح من أول مرة')}: ${res.firstRight} / ${total}</span>${kind === 'quest' ? `<span>${T('Best', 'أعلى نتيجة')}: ${bestScore}</span>` : ''}${extraXP ? `<span>🔥 ${T('Daily bonus', 'مكافأة اليوم')} +${extraXP}</span>` : ''}</div>
     ${levelBlock(gain)}
-    ${kind === 'quest' ? '<p class="rank" id="rank">Saving your score…</p>' : ''}
-    <p>${res.missed.length ? `Koko saved <b>${res.missed.length}</b> tricky question${res.missed.length > 1 ? 's' : ''} for your review.` : 'Perfect! Come back tomorrow for your Daily 5.'}</p>
+    ${kind === 'quest' ? `<p class="rank" id="rank">${T('Saving your score…', 'بنحفظ نتيجتك…')}</p>` : ''}
+    <p>${res.missed.length ? T(`Koko saved <b>${res.missed.length}</b> tricky question${res.missed.length > 1 ? 's' : ''} for your review.`, `كوكو حفظ لك <b>${res.missed.length}</b> سؤال صعب علشان تراجعه.`) : T('Perfect! Come back tomorrow for your Daily 5.', 'ممتاز! ارجع بكرة لخماسية اليوم.')}</p>
     <div class="row acts">
-      ${res.missed.length ? '<a class="btn primary" href="quiz.html#review">Review now</a>' : ''}
-      ${kind === 'quest' ? '<a class="btn" href="champions.html">🏆 Champions</a>' : ''}
-      <a class="btn" href="map.html">Map</a>
-      <button class="btn" type="button" id="again">Play again</button>
+      ${res.missed.length ? `<a class="btn primary" href="quiz.html#review">${T('Review now', 'راجع دلوقتي')}</a>` : ''}
+      ${kind === 'quest' ? `<a class="btn" href="champions.html">🏆 ${T('Champions', 'الأبطال')}</a>` : ''}
+      <a class="btn" href="map.html">${T('Map', 'الخريطة')}</a>
+      <button class="btn" type="button" id="again">${T('Play again', 'العب تاني')}</button>
     </div></div>`);
   document.body.appendChild(o);
   SI.rate.guard(o, 'a[href="map.html"], a[href="champions.html"]', 'results');   // Koko asks for a rating before the player leaves (once per chapter)
   $('#again', o).onclick = () => location.reload();
-  if (levelUp) { setTimeout(() => { sfx.level(); SI.voice('level'); banner('Level up!', `Level ${gain.after.n} · ${gain.after.title}`); }, 900); }
+  if (levelUp) { setTimeout(() => { sfx.level(); SI.voice('level'); banner(T('Level up!', 'مستوى جديد!'), `${T('Level', 'المستوى')} ${gain.after.n} · ${gain.after.title}`); }, 900); }
   if (kind === 'quest') {
     try {
       await SI.LB.submit(score);
       const m = await SI.LB.me();
-      $('#rank', o).innerHTML = m ? `🏆 You are <b>#${m.rank}</b> this week${m.online ? '' : ' on this device'}!` : '';
+      $('#rank', o).innerHTML = m ? T(`🏆 You are <b>#${m.rank}</b> this week${m.online ? '' : ' on this device'}!`, `🏆 ترتيبك <b>#${m.rank}</b> الأسبوع ده${m.online ? '' : ' على الجهاز ده'}!`) : '';
     } catch (e) { $('#rank', o).textContent = ''; }
   }
 }
 
-function intro(title, sub, text, startLabel = 'Start') {
+function intro(title, sub, text, startLabel = T('Start', 'ابدأ')) {
   return new Promise(res => {
     const o = mk('div', 'overlay', `<div class="panel">
       <img class="hero" src="assets/parrot_wave.png" alt="">
@@ -821,51 +824,53 @@ function notice(title, text, buttons) {
 async function main() {
   const me = SI.player();
   const mode = /^#(daily|review)$/.test(location.hash) ? location.hash.slice(1) : 'quest';
-  say(`Hi, ${esc(me.name)}! I’m Koko.`, 'wave');
-  const set = (t, s) => { $('#title').textContent = t; $('#subtitle').textContent = s; document.title = t + ' · Science Island'; };
+  say(T(`Hi, ${esc(me.name)}! I’m Koko.`, `أهلًا يا ${esc(me.name)}! أنا كوكو.`), 'wave');
+  const set = (t, s) => { $('#title').textContent = t; $('#subtitle').textContent = s; document.title = t + T(' · Science Island', ' · جزيرة العلوم'); };
+  const TITLE = SI.chTitle(CH);
 
   if (mode === 'quest') {
     const N = window.IDEAS.length;
-    set('Chapter Quest', `${CH.title} · ${N} questions`);
+    set(T('Chapter Quest', 'تحدي الفصل'), T(`${CH.title} · ${N} questions`, `${TITLE} · ${N} سؤال`));
     const list = buildQuest(); rememberVariants(list);
-    await intro(`Ready, ${esc(me.name)}?`, `Chapter ${CH.n} Quest · ${N} questions`,
-      'Some questions have a timer ⏱. The last ones are Boss questions ★. Get 5 right in a row for a mystery box 🎁. Your best score goes on the Champions board 🏆!');
+    await intro(T(`Ready, ${esc(me.name)}?`, `جاهز يا ${esc(me.name)}؟`), T(`Chapter ${CH.n} Quest · ${N} questions`, `تحدي الفصل ${CH.n} · ${N} سؤال`),
+      T('Some questions have a timer ⏱. The last ones are Boss questions ★. Get 5 right in a row for a mystery box 🎁. Your best score goes on the Champions board 🏆!',
+        'بعض الأسئلة ليها وقت ⏱. وآخر الأسئلة هي التحدي الكبير ★. جاوب ٥ صح ورا بعض وخد صندوق المفاجآت 🎁. وأعلى نتيجة ليك بتدخل لوحة الأبطال 🏆!'));
     const res = await playList(list, 'quest');
     const retry = res.missed.filter(q => q.mode !== 'boss');
     if (retry.length) {
-      await banner('Second chance', 'Try them again!');
+      await banner(T('Second chance', 'فرصة تانية'), T('Try them again!', 'جرّبهم تاني!'));
       await playList(retry.map(q => Object.assign({}, q, { mode: 'normal' })), 'retry');
     }
     await results('quest', res, list.length);
   } else if (mode === 'daily') {
-    set('Daily 5', `${CH.title} · five quick questions every day`);
+    set(T('Daily 5', 'خماسية اليوم'), T(`${CH.title} · five quick questions every day`, `${TITLE} · خمس أسئلة سريعة كل يوم`));
     const st = SI.dailyState();
     if (st.done) {
-      const o = notice('Done for today!', `You already did today’s Daily 5. 🔥 Your streak: <b>${st.streak} day${st.streak === 1 ? '' : 's'}</b>. Come back tomorrow!`,
-        '<button class="btn primary" type="button" id="practise">Practise anyway</button><a class="btn" href="map.html">Map</a>');
+      const o = notice(T('Done for today!', 'خلّصت النهارده!'), T(`You already did today’s Daily 5. 🔥 Your streak: <b>${st.streak} day${st.streak === 1 ? '' : 's'}</b>. Come back tomorrow!`, `إنت حليت خماسية النهارده خلاص. 🔥 سلسلتك: <b>${st.streak} يوم</b>. ارجع بكرة!`),
+        `<button class="btn primary" type="button" id="practise">${T('Practise anyway', 'اتمرّن برضه')}</button><a class="btn" href="map.html">${T('Map', 'الخريطة')}</a>`);
       await new Promise(r => { $('#practise', o).onclick = () => { o.remove(); r(); }; });
       const list = buildDaily(); rememberVariants(list);
       const res = await playList(list, 'daily');
       return results('daily', res, list.length);
     }
     const list = buildDaily(); rememberVariants(list);
-    await intro('Daily 5', st.streak ? `🔥 ${st.streak} day streak` : 'Start your streak today!', 'Five quick questions. Finish them to keep your fire streak going and win bonus XP.', 'Go!');
+    await intro(T('Daily 5', 'خماسية اليوم'), st.streak ? T(`🔥 ${st.streak} day streak`, `🔥 ${st.streak} يوم ورا بعض`) : T('Start your streak today!', 'ابدأ سلسلتك النهارده!'), T('Five quick questions. Finish them to keep your fire streak going and win bonus XP.', 'خمس أسئلة سريعة. خلّصهم علشان تحافظ على سلسلتك وتكسب XP زيادة.'), T('Go!', 'يلّا!'));
     const res = await playList(list, 'daily');
     const streakNow = SI.completeDaily();
     await results('daily', res, list.length, 20 + Math.min(streakNow, 10) * 5);
   } else {
-    set('Review', `${CH.title} · the tricky ones`);
+    set(T('Review', 'المراجعة'), T(`${CH.title} · the tricky ones`, `${TITLE} · الأسئلة الصعبة`));
     const list = buildReview();
     if (!list.length) {
       const cards = SI.chProf().cards || {};
       const next = Object.values(cards).map(c => c.due).sort((a, b) => a - b)[0];
       const when = next ? Math.max(1, Math.round((next - Date.now()) / DAY)) : 0;
-      notice('All caught up!', next ? `Nothing to review right now. Come back in about <b>${when} day${when > 1 ? 's' : ''}</b>.` : 'Play the Chapter Quest first. Koko will save the tricky questions here.',
-        '<a class="btn primary" href="map.html">Map</a>');
+      notice(T('All caught up!', 'مفيش حاجة متأخرة!'), next ? T(`Nothing to review right now. Come back in about <b>${when} day${when > 1 ? 's' : ''}</b>.`, `مفيش مراجعة دلوقتي. ارجع بعد حوالي <b>${when} يوم</b>.`) : T('Play the Chapter Quest first. Koko will save the tricky questions here.', 'العب تحدي الفصل الأول، وكوكو هيحفظ لك الأسئلة الصعبة هنا.'),
+        `<a class="btn primary" href="map.html">${T('Map', 'الخريطة')}</a>`);
       return;
     }
     rememberVariants(list);
-    await intro('Review time', `${list.length} question${list.length > 1 ? 's' : ''} to practise`, 'These were tricky before. Get them right to move them further away!', 'Go!');
+    await intro(T('Review time', 'وقت المراجعة'), T(`${list.length} question${list.length > 1 ? 's' : ''} to practise`, `${list.length} سؤال للتمرين`), T('These were tricky before. Get them right to move them further away!', 'الأسئلة دي كانت صعبة عليك قبل كده. جاوبها صح علشان تبعد عنك!'), T('Go!', 'يلّا!'));
     const res = await playList(list, 'review');
     await results('review', res, list.length);
   }
@@ -876,7 +881,7 @@ if (SI.requirePlayer() && SI.requireChapter()) {
   if (CH.quizBg) document.body.style.backgroundImage = `linear-gradient(rgba(255,255,255,.35),rgba(255,255,255,.35)),url(${CH.quizBg})`;
   SI.loadQuestions().then(main).catch(e => {
     console.error(e);
-    notice('Not ready yet', 'The questions for this chapter could not be loaded. Check your connection and try again.', '<a class="btn primary" href="chapters.html">Chapters</a><button class="btn" type="button" onclick="location.reload()">Try again</button>');
+    notice(T('Not ready yet', 'لسه مش جاهز'), T('The questions for this chapter could not be loaded. Check your connection and try again.', 'مقدرناش نحمّل أسئلة الفصل. اتأكد من النت وجرّب تاني.'), `<a class="btn primary" href="chapters.html">${T('Chapters', 'الفصول')}</a><button class="btn" type="button" onclick="location.reload()">${T('Try again', 'جرّب تاني')}</button>`);
   });
 }
 window.__quiz = { ask: q => ask(q), DIAGRAMS, variantOf, mysteryBox, notice, results: (kind, res, total, extra, sc) => { if (sc != null) score = sc; return results(kind, res, total, extra); } };

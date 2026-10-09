@@ -48,20 +48,20 @@ a.ch:focus-visible{outline:3px solid #f7b267;outline-offset:2px}
 <body>
 <div class="app">
   <header class="top">
-    <a class="brand" href="index.html" title="Change player">
+    <a class="brand" href="index.html" title="Change player" data-ar-label="تغيير اللاعب">
       <div class="logo" aria-hidden="true">🏝️</div>
-      <div><h1>Science Island</h1><p id="sub">Grade 5 · Languages · First term</p></div>
+      <div><h1 data-ar="جزيرة العلوم">Science Island</h1><p id="sub" data-ar="الصف الخامس · عربي · الفصل الدراسي الأول">Grade 5 · Languages · First term</p></div>
     </a>
     <div class="hud">
-      <span class="pill" title="Daily streak">🔥 <b id="streak">0</b></span>
-      <span class="pill" title="Stars in all chapters">⭐ <b id="stars">0</b></span>
-      <button class="icon" id="mute" type="button" aria-label="Sound" aria-pressed="false" title="Sound on/off">♪</button>
-      <a class="icon" href="index.html" aria-label="Change player" title="Change player">👤</a>
+      <span class="pill" title="Daily streak" data-ar-label="أيام متتالية">🔥 <b id="streak">0</b></span>
+      <span class="pill" title="Stars in all chapters" data-ar-label="النجوم في كل الفصول">⭐ <b id="stars">0</b></span>
+      <button class="icon" id="mute" type="button" aria-label="Sound" aria-pressed="false" title="Sound on/off" data-ar-label="الصوت">♪</button>
+      <a class="icon" href="index.html" aria-label="Change player" title="Change player" data-ar-label="تغيير اللاعب">👤</a>
     </div>
   </header>
   <main class="wrap">
     <div class="card intro">
-      <img id="parrot" src="assets/parrot_point.png" alt="Koko the parrot">
+      <img id="parrot" src="assets/parrot_point.png" alt="Koko the parrot" data-ar-label="الببغاء كوكو">
       <div class="txt">
         <div class="bubble" id="bubble"></div>
         <div class="lvl">
@@ -71,7 +71,7 @@ a.ch:focus-visible{outline:3px solid #f7b267;outline-offset:2px}
         </div>
       </div>
     </div>
-    <h2 class="sect">Choose a chapter <span class="ar">اختر الفصل</span></h2>
+    <h2 class="sect" data-ar="اختر الفصل">Choose a chapter <span class="ar">اختر الفصل</span></h2>
     <ol class="list" id="list"></ol>
   </main>
 </div>
@@ -83,17 +83,18 @@ a.ch:focus-visible{outline:3px solid #f7b267;outline-offset:2px}
   'use strict';
   const me = SI.requirePlayer(); if (!me) return;
   const $ = s => document.querySelector(s);
-  const esc = SI.esc, list = SI.chapters(), cur = SI.chapterId();
+  if (SI.isAr()) document.title = 'جزيرة العلوم · الفصول';
+  const esc = SI.esc, T = SI.T, list = SI.chapters(), cur = SI.chapterId();
 
   const lv = SI.levelInfo(SI.xp());
-  $('#lvlTitle').textContent = `Level ${lv.n} · ${lv.title}`;
+  $('#lvlTitle').textContent = `${T('Level', 'المستوى')} ${lv.n} · ${lv.title}`;
   $('#lvlXp').textContent = `${lv.xp} XP`;
   $('#lvlBar').style.width = Math.round(lv.pct * 100) + '%';
-  $('#lvlNext').textContent = lv.to ? `${lv.to - lv.xp} XP to ${lv.next}` : 'Top level reached!';
+  $('#lvlNext').textContent = lv.to ? T(`${lv.to - lv.xp} XP to ${lv.next}`, `باقي ${lv.to - lv.xp} XP للوصول إلى ${lv.next}`) : T('Top level reached!', 'وصلت لأعلى مستوى!');
   $('#streak').textContent = SI.dailyState().streak;
 
   const mute = $('#mute');
-  const paint = () => { mute.setAttribute('aria-pressed', SI.isMuted()); mute.setAttribute('aria-label', SI.isMuted() ? 'Sound off' : 'Sound on'); };
+  const paint = () => { mute.setAttribute('aria-pressed', SI.isMuted()); mute.setAttribute('aria-label', SI.isMuted() ? T('Sound off', 'الصوت مغلق') : T('Sound on', 'الصوت شغال')); };
   mute.onclick = () => { SI.setMuted(!SI.isMuted()); paint(); }; paint();
 
   let total = 0, started = false;
@@ -102,19 +103,19 @@ a.ch:focus-visible{outline:3px solid #f7b267;outline-offset:2px}
     const li = document.createElement('li');
     const s = SI.chapterStars(c.id); total += s.got; if (s.got) started = true;
     const tile = `<span class="tile" style="background-color:${c.tint || '#e3f1f7'}${c.cover ? `;background-image:url(${c.cover})` : ''}">${c.cover ? '' : c.icon || '📘'}<span class="n">${c.n}</span></span>`;
-    const lessons = `${c.lessons.length} lesson${c.lessons.length > 1 ? 's' : ''}`;
-    if (c.ready) {
+    const nL = c.lessons.length, lessons = T(`${nL} lesson${nL > 1 ? 's' : ''}`, nL === 1 ? 'درس واحد' : nL === 2 ? 'درسان' : `${nL} دروس`), title = SI.chTitle(c), chN = T(`Chapter ${c.n}`, `الفصل ${c.n}`);
+    if (SI.chReady(c)) {
       const a = document.createElement('a');
       a.className = 'ch' + (c.id === cur ? ' cur' : ''); a.href = 'map.html';
-      a.setAttribute('aria-label', `Chapter ${c.n}: ${c.title}, ${s.got} of ${s.of} stars`);
-      a.innerHTML = `${tile}<span class="tx"><span class="k">Chapter ${c.n}</span><b>${esc(c.title)}</b>
+      a.setAttribute('aria-label', T(`Chapter ${c.n}: ${c.title}, ${s.got} of ${s.of} stars`, `${chN}: ${title}، ${s.got} من ${s.of} نجوم`));
+      a.innerHTML = `${tile}<span class="tx"><span class="k">${chN}</span><b>${esc(title)}</b>
         <span class="meta"><span>${lessons}</span><span class="st" aria-hidden="true">${'★'.repeat(s.got)}<span class="no">${'★'.repeat(s.of - s.got)}</span></span></span></span>
-        <span class="go" aria-hidden="true">${c.id === cur ? 'Continue ▸' : '›'}</span>`;
+        <span class="go" aria-hidden="true">${c.id === cur ? T('Continue ▸', 'كمّل ◂') : '›'}</span>`;
       a.onclick = () => { SI.setChapter(c.id); SI.sfx.tick(); };
       li.appendChild(a);
     } else {
-      li.innerHTML = `<div class="ch off" aria-label="Chapter ${c.n}: ${esc(c.title)}, coming soon">${tile}<span class="tx"><span class="k">Chapter ${c.n}</span><b>${esc(c.title)}</b>
-        <span class="meta"><span>${lessons}</span><span class="soon">Soon · قريبًا</span></span></span></div>`;
+      li.innerHTML = `<div class="ch off" aria-label="${chN}: ${esc(title)}, ${T('coming soon', 'قريبًا')}">${tile}<span class="tx"><span class="k">${chN}</span><b>${esc(title)}</b>
+        <span class="meta"><span>${lessons}</span><span class="soon">${T('Soon · قريبًا', 'قريبًا')}</span></span></span></div>`;
     }
     box.appendChild(li);
   });
@@ -122,8 +123,8 @@ a.ch:focus-visible{outline:3px solid #f7b267;outline-offset:2px}
 
   const curCh = SI.chapter();
   $('#bubble').innerHTML = started && curCh
-    ? `Welcome back, <b>${esc(me.name)}</b>! Keep going with <b>${esc(curCh.title)}</b>, or pick another chapter.`
-    : `Hi, <b>${esc(me.name)}</b>! I’m Koko. Pick a chapter and let’s play!`;
+    ? T(`Welcome back, <b>${esc(me.name)}</b>! Keep going with <b>${esc(curCh.title)}</b>, or pick another chapter.`, `أهلًا بعودتك يا <b>${esc(me.name)}</b>! كمّل في <b>${esc(SI.chTitle(curCh))}</b>، أو اختر فصلًا آخر.`)
+    : T(`Hi, <b>${esc(me.name)}</b>! I’m Koko. Pick a chapter and let’s play!`, `أهلًا يا <b>${esc(me.name)}</b>! أنا كوكو. اختر فصلًا ويلّا نلعب!`);
   if (started) $('#parrot').src = 'assets/parrot_thumbs.png';
 })();
 </script>

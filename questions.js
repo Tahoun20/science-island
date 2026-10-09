@@ -1,5 +1,5 @@
 /* Grade 5 Science (Languages) · Chapter 1 Bones and Muscles
-   20 core ideas from the school book (Point!, Warm Up, Try, Exercise).
+   23 core ideas from the school book, all four lessons (1-1 to 1-4) (Point!, Warm Up, Try, Exercise).
    Each idea has 2-3 phrasings ("variants"). Every game picks one phrasing per idea,
    so a student meets the same idea from a different angle each time.
    boss: true -> the idea is asked at the end in the Boss round.
@@ -154,5 +154,28 @@ window.IDEAS = [
       { type: 'mc', style: 'spot', mode: 'boss', level: 'hard', q: '“The backbone is one big bone, so we cannot bend our back.” Choose the right fix.', options: ['The backbone is many small connected bones, so we can bend', 'The backbone is a muscle, so we can bend', 'The backbone is cartilage, so it is soft'], answer: 0 },
       { type: 'mc', style: 'story', mode: 'boss', level: 'hard', q: 'Adam bends forward to tie his shoes, then bends to the left to see his friend. What if his backbone were ONE solid bone?', options: ['He could not bend his back', 'His brain would not be protected', 'His ribs would fall off', 'His muscles would push instead of pull'], answer: 0 },
       { type: 'mc', mode: 'boss', level: 'hard', q: 'Why does the skeleton have a hard skull AND a backbone made of many small bones?', options: ['To protect the brain and still let us bend', 'To make the body lighter', 'So muscles can push the bones', 'So the skull can bend'], answer: 0 }
+    ] },
+
+  /* ---------- 1-4 Animal Bodies ---------- */
+  { id: 'A1', lesson: 4, concept: 'Animals have backbones and joints',
+    explain: 'Many animals, like dogs, cats and rabbits, have a backbone like humans, and joints in their front and back legs (limbs).',
+    variants: [
+      { type: 'tf', mode: 'timed', seconds: 10, level: 'easy', q: 'Many animals, like dogs, have a backbone just like humans.', answer: 0 },
+      { type: 'mc', mode: 'normal', level: 'medium', q: 'Which statement correctly explains the structure of a dog’s front legs?', options: ['It has joints (bending parts), just like humans', 'It is one connected hard bone that does not bend anywhere', 'It has muscles but no bones', 'It can bend only at the paw'], answer: 0 },
+      { type: 'mc', style: 'story', mode: 'normal', level: 'medium', q: 'Salma looks at her dog’s front leg and finds the part that matches a human “elbow”. Where is it?', options: ['Higher up the leg, away from the ground', 'Touching the ground', 'On the dog’s back', 'A dog has no such part'], answer: 0 }
+    ] },
+  { id: 'A2', lesson: 4, concept: 'Animals move with muscles and bones',
+    explain: 'Animals like dogs and horses also move by their muscles contracting and pulling their bones, just like humans.',
+    variants: [
+      { type: 'fill', mode: 'timed', seconds: 15, level: 'easy', q: 'Dogs and horses move by ___ contracting and pulling the bones, just like humans.', options: ['muscles', 'skin', 'hair'], answer: 0 },
+      { type: 'fill', mode: 'timed', seconds: 15, level: 'easy', q: 'A horse’s muscles contract and pull its ___ to move its body.', options: ['bones', 'hair', 'skin'], answer: 0 },
+      { type: 'tf', mode: 'normal', level: 'medium', q: 'Muscles move bones by completely different rules in humans and in animals.', answer: 1 }
+    ] },
+  { id: 'A3', lesson: 4, boss: true, concept: 'Bones fit how an animal lives',
+    explain: 'Bone length and how the muscles are attached differ a little depending on how the animal lives, like running fast or flying. The way bones and muscles move the body is very similar to humans.',
+    variants: [
+      { type: 'mc', mode: 'boss', level: 'hard', q: 'What does the difference in bone length and shape among animals depend on?', options: ['How the animal lives and moves (running, jumping, flying)', 'The colour of the animal’s body', 'How much water the animal drinks', 'Whether the animal has a backbone or not'], answer: 0 },
+      { type: 'mc', style: 'story', mode: 'boss', level: 'hard', q: 'Omar holds a rabbit and sees that its back legs have very long bones. Why?', options: ['Long back-leg bones make it easy to jump', 'Long bones keep the rabbit warm', 'Long bones protect its heart and lungs', 'Long bones mean the rabbit has no joints'], answer: 0 },
+      { type: 'mc', mode: 'boss', level: 'hard', q: 'Which statement correctly explains the body structure of animals?', options: ['Bone shapes differ because each animal is adapted to its own kind of movement', 'Animal muscles push bones, but human muscles pull them', 'Animals have no joints, so their legs do not bend', 'Every animal has exactly the same bones as a human'], answer: 0 }
     ] }
 ];

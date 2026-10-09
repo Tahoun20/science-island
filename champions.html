@@ -36,28 +36,28 @@
 <body>
 <div class="app">
   <header class="top">
-    <a class="brand" href="map.html" title="Back to the map">
+    <a class="brand" href="map.html" title="Back to the map" data-ar-label="رجوع للخريطة">
       <div class="logo" aria-hidden="true">🏆</div>
-      <div><h1>Champions</h1><p id="chSub">This chapter</p></div>
+      <div><h1 data-ar="الأبطال">Champions</h1><p id="chSub">This chapter</p></div>
     </a>
     <div class="hud">
-      <a class="pill" href="map.html">‹ Map</a>
+      <a class="pill" href="map.html" data-ar="‹ الخريطة">‹ Map</a>
     </div>
   </header>
   <div class="wrap">
     <div class="head">
-      <img src="assets/parrot_celebrate.png" alt="Koko the parrot">
+      <img src="assets/parrot_celebrate.png" alt="Koko the parrot" data-ar-label="الببغاء كوكو">
       <div class="card">
-        <h2>This week’s top 10 <span class="ar">أبطال الأسبوع</span></h2>
+        <h2 data-ar="أفضل ١٠ أبطال هذا الأسبوع">This week’s top 10 <span class="ar">أبطال الأسبوع</span></h2>
         <p id="reset"></p>
       </div>
     </div>
     <div class="card mine" id="mine" hidden></div>
     <div class="card">
-      <ol class="board" id="board" aria-live="polite"><li class="empty" style="display:block;border:0">Loading…</li></ol>
+      <ol class="board" id="board" aria-live="polite"><li class="empty" style="display:block;border:0" data-ar="جاري التحميل…">Loading…</li></ol>
     </div>
     <p class="note" id="note"></p>
-    <div class="row"><a class="btn primary big" href="quiz.html#quest">Play Chapter Quest ▸</a></div>
+    <div class="row"><a class="btn primary big" href="quiz.html#quest" data-ar="العب تحدي الفصل ◂">Play Chapter Quest ▸</a></div>
   </div>
 </div>
 <script src="firebase-config.js"></script>
@@ -69,31 +69,33 @@
   const me = SI.requirePlayer(); if (!me) return;
   const CH = SI.requireChapter(); if (!CH) return;
   SI.applyTheme();
-  const $ = s => document.querySelector(s);
-  $('#chSub').textContent = `Chapter ${CH.n} · ${CH.title}`;
+  const $ = s => document.querySelector(s), T = SI.T;
+  if (SI.isAr()) document.title = 'الأبطال · جزيرة العلوم';
+  $('#chSub').textContent = T(`Chapter ${CH.n} · ${CH.title}`, `الفصل ${CH.n} · ${SI.chTitle(CH)}`);
   const ms = SI.weekEndsIn(), d = Math.floor(ms / 864e5), h = Math.floor(ms % 864e5 / 36e5);
-  $('#reset').textContent = `New week starts in ${d ? d + ' day' + (d > 1 ? 's ' : ' ') : ''}${h} hour${h === 1 ? '' : 's'}. Everyone starts again!`;
+  $('#reset').textContent = T(`New week starts in ${d ? d + ' day' + (d > 1 ? 's ' : ' ') : ''}${h} hour${h === 1 ? '' : 's'}. Everyone starts again!`,
+    `الأسبوع الجديد يبدأ بعد ${d ? d + ' يوم و' : ''}${h} ساعة. والكل يبدأ من جديد!`);
   const { online, rows } = await SI.LB.top(10);
   const board = $('#board'); board.innerHTML = '';
   if (!rows.length) {
-    board.innerHTML = '<li class="empty" style="display:block;border:0">No champions yet this week. Play the Chapter Quest and be the first!</li>';
+    board.innerHTML = `<li class="empty" style="display:block;border:0">${T('No champions yet this week. Play the Chapter Quest and be the first!', 'لسه مفيش أبطال الأسبوع ده. العب تحدي الفصل وكن الأول!')}</li>`;
   }
   rows.forEach((r, i) => {
     const li = document.createElement('li');
     li.className = (i < 3 ? `top${i + 1}` : '') + (r.id === me.id ? ' me' : '');
-    li.innerHTML = `<span class="r">${['🥇', '🥈', '🥉'][i] || i + 1}</span><span class="nm">${SI.esc(r.name)}${r.id === me.id ? '<span class="you">YOU</span>' : ''}</span><span class="sc">${r.score}</span>`;
+    li.innerHTML = `<span class="r">${['🥇', '🥈', '🥉'][i] || i + 1}</span><span class="nm">${SI.esc(r.name)}${r.id === me.id ? `<span class="you">${T('YOU', 'أنت')}</span>` : ''}</span><span class="sc">${r.score}</span>`;
     board.appendChild(li);
   });
   const m = await SI.LB.me();
   const mine = $('#mine');
   if (m) {
     const above = rows[m.rank - 2];
-    mine.innerHTML = `<div>Your best this week: <b>${m.score}</b><br>Rank <b>#${m.rank}</b></div>` +
-      (m.rank === 1 ? '<div>👑 You are number 1!</div>' : above ? `<div>${above.score - m.score + 1} more points to pass <b>${SI.esc(above.name)}</b>!</div>` : '');
+    mine.innerHTML = T(`<div>Your best this week: <b>${m.score}</b><br>Rank <b>#${m.rank}</b></div>`, `<div>أعلى نتيجة ليك الأسبوع ده: <b>${m.score}</b><br>ترتيبك <b>#${m.rank}</b></div>`) +
+      (m.rank === 1 ? T('<div>👑 You are number 1!</div>', '<div>👑 إنت رقم ١!</div>') : above ? T(`<div>${above.score - m.score + 1} more points to pass <b>${SI.esc(above.name)}</b>!</div>`, `<div>محتاج ${above.score - m.score + 1} نقطة كمان علشان تعدّي <b>${SI.esc(above.name)}</b>!</div>`) : '');
     mine.hidden = false;
     if (m.rank <= 3) SI.voice('champion');
   }
-  $('#note').textContent = online ? 'Showing players from every device.' : 'Showing players on this device only.';
+  $('#note').textContent = online ? T('Showing players from every device.', 'اللاعبين من كل الأجهزة.') : T('Showing players on this device only.', 'اللاعبين على الجهاز ده بس.');
 })();
 </script>
 </body>
