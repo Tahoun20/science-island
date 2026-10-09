@@ -616,7 +616,8 @@
         sfx.ok(); voice('thanks');
         q('.rt-p').innerHTML = `<div class="rt-done" role="status"><img src="assets/parrot_celebrate.png" alt="">
           <h2>Thank you, ${esc(p.name)}!</h2><p class="rt-ar">شكرًا يا بطل! رأيك وصل لكوكو</p></div>`;
-        setTimeout(() => close(true), isMuted() ? 1500 : 2600);        // long enough for Koko to say thank you
+        const said = bufs.thanks ? (LEAD.thanks + bufs.thanks.duration) * 1000 + 250 : 0;   // wait for Koko's whole "thank you" before moving on
+        setTimeout(() => close(true), isMuted() ? 1500 : Math.max(1800, Math.min(said, 6000)));
       };
       send.onclick = submit;
       input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
