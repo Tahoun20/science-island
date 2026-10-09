@@ -6,7 +6,7 @@
 <title>Chapter Quest · Science Island</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
   --navy:#1f3d57; --ink:#3a5c75; --card:rgba(255,250,240,.95);
@@ -788,6 +788,7 @@ async function results(kind, res, total, extraXP = 0) {
       <button class="btn" type="button" id="again">Play again</button>
     </div></div>`);
   document.body.appendChild(o);
+  SI.rate.guard(o, 'a[href="map.html"], a[href="champions.html"]', 'results');   // Koko asks for a rating before the player leaves (once per chapter)
   $('#again', o).onclick = () => location.reload();
   if (levelUp) { setTimeout(() => { sfx.level(); SI.voice('level'); banner('Level up!', `Level ${gain.after.n} · ${gain.after.title}`); }, 900); }
   if (kind === 'quest') {

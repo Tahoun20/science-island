@@ -123,6 +123,7 @@
   const mute = $('#mute');
   const paint = () => { mute.setAttribute('aria-pressed', SI.isMuted()); mute.setAttribute('aria-label', SI.isMuted() ? 'Sound off' : 'Sound on'); };
   mute.onclick = () => { SI.setMuted(!SI.isMuted()); paint(); }; paint();
+  SI.rate.guard(document, 'a[href="chapters.html"], a[href="index.html"]', 'map');   // leaving the chapter: Koko asks for a rating (once per chapter)
 
   const stars = n => '★'.repeat(n) + `<span class="off">${'★'.repeat(3 - n)}</span>`;
   const G = CH.game;

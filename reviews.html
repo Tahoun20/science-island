@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Science Island · التقييمات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="common.css">
+<style>
+/* Owner's page: ratings and messages. Only the owner's Google account can read them
+   (the Firestore rules decide that, not this page). */
+body{font-family:"Cairo","Nunito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:860px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.en{font-family:"Nunito","Cairo",system-ui,sans-serif;direction:ltr;unicode-bidi:isolate}
+.gate{display:flex;align-items:center;gap:14px}
+.gate img{height:130px;flex:none}
+.gate h2{margin:0 0 4px;font-size:24px;font-weight:900}
+.gate p{margin:0 0 12px;font-weight:700;font-size:16px;line-height:1.6;color:var(--ink)}
+.msg{font-weight:800;color:#b42318;min-height:1.2em;margin:8px 0 0;font-size:15px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tab{font:inherit;font-weight:900;font-size:17px;border:3px solid transparent;border-radius:999px;padding:8px 18px;min-height:46px;cursor:pointer;background:var(--card);color:var(--navy);box-shadow:0 3px 10px rgba(31,61,87,.12)}
+.tab[aria-selected="true"]{background:var(--primary);color:#fff}
+.tab b{font-family:"Nunito",sans-serif;font-size:15px;background:rgba(31,61,87,.12);border-radius:99px;padding:1px 9px;margin-inline-start:6px}
+.tab[aria-selected="true"] b{background:rgba(255,255,255,.25)}
+.tab:focus-visible,.chip:focus-visible,.act:focus-visible{outline:3px solid #f7b267;outline-offset:2px}
+/* summary: one headline number + how the answers are spread */
+.sum{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 26px;align-items:center}
+.hero{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:150px}
+.hero .big{font-family:"Nunito",sans-serif;font-size:56px;font-weight:900;line-height:1;direction:ltr}
+.hero .big small{font-size:22px;color:var(--ink);font-weight:800}
+.hero .cap{font-weight:800;color:var(--ink);font-size:15px}
+.hero .sub{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+.hero .sub span{background:#fff;border:2px solid var(--line);border-radius:99px;padding:2px 12px;font-weight:800;font-size:13.5px}
+.dist{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:7px 10px;align-items:center;margin:0;padding:0;list-style:none}
+.dist li{display:contents}
+.dist .nm{font-weight:800;font-size:15px;white-space:nowrap}
+.dist .tr{height:12px;border-radius:4px;background:#e6eef2;overflow:hidden;direction:rtl}
+.dist .tr i{display:block;height:100%;min-width:0;border-radius:4px;background:var(--primary)}
+.dist .ct{font-family:"Nunito",sans-serif;font-weight:900;font-size:15px;min-width:2ch;text-align:left;direction:ltr}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip{font:inherit;font-weight:800;font-size:15px;border:3px solid var(--line);background:#fff;color:var(--navy);border-radius:99px;padding:5px 14px;min-height:40px;cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--primary);background:#e3f1f7}
+.list{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.rv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;align-items:start}
+.rv.low{border-inline-start:6px solid var(--coral)}
+.rv .face{font-size:44px;line-height:1}
+.rv .body{display:flex;flex-direction:column;gap:6px;min-width:0}
+.rv .who{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline}
+.rv .who b{font-size:18px;font-weight:900}
+.rv .lab{font-weight:900;font-size:16px;color:var(--ink)}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{background:#fff;border:2px solid var(--line);border-radius:99px;padding:1px 10px;font-weight:800;font-size:13px;color:var(--ink)}
+.tag.want{background:#fff3d6;border-color:#f2d489;color:#6b4a00}
+.tag.on{background:#dff5ea;border-color:#9fd8bd;color:#1c6a47}
+.say{margin:0;font-weight:800;font-size:18px;line-height:1.6;background:#fff;border:2px solid var(--line);border-radius:14px;padding:8px 12px;overflow-wrap:anywhere;text-align:start}
+.none{font-weight:700;color:#7d94a5;font-size:14.5px;margin:0}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
+.act{font:inherit;font-weight:900;font-size:15px;border:0;border-radius:12px;padding:7px 14px;min-height:40px;cursor:pointer;background:var(--mint);color:var(--navy)}
+.act.on{background:var(--ok);color:#fff}
+.act.del{background:#fff;border:2px solid var(--line);color:var(--ink)}
+.act.del.sure{background:#b42318;border-color:#b42318;color:#fff}
+.act:disabled{opacity:.5;cursor:default}
+.contactLine{font-family:"Nunito",sans-serif;font-weight:800;font-size:17px;direction:ltr;unicode-bidi:isolate;text-align:right;overflow-wrap:anywhere}
+.contactLine a{color:var(--primary)}
+.empty{text-align:center;font-weight:800;color:var(--ink);padding:18px}
+.who-in{font-family:"Nunito",sans-serif;font-weight:800;font-size:13px;direction:ltr;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:620px){
+  .gate{flex-direction:column;text-align:center}
+  .gate img{height:96px}
+  .sum{grid-template-columns:1fr}
+  .hero .big{font-size:46px}
+  .rv .face{font-size:34px}
+  .say{font-size:16.5px}
+  .who-in{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <a class="brand" href="index.html" title="الصفحة الرئيسية">
+      <div class="logo" aria-hidden="true">📋</div>
+      <div><h1>التقييمات والرسائل</h1><p class="en">Science Island</p></div>
+    </a>
+    <div class="hud" id="hud" hidden>
+      <span class="pill who-in" id="whoIn"></span>
+      <button class="pill" type="button" id="out" style="border:0;cursor:pointer;font:inherit;font-weight:800">خروج</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- 1. sign in -->
+    <section class="card gate" id="gate">
+      <img src="assets/parrot_wave.png" alt="">
+      <div>
+        <h2>صفحة خاصة بصاحب الموقع</h2>
+        <p>ادخل بحساب جوجل الخاص بك لقراءة تقييمات اللاعبين ورسائل أولياء الأمور والمعلمين.</p>
+        <button class="btn primary" type="button" id="in">دخول بحساب جوجل</button>
+        <p class="msg" id="gateMsg" role="alert"></p>
+      </div>
+    </section>
+
+    <!-- 2. signed in, but this account may not read -->
+    <section class="card gate" id="denied" hidden>
+      <img src="assets/parrot_think.png" alt="">
+      <div>
+        <h2>هذا الحساب غير مسموح له</h2>
+        <p>هذه الصفحة تُفتح بحساب صاحب الموقع فقط. اخرج ثم ادخل بالحساب الصحيح.</p>
+        <button class="btn" type="button" id="out2">خروج</button>
+      </div>
+    </section>
+
+    <!-- 3. the owner's view -->
+    <div id="panel" hidden>
+      <div class="wrap">
+        <div class="tabs" role="tablist">
+          <button class="tab" type="button" role="tab" id="tabR" aria-selected="true" aria-controls="viewR">التقييمات <b id="nR">0</b></button>
+          <button class="tab" type="button" role="tab" id="tabM" aria-selected="false" aria-controls="viewM">الرسائل <b id="nM">0</b></button>
+        </div>
+
+        <section id="viewR" role="tabpanel" aria-labelledby="tabR" class="wrap">
+          <div class="card sum" id="sum"></div>
+          <div class="filters" id="filters" role="group" aria-label="تصفية التقييمات"></div>
+          <ul class="list" id="listR" aria-live="polite"></ul>
+        </section>
+
+        <section id="viewM" role="tabpanel" aria-labelledby="tabM" class="wrap" hidden>
+          <ul class="list" id="listM" aria-live="polite"></ul>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+<noscript>Please turn on JavaScript.</noscript>
+<script src="firebase-config.js"></script>
+<script src="chapters.js"></script>
+<script src="common.js"></script>
+<script>
+(async () => {
+  'use strict';
+  const $ = s => document.querySelector(s), esc = SI.esc;
+  const show = id => ['gate', 'denied', 'panel'].forEach(k => { $('#' + k).hidden = k !== id; });
+  const FACES = {}; SI.rate.CHOICES.forEach(c => { FACES[c.v] = c; });
+  const WANTS = {}; SI.rate.WANTS.forEach(w => { WANTS[w.k] = w; });
+  const ROLES = { parent: 'ولي أمر', teacher: 'معلم', other: 'آخر' };
+  const FROM = { results: 'بعد شاشة النتيجة', map: 'عند الخروج من الخريطة' };
+  const when = t => { try { const d = t && t.toDate ? t.toDate() : null; return d ? d.toLocaleDateString('ar-EG-u-nu-latn', { day: 'numeric', month: 'long', year: 'numeric' }) + ' · ' + d.toLocaleTimeString('ar-EG-u-nu-latn', { hour: 'numeric', minute: '2-digit' }) : ''; } catch (e) { return ''; } };
+  const gateMsg = t => { $('#gateMsg').textContent = t || ''; };
+
+  let db = null, fs = null, auth = null, A = null;
+  try {
+    if (!window.FIREBASE_CONFIG) throw new Error('no config');
+    const appMod = await import(SI.LB.base + 'firebase-app.js');
+    db = await SI.LB.ready(); fs = SI.LB._fs;
+    if (!db) throw new Error('offline');
+    A = await import(SI.LB.base + 'firebase-auth.js');
+    auth = A.getAuth(appMod.getApp());
+  } catch (e) {
+    console.warn(e); $('#in').disabled = true;
+    gateMsg('تعذّر الاتصال بقاعدة البيانات. تأكد من الإنترنت ثم أعد تحميل الصفحة.');
+    return;
+  }
+
+  $('#in').onclick = async () => {
+    gateMsg('');
+    try { await A.signInWithPopup(auth, new A.GoogleAuthProvider()); }
+    catch (e) {
+      const c = (e && e.code) || '';
+      if (c === 'auth/popup-closed-by-user' || c === 'auth/cancelled-popup-request') return;
+      gateMsg(c === 'auth/popup-blocked' ? 'المتصفح منع نافذة الدخول. اسمح بالنوافذ المنبثقة لهذا الموقع ثم حاول مرة أخرى.'
+        : c === 'auth/unauthorized-domain' ? 'هذا الدومين غير مضاف في إعدادات الدخول في Firebase.'
+        : c === 'auth/operation-not-allowed' ? 'الدخول بحساب جوجل غير مفعّل في Firebase.'
+        : 'تعذّر الدخول. حاول مرة أخرى.');
+      console.warn(e);
+    }
+  };
+  const out = () => A.signOut(auth);
+  $('#out').onclick = out; $('#out2').onclick = out;
+
+  let reviews = [], messages = [], filter = 'all';
+  const FILTERS = [['all', 'الكل'], ['low', 'السلبية'], ['text', 'فيها كلام'], ['shown', 'المعروضة في الرئيسية']];
+  const match = r => filter === 'low' ? r.rating <= 2 : filter === 'text' ? !!r.text : filter === 'shown' ? !!r.shown : true;
+
+  function paintSummary() {
+    const n = reviews.length, sum = reviews.reduce((a, r) => a + (r.rating || 0), 0);
+    const low = reviews.filter(r => r.rating <= 2).length, shown = reviews.filter(r => r.shown).length;
+    const max = Math.max(1, ...[1, 2, 3, 4, 5].map(v => reviews.filter(r => r.rating === v).length));
+    $('#sum').innerHTML = `<div class="hero">
+        <div class="big">${n ? (sum / n).toFixed(1) : '–'}<small> / 5</small></div>
+        <div class="cap">متوسط التقييم</div>
+        <div class="sub"><span>${n} تقييم</span><span>${low} سلبي</span><span>${shown} معروض</span></div>
+      </div>
+      <ul class="dist" aria-label="توزيع التقييمات">${[5, 4, 3, 2, 1].map(v => {
+        const c = reviews.filter(r => r.rating === v).length, pc = n ? Math.round(c / n * 100) : 0;
+        return `<li title="${esc(FACES[v].ar)}: ${c} تقييم (${pc}%)"><span class="nm">${FACES[v].face} ${esc(FACES[v].ar)}</span><span class="tr"><i style="width:${c / max * 100}%"></i></span><span class="ct">${c}</span></li>`;
+      }).join('')}</ul>`;
+    $('#nR').textContent = n; $('#nM').textContent = messages.length;
+  }
+  function paintFilters() {
+    $('#filters').innerHTML = FILTERS.map(([k, t]) => `<button class="chip" type="button" data-f="${k}" aria-pressed="${k === filter}">${t}</button>`).join('');
+    $('#filters').querySelectorAll('.chip').forEach(b => b.onclick = () => { filter = b.dataset.f; paintFilters(); paintReviews(); });
+  }
+  function paintReviews() {
+    const rows = reviews.filter(match), box = $('#listR');
+    if (!rows.length) { box.innerHTML = `<li class="card empty">${reviews.length ? 'لا توجد تقييمات في هذا التصنيف.' : 'لم يصل أي تقييم بعد.'}</li>`; return; }
+    box.innerHTML = rows.map(r => {
+      const f = FACES[r.rating] || { face: '❔', ar: '', en: r.label || '' }, ch = SI.chapterById(r.chapter);
+      const wants = String(r.wants || '').split(',').filter(k => WANTS[k]);
+      return `<li class="card rv${r.rating <= 2 ? ' low' : ''}" data-id="${esc(r.id)}">
+        <div class="face" aria-hidden="true">${f.face}</div>
+        <div class="body">
+        <div class="who"><b dir="auto">${esc(r.name || '—')}</b><span class="lab">${esc(f.ar)}</span></div>
+        <div class="tags">
+          ${ch ? `<span class="tag">الفصل ${ch.n}</span><span class="tag en">${esc(ch.title)}</span>` : ''}
+          ${r.at ? `<span class="tag">${esc(when(r.at))}</span>` : ''}
+          ${FROM[r.from] ? `<span class="tag">${FROM[r.from]}</span>` : ''}
+          ${r.shown ? '<span class="tag on">معروض في الرئيسية</span>' : ''}
+        </div>
+        ${wants.length ? `<div class="tags" aria-label="يريد">${wants.map(k => `<span class="tag want">${WANTS[k].i} ${esc(WANTS[k].ar)}</span>`).join('')}</div>` : ''}
+        ${r.text ? `<p class="say" dir="auto">${esc(r.text)}</p>` : '<p class="none">لم يكتب كلامًا.</p>'}
+        <div class="acts">
+          ${r.rating >= 3 ? `<button class="act${r.shown ? ' on' : ''}" type="button" data-act="show">${r.shown ? '✓ معروض · إزالة من الرئيسية' : 'اعرض في الصفحة الرئيسية'}</button>` : ''}
+          <button class="act del" type="button" data-act="del">حذف</button>
+        </div>
+        </div>
+      </li>`;
+    }).join('');
+  }
+  function paintMessages() {
+    const box = $('#listM');
+    if (!messages.length) { box.innerHTML = '<li class="card empty">لم تصل أي رسالة بعد.</li>'; return; }
+    box.innerHTML = messages.map(m => {
+      const c = String(m.contact || '').trim();
+      const href = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(c) ? 'mailto:' + c : /^\+?[\d\s()-]{7,}$/.test(c) ? 'tel:' + c.replace(/[^\d+]/g, '') : '';
+      return `<li class="card rv" data-id="${esc(m.id)}">
+        <div class="face" aria-hidden="true">✉️</div>
+        <div class="body">
+        <div class="who"><b dir="auto">${esc(m.name || '—')}</b><span class="lab">${ROLES[m.role] || ''}</span></div>
+        <div class="tags">${m.at ? `<span class="tag">${esc(when(m.at))}</span>` : ''}</div>
+        <p class="say" dir="auto">${esc(m.text || '')}</p>
+        ${c ? `<div class="contactLine">${href ? `<a href="${esc(href)}">${esc(c)}</a>` : esc(c)}</div>` : ''}
+        <div class="acts"><button class="act del" type="button" data-act="delmsg">حذف</button></div>
+        </div>
+      </li>`;
+    }).join('');
+  }
+  const paintAll = () => { paintSummary(); paintFilters(); paintReviews(); paintMessages(); };
+
+  /* "Show on the home page" copies the chosen answer into the public `showcase` collection
+     (first name, rating and the line only); the answer itself stays private in `feedback`. */
+  async function toggleShown(r) {
+    const batch = fs.writeBatch(db), fref = fs.doc(db, 'feedback', r.id);
+    if (r.shown) {
+      batch.delete(fs.doc(db, 'showcase', r.shown)); batch.update(fref, { shown: fs.deleteField() });
+      await batch.commit(); r.shown = '';
+    } else {
+      const sref = fs.doc(fs.collection(db, 'showcase'));
+      batch.set(sref, { name: r.name || '', rating: r.rating, label: r.label || '', text: r.text || '', chapter: r.chapter || '', at: fs.serverTimestamp() });
+      batch.update(fref, { shown: sref.id });
+      await batch.commit(); r.shown = sref.id;
+    }
+  }
+  async function removeReview(r) {
+    const batch = fs.writeBatch(db);
+    if (r.shown) batch.delete(fs.doc(db, 'showcase', r.shown));
+    batch.delete(fs.doc(db, 'feedback', r.id));
+    await batch.commit(); reviews = reviews.filter(x => x !== r);
+  }
+  /* delete asks twice: the first tap arms the button, the second one deletes */
+  function armed(b) {
+    if (b.classList.contains('sure')) return true;
+    b.classList.add('sure'); b.textContent = 'تأكيد الحذف'; setTimeout(() => { if (document.contains(b)) { b.classList.remove('sure'); b.textContent = 'حذف'; } }, 4000);
+    return false;
+  }
+  async function onAct(e) {
+    const b = e.target.closest('.act'); if (!b) return;
+    const li = b.closest('[data-id]'), id = li.dataset.id, act = b.dataset.act;
+    if ((act === 'del' || act === 'delmsg') && !armed(b)) return;
+    b.disabled = true;
+    try {
+      if (act === 'show') await toggleShown(reviews.find(r => r.id === id));
+      else if (act === 'del') await removeReview(reviews.find(r => r.id === id));
+      else if (act === 'delmsg') { await fs.deleteDoc(fs.doc(db, 'messages', id)); messages = messages.filter(m => m.id !== id); }
+      paintAll();
+    } catch (err) { console.warn(err); b.disabled = false; b.textContent = 'تعذّر التنفيذ، حاول مرة أخرى'; }
+  }
+  $('#listR').addEventListener('click', onAct); $('#listM').addEventListener('click', onAct);
+
+  const tab = t => { const r = t === 'R'; $('#tabR').setAttribute('aria-selected', r); $('#tabM').setAttribute('aria-selected', !r); $('#viewR').hidden = !r; $('#viewM').hidden = r; };
+  $('#tabR').onclick = () => tab('R'); $('#tabM').onclick = () => tab('M');
+
+  async function load() {
+    const rows = async (name, n) => (await fs.getDocs(fs.query(fs.collection(db, name), fs.orderBy('at', 'desc'), fs.limit(n)))).docs.map(d => Object.assign({ id: d.id }, d.data()));
+    reviews = await rows('feedback', 500);
+    messages = await rows('messages', 200);
+    paintAll(); show('panel');
+  }
+  A.onAuthStateChanged(auth, async u => {
+    $('#hud').hidden = !u; $('#whoIn').textContent = u ? (u.email || '') : '';
+    if (!u) { show('gate'); return; }
+    try { await load(); }
+    catch (e) { console.warn(e); if (e && e.code === 'permission-denied') show('denied'); else { show('gate'); gateMsg('تعذّر تحميل البيانات. أعد تحميل الصفحة.'); } }
+  });
+})();
+</script>
+</body>
+</html>

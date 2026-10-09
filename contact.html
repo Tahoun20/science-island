@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Science Island · تواصل معنا</title>
+<meta name="description" content="لأولياء الأمور والمعلمين: أرسل رسالة إلى فريق Science Island.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="common.css">
+<style>
+/* Contact page for parents and teachers. A message is saved in Firestore `messages`
+   (visitors can only write); the owner reads it, signed in, on reviews.html. */
+body{font-family:"Cairo","Nunito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:620px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.en{display:block;font-family:"Nunito","Cairo",system-ui,sans-serif;direction:ltr;unicode-bidi:isolate;text-align:right;font-weight:700;color:var(--ink);font-size:.86em}
+.intro{display:flex;align-items:center;gap:12px}
+.intro img{height:120px;flex:none}
+.intro h2{margin:0 0 4px;font-size:25px;font-weight:900;line-height:1.3}
+.intro p{margin:0;font-weight:700;font-size:16px;line-height:1.6;color:var(--ink)}
+form{display:flex;flex-direction:column;gap:14px}
+.f label,.f .lab{display:block;font-weight:900;font-size:17px;margin:0 2px 6px}
+.f input,.f textarea{display:block;width:100%;font:inherit;font-size:17px;font-weight:700;color:var(--navy);background:#fff;border:3px solid var(--line);border-radius:14px;padding:10px 14px}
+.f textarea{min-height:150px;resize:vertical;line-height:1.6}
+.f input:focus,.f textarea:focus{outline:none;border-color:var(--primary)}
+.f .hint{margin:5px 2px 0;font-size:13.5px;font-weight:700;color:#5d7a8f}
+.roles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.role{font:inherit;font-weight:900;font-size:17px;border:3px solid var(--line);background:#fff;color:var(--navy);border-radius:14px;padding:8px 6px;min-height:58px;cursor:pointer}
+.role[aria-pressed="true"]{border-color:var(--primary);background:#e3f1f7}
+.role:focus-visible,.f input:focus-visible,.f textarea:focus-visible{outline:3px solid #f7b267;outline-offset:2px}
+.trap{position:absolute;inset-inline-start:-9999px;width:1px;height:1px;overflow:hidden}
+.err{color:#b42318;font-weight:800;font-size:15.5px;margin:0;min-height:1.3em}
+.sendRow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.done{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:10px 0}
+.done img{height:150px}
+.done h2{margin:0;font-size:27px;font-weight:900}
+.done p{margin:0 0 8px;font-weight:700;font-size:17px;color:var(--ink);line-height:1.6}
+@media (max-width:520px){
+  .intro img{height:84px}
+  .intro h2{font-size:21px}
+  .f label,.f .lab{font-size:16px}
+  .role{font-size:15.5px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <a class="brand" href="index.html" title="الصفحة الرئيسية">
+      <div class="logo" aria-hidden="true">✉️</div>
+      <div><h1>تواصل معنا</h1><p class="en" style="font-size:13px;font-weight:800">Science Island</p></div>
+    </a>
+    <div class="hud"><a class="pill" href="index.html">الرئيسية ›</a></div>
+  </header>
+
+  <main class="wrap">
+    <div class="card intro">
+      <img src="assets/parrot_wave.png" alt="">
+      <div>
+        <h2>لأولياء الأمور والمعلمين<span class="en">For parents and teachers</span></h2>
+        <p>عندك اقتراح، ملاحظة على سؤال، أو تريد استخدام الموقع مع فصلك؟ اكتب لنا وسنرد عليك.</p>
+      </div>
+    </div>
+
+    <div class="card" id="formCard">
+      <form id="form" novalidate>
+        <div class="f">
+          <label for="name">الاسم<span class="en">Your name</span></label>
+          <input id="name" name="name" maxlength="40" autocomplete="name" dir="auto" required>
+        </div>
+        <div class="f">
+          <div class="lab" id="roleLab">أنا<span class="en">I am</span></div>
+          <div class="roles" role="group" aria-labelledby="roleLab">
+            <button class="role" type="button" data-role="parent" aria-pressed="true">ولي أمر<span class="en" style="text-align:center">Parent</span></button>
+            <button class="role" type="button" data-role="teacher" aria-pressed="false">معلم<span class="en" style="text-align:center">Teacher</span></button>
+            <button class="role" type="button" data-role="other" aria-pressed="false">آخر<span class="en" style="text-align:center">Other</span></button>
+          </div>
+        </div>
+        <div class="f">
+          <label for="contact">رقم واتساب أو بريد إلكتروني<span class="en">WhatsApp number or email</span></label>
+          <input id="contact" name="contact" maxlength="80" autocomplete="email" dir="ltr" inputmode="email" required>
+          <p class="hint">نستخدمه للرد عليك فقط، ولا يظهر لأي زائر.</p>
+        </div>
+        <div class="f">
+          <label for="text">الرسالة<span class="en">Your message</span></label>
+          <textarea id="text" name="text" maxlength="800" dir="auto" required></textarea>
+        </div>
+        <div class="trap" aria-hidden="true"><label>Website <input id="website" name="website" tabindex="-1" autocomplete="off"></label></div>
+        <p class="err" id="err" role="alert"></p>
+        <div class="sendRow"><button class="btn primary big" type="submit" id="send">إرسال</button></div>
+      </form>
+    </div>
+
+    <div class="card done" id="done" hidden>
+      <img src="assets/parrot_thumbs.png" alt="">
+      <h2>وصلت رسالتك، شكرًا!</h2>
+      <p>سنقرأها ونرد عليك في أقرب وقت.</p>
+      <a class="btn primary" href="index.html">الصفحة الرئيسية</a>
+    </div>
+  </main>
+</div>
+<noscript>Please turn on JavaScript.</noscript>
+<script src="firebase-config.js"></script>
+<script src="common.js"></script>
+<script>
+(() => {
+  'use strict';
+  const $ = s => document.querySelector(s);
+  const clean = (v, n) => String(v == null ? '' : v).replace(/[ \t]+/g, ' ').trim().slice(0, n);
+  let role = 'parent', busy = false;
+  document.querySelectorAll('.role').forEach(b => b.onclick = () => {
+    role = b.dataset.role; document.querySelectorAll('.role').forEach(x => x.setAttribute('aria-pressed', x === b));
+  });
+  ['name', 'contact', 'text'].forEach(id => $('#' + id).addEventListener('input', () => { $('#err').textContent = ''; }));
+  /* a small brake against repeated sending from one device */
+  const sentToday = () => { try { const o = JSON.parse(localStorage.getItem('si.msg') || '{}'); return o.day === SI.today() ? (o.n || 0) : 0; } catch (e) { return 0; } };
+  const countSent = () => { try { localStorage.setItem('si.msg', JSON.stringify({ day: SI.today(), n: sentToday() + 1 })); } catch (e) {} };
+
+  $('#form').addEventListener('submit', async e => {
+    e.preventDefault(); if (busy) return;
+    const err = t => { $('#err').textContent = t || ''; };
+    const name = clean($('#name').value, 40), contact = clean($('#contact').value, 80), text = String($('#text').value || '').trim().slice(0, 800);
+    if ($('#website').value) return;                                  // filled only by robots
+    if (!name) { err('اكتب اسمك من فضلك.'); $('#name').focus(); return; }
+    if (contact.length < 5) { err('اكتب رقم واتساب أو بريدًا إلكترونيًا لنرد عليك.'); $('#contact').focus(); return; }
+    if (text.length < 5) { err('اكتب رسالتك من فضلك.'); $('#text').focus(); return; }
+    if (sentToday() >= 5) { err('أرسلت عدة رسائل اليوم. حاول غدًا من فضلك.'); return; }
+    busy = true; $('#send').disabled = true; $('#send').textContent = 'جارٍ الإرسال…'; err('');
+    try {
+      const db = await SI.LB.ready(); if (!db) throw new Error('offline');
+      const fs = SI.LB._fs;
+      await Promise.race([
+        fs.addDoc(fs.collection(db, 'messages'), { name, role, contact, text, at: fs.serverTimestamp() }),
+        new Promise((_, no) => setTimeout(() => no(new Error('timeout')), 12000))
+      ]);
+      countSent();
+      $('#formCard').hidden = true; $('#done').hidden = false; $('#done').scrollIntoView({ block: 'center' });
+    } catch (e2) {
+      console.warn(e2);
+      err('تعذّر إرسال الرسالة. تأكد من الإنترنت ثم حاول مرة أخرى.');
+      busy = false; $('#send').disabled = false; $('#send').textContent = 'إرسال';
+    }
+  });
+})();
+</script>
+</body>
+</html>

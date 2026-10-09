@@ -6,7 +6,7 @@
 <title>Arm Mechanic · Bones and Muscles</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
   --navy:#1f3d57; --ink:#3a5c75; --card:rgba(255,250,240,.94);
@@ -358,6 +358,7 @@ body{
   </main>
 </div>
 
+<script src="firebase-config.js"></script>
 <script src="chapters.js"></script>
 <script src="common.js"></script>
 <script>
@@ -882,6 +883,7 @@ function results() {
     </div>
   </div>`;
   document.body.appendChild(o);
+  SI.rate.guard(o, 'a[href="map.html"]', 'results');   // Koko asks for a rating before the player leaves (once per chapter)
   $('#again', o).onclick = () => location.reload();
 }
 

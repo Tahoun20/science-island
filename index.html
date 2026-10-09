@@ -44,6 +44,20 @@ body{background:linear-gradient(rgba(255,255,255,.25),rgba(255,255,255,.25)),url
 .who:hover{border-color:var(--primary)}
 .who:focus-visible{outline:3px solid #f7b267;outline-offset:2px}
 .who .av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#e3f1f7;font-size:16px}
+/* "Players say": answers the owner chose on reviews.html (hidden until there is at least one) */
+.says{background:var(--card);border-radius:24px;padding:14px 16px;box-shadow:0 8px 28px rgba(31,61,87,.16)}
+.says h2{margin:0 0 8px;font-size:18px;font-weight:900;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline}
+.says h2 .ar{font-size:16.5px;color:var(--ink)}
+.says ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.says li{display:flex;align-items:center;gap:10px;background:#fff;border:2px solid var(--line);border-radius:16px;padding:8px 12px}
+.says .fc{font-size:28px;line-height:1;flex:none}
+.says .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.says q{quotes:none;font-weight:800;font-size:16.5px;line-height:1.45;overflow-wrap:anywhere;font-family:"Cairo","Nunito",system-ui,sans-serif}
+.says .by{font-weight:800;font-size:13.5px;color:var(--ink)}
+.foot{margin:0;text-align:center}
+.foot a{display:inline-flex;flex-wrap:wrap;justify-content:center;gap:2px 10px;align-items:baseline;background:var(--card);border-radius:999px;padding:8px 18px;font-weight:800;font-size:14.5px;color:var(--navy);text-decoration:none;box-shadow:0 3px 10px rgba(31,61,87,.12)}
+.foot a:hover{text-decoration:underline}
+.foot a:focus-visible{outline:3px solid #f7b267;outline-offset:2px}
 @media (max-width:520px){
   .hero img{height:100px}
   .title h1{font-size:27px}
@@ -106,7 +120,14 @@ body{background:linear-gradient(rgba(255,255,255,.25),rgba(255,255,255,.25)),url
     </form>
     <button class="back" type="button" data-back="stepTrack">‹ Back</button>
   </section>
+
+  <section class="says" id="says" hidden>
+    <h2>Players say <span class="ar">آراء الأبطال</span></h2>
+    <ul id="saysList"></ul>
+  </section>
+  <p class="foot"><a href="contact.html">For parents and teachers <span class="ar">لأولياء الأمور والمعلمين</span></a></p>
 </main>
+<script src="firebase-config.js"></script>
 <script src="common.js"></script>
 <script>
 (() => {
@@ -141,6 +162,29 @@ body{background:linear-gradient(rgba(255,255,255,.25),rgba(255,255,255,.25)),url
     SI.sfx.ok(); SI.voice('hello');
     setTimeout(() => { location.href = MAP; }, SI.isMuted() ? 350 : 1400);   // let Koko finish saying hello
   });
+
+  /* "Players say": up to three of the answers the owner chose to show (first name and one line) */
+  window.addEventListener('load', () => setTimeout(async () => {
+    try {
+      const db = await SI.LB.ready(); if (!db) return;
+      const fs = SI.LB._fs;
+      const ss = await fs.getDocs(fs.query(fs.collection(db, 'showcase'), fs.orderBy('at', 'desc'), fs.limit(12)));
+      const rows = ss.docs.map(d => d.data()).filter(r => r && r.rating >= 3 && r.name);
+      if (!rows.length) return;
+      for (let i = rows.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [rows[i], rows[j]] = [rows[j], rows[i]]; }
+      const box = $('#saysList');
+      rows.slice(0, 3).forEach(r => {
+        const c = SI.rate.CHOICES.find(x => x.v === r.rating) || {};
+        const li = document.createElement('li'), fc = document.createElement('span'), tx = document.createElement('span'), q = document.createElement('q'), by = document.createElement('span');
+        fc.className = 'fc'; fc.setAttribute('aria-hidden', 'true'); fc.textContent = c.face || '⭐';
+        li.dir = 'auto';                                             // an Arabic line puts the whole row right to left
+        tx.className = 'tx'; q.textContent = r.text || c.ar || r.label || '';
+        by.className = 'by'; by.textContent = r.name;
+        tx.append(q, by); li.append(fc, tx); box.appendChild(li);
+      });
+      $('#says').hidden = false;
+    } catch (e) { console.warn(e); }
+  }, 800));
 })();
 </script>
 </body>
