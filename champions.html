@@ -38,7 +38,7 @@
   <header class="top">
     <a class="brand" href="map.html" title="Back to the map">
       <div class="logo" aria-hidden="true">🏆</div>
-      <div><h1>Champions</h1><p>Chapter 1 · Bones and Muscles</p></div>
+      <div><h1>Champions</h1><p id="chSub">This chapter</p></div>
     </a>
     <div class="hud">
       <a class="pill" href="map.html">‹ Map</a>
@@ -61,12 +61,16 @@
   </div>
 </div>
 <script src="firebase-config.js"></script>
+<script src="chapters.js"></script>
 <script src="common.js"></script>
 <script>
 (async () => {
   'use strict';
   const me = SI.requirePlayer(); if (!me) return;
+  const CH = SI.requireChapter(); if (!CH) return;
+  SI.applyTheme();
   const $ = s => document.querySelector(s);
+  $('#chSub').textContent = `Chapter ${CH.n} · ${CH.title}`;
   const ms = SI.weekEndsIn(), d = Math.floor(ms / 864e5), h = Math.floor(ms % 864e5 / 36e5);
   $('#reset').textContent = `New week starts in ${d ? d + ' day' + (d > 1 ? 's ' : ' ') : ''}${h} hour${h === 1 ? '' : 's'}. Everyone starts again!`;
   const { online, rows } = await SI.LB.top(10);

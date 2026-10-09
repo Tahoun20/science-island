@@ -358,6 +358,7 @@ body{
   </main>
 </div>
 
+<script src="chapters.js"></script>
 <script src="common.js"></script>
 <script>
 (() => {
@@ -621,8 +622,8 @@ function throwBall() {
 
 /* ---------- sound + per-player progress (shared module) ---------- */
 const store = {
-  load() { return Object.assign({}, SI.prof().arm || {}); },
-  save(o) { SI.updateProf(p => { p.arm = o; }); }
+  load() { return Object.assign({}, SI.chProf('ch1').game || {}); },
+  save(o) { SI.updateChProf(c => { c.game = o; }, 'ch1'); }
 };
 const sfx = {
   ok() { SI.sfx.ok(); SI.voice('ok'); },
@@ -907,7 +908,7 @@ function intro() {
 }
 
 async function main() {
-  if (!SI.requirePlayer()) return;
+  if (!SI.requirePlayer() || !SI.requireChapter('ch1')) return;   // this game belongs to Chapter 1
   setUI({ chips: true, meters: true, controls: true });
   applySkin(store.load().skin || 0);
   setTheta(0);

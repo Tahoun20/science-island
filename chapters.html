@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Science Island · Chapters</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="common.css">
+<style>
+.wrap{max-width:980px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.intro{display:flex;align-items:center;gap:12px}
+.intro img{height:120px;width:auto;flex:none}
+.intro .txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+.lvl{display:flex;flex-direction:column;gap:5px}
+.lvl .t{display:flex;justify-content:space-between;gap:8px;font-weight:900;font-size:14.5px}
+.lvl small{font-weight:800;color:var(--ink);font-size:12.5px}
+.sect{margin:4px 2px 0;font-size:15px;font-weight:900;color:var(--ink);display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.sect .ar{direction:rtl;unicode-bidi:isolate;font-size:14px}
+.list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+.ch{display:flex;align-items:center;gap:12px;width:100%;height:100%;text-align:left;font:inherit;color:var(--navy);text-decoration:none;
+  background:var(--card);border:3px solid transparent;border-radius:var(--radius);padding:10px 12px 10px 10px;box-shadow:0 6px 20px rgba(31,61,87,.13);transition:transform .12s,border-color .12s}
+a.ch:hover{transform:translateY(-2px);border-color:var(--primary)}
+a.ch:focus-visible{outline:3px solid #f7b267;outline-offset:2px}
+.ch.cur{border-color:var(--ok)}
+.ch.off{box-shadow:none;background:rgba(255,250,240,.72)}
+.ch .tile{flex:none;width:78px;height:78px;border-radius:18px;display:grid;place-items:center;font-size:38px;background-size:cover;background-position:center;position:relative}
+.ch.off .tile{filter:saturate(.55);opacity:.85}
+.ch .n{position:absolute;top:-6px;left:-6px;min-width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;font-size:13.5px;font-weight:900;display:grid;place-items:center}
+.ch .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.ch .k{font-size:11.5px;font-weight:900;letter-spacing:.6px;text-transform:uppercase;color:var(--ink)}
+.ch b{font-size:18px;font-weight:900;line-height:1.2}
+.ch .meta{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;font-size:13px;font-weight:800;color:var(--ink)}
+.ch .st{color:var(--gold);letter-spacing:1px;font-size:15px}
+.ch .st .no{color:#e3d9c4}
+.ch .go{flex:none;font-size:24px;font-weight:900;color:var(--primary)}
+.ch.cur .go{font-size:13px;background:var(--ok);color:#fff;border-radius:99px;padding:4px 10px}
+@media (max-width:520px){
+  .intro img{height:84px}
+  .list{grid-template-columns:1fr;gap:10px}
+  .ch .tile{width:64px;height:64px;font-size:31px;border-radius:16px}
+  .ch b{font-size:17px}
+}
+@media (max-height:520px) and (orientation:landscape){ .intro img{height:64px} }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <a class="brand" href="index.html" title="Change player">
+      <div class="logo" aria-hidden="true">🏝️</div>
+      <div><h1>Science Island</h1><p id="sub">Grade 5 · Languages · First term</p></div>
+    </a>
+    <div class="hud">
+      <span class="pill" title="Daily streak">🔥 <b id="streak">0</b></span>
+      <span class="pill" title="Stars in all chapters">⭐ <b id="stars">0</b></span>
+      <button class="icon" id="mute" type="button" aria-label="Sound" aria-pressed="false" title="Sound on/off">♪</button>
+      <a class="icon" href="index.html" aria-label="Change player" title="Change player">👤</a>
+    </div>
+  </header>
+  <main class="wrap">
+    <div class="card intro">
+      <img id="parrot" src="assets/parrot_point.png" alt="Koko the parrot">
+      <div class="txt">
+        <div class="bubble" id="bubble"></div>
+        <div class="lvl">
+          <div class="t"><span id="lvlTitle"></span><span id="lvlXp"></span></div>
+          <div class="xpbar" aria-hidden="true"><i id="lvlBar"></i></div>
+          <small id="lvlNext"></small>
+        </div>
+      </div>
+    </div>
+    <h2 class="sect">Choose a chapter <span class="ar">اختر الفصل</span></h2>
+    <ol class="list" id="list"></ol>
+  </main>
+</div>
+<noscript>Please turn on JavaScript to play.</noscript>
+<script src="chapters.js"></script>
+<script src="common.js"></script>
+<script>
+(() => {
+  'use strict';
+  const me = SI.requirePlayer(); if (!me) return;
+  const $ = s => document.querySelector(s);
+  const esc = SI.esc, list = SI.chapters(), cur = SI.chapterId();
+
+  const lv = SI.levelInfo(SI.xp());
+  $('#lvlTitle').textContent = `Level ${lv.n} · ${lv.title}`;
+  $('#lvlXp').textContent = `${lv.xp} XP`;
+  $('#lvlBar').style.width = Math.round(lv.pct * 100) + '%';
+  $('#lvlNext').textContent = lv.to ? `${lv.to - lv.xp} XP to ${lv.next}` : 'Top level reached!';
+  $('#streak').textContent = SI.dailyState().streak;
+
+  const mute = $('#mute');
+  const paint = () => { mute.setAttribute('aria-pressed', SI.isMuted()); mute.setAttribute('aria-label', SI.isMuted() ? 'Sound off' : 'Sound on'); };
+  mute.onclick = () => { SI.setMuted(!SI.isMuted()); paint(); }; paint();
+
+  let total = 0, started = false;
+  const box = $('#list');
+  list.forEach(c => {
+    const li = document.createElement('li');
+    const s = SI.chapterStars(c.id); total += s.got; if (s.got) started = true;
+    const tile = `<span class="tile" style="background-color:${c.tint || '#e3f1f7'}${c.cover ? `;background-image:url(${c.cover})` : ''}">${c.cover ? '' : c.icon || '📘'}<span class="n">${c.n}</span></span>`;
+    const lessons = `${c.lessons.length} lesson${c.lessons.length > 1 ? 's' : ''}`;
+    if (c.ready) {
+      const a = document.createElement('a');
+      a.className = 'ch' + (c.id === cur ? ' cur' : ''); a.href = 'map.html';
+      a.setAttribute('aria-label', `Chapter ${c.n}: ${c.title}, ${s.got} of ${s.of} stars`);
+      a.innerHTML = `${tile}<span class="tx"><span class="k">Chapter ${c.n}</span><b>${esc(c.title)}</b>
+        <span class="meta"><span>${lessons}</span><span class="st" aria-hidden="true">${'★'.repeat(s.got)}<span class="no">${'★'.repeat(s.of - s.got)}</span></span></span></span>
+        <span class="go" aria-hidden="true">${c.id === cur ? 'Continue ▸' : '›'}</span>`;
+      a.onclick = () => { SI.setChapter(c.id); SI.sfx.tick(); };
+      li.appendChild(a);
+    } else {
+      li.innerHTML = `<div class="ch off" aria-label="Chapter ${c.n}: ${esc(c.title)}, coming soon">${tile}<span class="tx"><span class="k">Chapter ${c.n}</span><b>${esc(c.title)}</b>
+        <span class="meta"><span>${lessons}</span><span class="soon">Soon · قريبًا</span></span></span></div>`;
+    }
+    box.appendChild(li);
+  });
+  $('#stars').textContent = total;
+
+  const curCh = SI.chapter();
+  $('#bubble').innerHTML = started && curCh
+    ? `Welcome back, <b>${esc(me.name)}</b>! Keep going with <b>${esc(curCh.title)}</b>, or pick another chapter.`
+    : `Hi, <b>${esc(me.name)}</b>! I’m Koko. Pick a chapter and let’s play!`;
+  if (started) $('#parrot').src = 'assets/parrot_thumbs.png';
+})();
+</script>
+</body>
+</html>

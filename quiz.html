@@ -247,7 +247,7 @@ body{
   <header class="top">
     <a class="brand" href="map.html" title="Back to the map">
       <div class="logo" aria-hidden="true">🗺️</div>
-      <div><h1 id="title">Question Quest</h1><p id="subtitle">Chapter 1 · Bones and Muscles</p></div>
+      <div><h1 id="title">Question Quest</h1><p id="subtitle">Science Island</p></div>
     </a>
     <div class="hud">
       <div class="pill" id="countPill">1 / 12</div>
@@ -279,7 +279,7 @@ body{
 </div>
 
 <script src="firebase-config.js"></script>
-<script src="questions.js"></script>
+<script src="chapters.js"></script>
 <script src="common.js"></script>
 <script>
 (() => {
@@ -294,10 +294,11 @@ const mk = (tag, cls, html) => { const e = document.createElement(tag); if (cls)
 const esc = SI.esc;
 
 /* ---------- per-player review schedule (Leitner boxes), sound, mute ---------- */
-const armSkin = (SI.prof().arm || {}).skin || 0;
+const CH = SI.chapter() || {};                             // the chapter being played (questions come from CH.questions)
+const armSkin = (SI.chProf('ch1').game || {}).skin || 0;   // arm colour chosen in Arm Mechanic, used by the arm diagrams
 const DAY = 864e5, INTERVALS = [0, 1, 3, 7, 14];
 function recordCard(id, firstTry) {
-  SI.updateProf(p => {
+  SI.updateChProf(p => {
     p.cards = p.cards || {};
     const c = p.cards[id] || { box: 0 };
     c.seen = (c.seen || 0) + 1;
@@ -307,7 +308,7 @@ function recordCard(id, firstTry) {
   });
 }
 function dueCards() {
-  const cards = SI.prof().cards || {}, now = Date.now();
+  const cards = SI.chProf().cards || {}, now = Date.now();
   return Object.entries(cards).filter(([, c]) => c.due <= now).sort((a, b) => a[1].box - b[1].box || a[1].due - b[1].due).map(([id]) => id);
 }
 const sfx = SI.sfx;
@@ -673,13 +674,13 @@ async function mysteryBox() {
 
 /* one phrasing per idea, a different one from last time when possible */
 function variantOf(idea) {
-  const last = (SI.prof().lastVar || {})[idea.id];
+  const last = (SI.chProf().lastVar || {})[idea.id];
   let pool = idea.variants.map((_, i) => i);
   if (pool.length > 1) pool = pool.filter(i => i !== last);
   const vi = pool[Math.floor(Math.random() * pool.length)], v = idea.variants[vi];
   return Object.assign({ id: idea.id, lesson: idea.lesson, concept: idea.concept, explain: idea.explain, vi }, v, v.explain ? { explain: v.explain } : {});
 }
-function rememberVariants(list) { SI.updateProf(p => { p.lastVar = p.lastVar || {}; list.forEach(q => { p.lastVar[q.id] = q.vi; }); }); }
+function rememberVariants(list) { SI.updateChProf(p => { p.lastVar = p.lastVar || {}; list.forEach(q => { p.lastVar[q.id] = q.vi; }); }); }
 const ideaById = id => window.IDEAS.find(I => I.id === id);
 
 async function playList(list, label) {
@@ -743,7 +744,7 @@ function buildQuest() {
 }
 /* Daily 5: ideas due for review first, then the ones the player knows least */
 function buildDaily() {
-  const cards = SI.prof().cards || {}, due = dueCards();
+  const cards = SI.chProf().cards || {}, due = dueCards();
   const box = id => (cards[id] ? cards[id].box : -1);
   const rest = shuffle(window.IDEAS.map(I => I.id).filter(id => !due.includes(id))).sort((a, b) => box(a) - box(b));
   return due.concat(rest).slice(0, 5).map(id => { const q = variantOf(ideaById(id)); if (q.mode === 'boss') q.mode = 'normal'; return q; });
@@ -764,13 +765,13 @@ async function results(kind, res, total, extraXP = 0) {
   const stars = acc >= .9 ? 3 : acc >= .7 ? 2 : acc > 0 ? 1 : 0;
   let bestScore = score;
   if (kind === 'quest') {
-    SI.updateProf(p => { const Q = p.quest = p.quest || {}; Q.best = Math.max(Q.best || 0, score); Q.stars = Math.max(Q.stars || 0, stars); Q.plays = (Q.plays || 0) + 1; bestScore = Q.best; });
+    SI.updateChProf(p => { const Q = p.quest = p.quest || {}; Q.best = Math.max(Q.best || 0, score); Q.stars = Math.max(Q.stars || 0, stars); Q.plays = (Q.plays || 0) + 1; bestScore = Q.best; });
   }
   const gain = SI.addXP(score + extraXP);
   const levelUp = gain.after.n > gain.before.n;
   sfx.win(); confetti(60); SI.voice('finish');
   const me = SI.player();
-  say(stars === 3 ? `Amazing, ${esc(me.name)}! You are a bone and muscle expert!` : `Nice work, ${esc(me.name)}! Play again to get more stars.`, 'celebrate');
+  say(stars === 3 ? `Amazing, ${esc(me.name)}! You are a real expert on ${esc(CH.title)}!` : `Nice work, ${esc(me.name)}! Play again to get more stars.`, 'celebrate');
   const titles = { quest: 'Quest complete!', daily: 'Daily 5 done!', review: 'Review done!' };
   const o = mk('div', 'overlay', `<div class="panel">
     <img class="hero" src="assets/parrot_${stars >= 2 ? 'celebrate' : 'thumbs'}.png" alt="">
@@ -823,9 +824,10 @@ async function main() {
   const set = (t, s) => { $('#title').textContent = t; $('#subtitle').textContent = s; document.title = t + ' · Science Island'; };
 
   if (mode === 'quest') {
-    set('Chapter Quest', 'Bones and Muscles · 20 questions');
+    const N = window.IDEAS.length;
+    set('Chapter Quest', `${CH.title} · ${N} questions`);
     const list = buildQuest(); rememberVariants(list);
-    await intro(`Ready, ${esc(me.name)}?`, 'Chapter Quest · 20 questions',
+    await intro(`Ready, ${esc(me.name)}?`, `Chapter ${CH.n} Quest · ${N} questions`,
       'Some questions have a timer ⏱. The last ones are Boss questions ★. Get 5 right in a row for a mystery box 🎁. Your best score goes on the Champions board 🏆!');
     const res = await playList(list, 'quest');
     const retry = res.missed.filter(q => q.mode !== 'boss');
@@ -835,7 +837,7 @@ async function main() {
     }
     await results('quest', res, list.length);
   } else if (mode === 'daily') {
-    set('Daily 5', 'Five quick questions every day');
+    set('Daily 5', `${CH.title} · five quick questions every day`);
     const st = SI.dailyState();
     if (st.done) {
       const o = notice('Done for today!', `You already did today’s Daily 5. 🔥 Your streak: <b>${st.streak} day${st.streak === 1 ? '' : 's'}</b>. Come back tomorrow!`,
@@ -851,10 +853,10 @@ async function main() {
     const streakNow = SI.completeDaily();
     await results('daily', res, list.length, 20 + Math.min(streakNow, 10) * 5);
   } else {
-    set('Review', 'The tricky ones');
+    set('Review', `${CH.title} · the tricky ones`);
     const list = buildReview();
     if (!list.length) {
-      const cards = SI.prof().cards || {};
+      const cards = SI.chProf().cards || {};
       const next = Object.values(cards).map(c => c.due).sort((a, b) => a - b)[0];
       const when = next ? Math.max(1, Math.round((next - Date.now()) / DAY)) : 0;
       notice('All caught up!', next ? `Nothing to review right now. Come back in about <b>${when} day${when > 1 ? 's' : ''}</b>.` : 'Play the Chapter Quest first. Koko will save the tricky questions here.',
@@ -868,7 +870,14 @@ async function main() {
   }
 }
 window.addEventListener('hashchange', () => location.reload());
-if (SI.requirePlayer()) main().catch(e => console.error(e));
+if (SI.requirePlayer() && SI.requireChapter()) {
+  SI.applyTheme();
+  if (CH.quizBg) document.body.style.backgroundImage = `linear-gradient(rgba(255,255,255,.35),rgba(255,255,255,.35)),url(${CH.quizBg})`;
+  SI.loadQuestions().then(main).catch(e => {
+    console.error(e);
+    notice('Not ready yet', 'The questions for this chapter could not be loaded. Check your connection and try again.', '<a class="btn primary" href="chapters.html">Chapters</a><button class="btn" type="button" onclick="location.reload()">Try again</button>');
+  });
+}
 window.__quiz = { ask: q => ask(q), DIAGRAMS, variantOf, mysteryBox, notice, results: (kind, res, total, extra, sc) => { if (sc != null) score = sc; return results(kind, res, total, extra); } };
 })();
 </script>

@@ -11,7 +11,7 @@
 <style>
 .grid{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:16px;align-items:start}
 .mapWrap{position:relative;width:100%;max-width:min(680px, calc((100vh - 120px) * 1224 / 1285));margin:0 auto;aspect-ratio:1224/1285;border-radius:26px;
-  box-shadow:0 10px 34px rgba(31,61,87,.22);background:url(assets/map_island.jpg) center/cover #8fd3ee;container-type:inline-size}
+  box-shadow:0 10px 34px rgba(31,61,87,.22);background:linear-gradient(#bfe8f6,#8fd3ee) center/cover #8fd3ee;container-type:inline-size}
 .stop{position:absolute;transform:translate(-50%,-50%);text-decoration:none;color:var(--navy)}
 .stop .dot{width:clamp(48px,11vw,76px);aspect-ratio:1;border-radius:50%;background:var(--paper);border:5px solid #f08a6c;display:grid;place-items:center;
   font-size:clamp(22px,5vw,34px);box-shadow:0 6px 14px rgba(31,61,87,.25);position:relative;transition:transform .15s}
@@ -62,19 +62,20 @@
 <body>
 <div class="app">
   <header class="top">
-    <a class="brand" href="index.html" title="Change player">
-      <div class="logo" aria-hidden="true">🏝️</div>
-      <div><h1>Science Island</h1><p>Grade 5 · Languages · Chapter 1: Bones and Muscles</p></div>
+    <a class="brand" href="chapters.html" title="All chapters">
+      <div class="logo" aria-hidden="true" id="logo">🏝️</div>
+      <div><h1 id="chTitle">Science Island</h1><p id="chSub">Grade 5 · Languages</p></div>
     </a>
     <div class="hud">
       <span class="pill" id="streakPill" title="Daily streak">🔥 <b id="streak">0</b></span>
-      <span class="pill" title="Stars">⭐ <b id="stars">0</b> / 6</span>
+      <span class="pill" title="Stars">⭐ <b id="stars">0</b> / <span id="starsOf">6</span></span>
       <button class="icon" id="mute" type="button" aria-label="Sound" aria-pressed="false" title="Sound on/off">♪</button>
+      <a class="icon" href="chapters.html" aria-label="All chapters" title="All chapters">📚</a>
       <a class="icon" href="index.html" aria-label="Change player" title="Change player">👤</a>
     </div>
   </header>
   <main class="grid">
-    <div class="mapWrap" id="map" role="list" aria-label="Island map with five stops"></div>
+    <div class="mapWrap" id="map" role="list" aria-label="Chapter map"></div>
     <aside class="side">
       <div class="card coachCard">
         <img id="parrot" src="assets/parrot_point.png" alt="Koko the parrot">
@@ -91,15 +92,22 @@
   </main>
 </div>
 <script src="firebase-config.js"></script>
-<script src="questions.js"></script>
+<script src="chapters.js"></script>
 <script src="common.js"></script>
 <script>
 (async () => {
   'use strict';
   const me = SI.requirePlayer(); if (!me) return;
+  const CH = SI.requireChapter(); if (!CH) return;
+  SI.applyTheme();
   const $ = s => document.querySelector(s);
-  const P = SI.prof(), now = Date.now();
-  const arm = P.arm || {}, quest = P.quest || {}, daily = SI.dailyState();
+  const P = SI.chProf(), now = Date.now();
+  const arm = P.game || {}, quest = P.quest || {}, daily = SI.dailyState();   // "arm" = this chapter's own game
+  document.title = `${CH.title} · Science Island`;
+  $('#chTitle').textContent = CH.title;
+  $('#chSub').textContent = `Grade 5 · Languages · Chapter ${CH.n}`;
+  if (CH.icon) $('#logo').textContent = CH.icon;
+  if (CH.map && CH.map.img) $('#map').style.backgroundImage = `url(${CH.map.img})`;
   const due = Object.values(P.cards || {}).filter(c => c.due <= now).length;
   const lv = SI.levelInfo(SI.xp());
 
@@ -109,26 +117,31 @@
   $('#lvlBar').style.width = Math.round(lv.pct * 100) + '%';
   $('#lvlNext').textContent = lv.to ? `${lv.to - lv.xp} XP to ${lv.next}` : 'Top level reached!';
   $('#streak').textContent = daily.streak;
-  $('#stars').textContent = (arm.stars || 0) + (quest.stars || 0);
+  const st = SI.chapterStars(CH.id);
+  $('#stars').textContent = st.got; $('#starsOf').textContent = st.of;
 
   const mute = $('#mute');
   const paint = () => { mute.setAttribute('aria-pressed', SI.isMuted()); mute.setAttribute('aria-label', SI.isMuted() ? 'Sound off' : 'Sound on'); };
   mute.onclick = () => { SI.setMuted(!SI.isMuted()); paint(); }; paint();
 
   const stars = n => '★'.repeat(n) + `<span class="off">${'★'.repeat(3 - n)}</span>`;
-  const STOPS = [
-    { x: 59.6, y: 82.9, side: 'left', icon: '🦾', name: 'Arm Mechanic', href: 'arm.html', done: !!arm.stars, sub: stars(arm.stars || 0),
-      hint: 'See how your muscles pull your bones!' },
-    { x: 54.6, y: 67.1, side: 'right', icon: '⭐', name: 'Chapter Quest', href: 'quiz.html#quest', done: !!quest.stars, sub: stars(quest.stars || 0),
-      hint: '20 questions on the whole chapter. Your best score goes on the Champions board!' },
-    { x: 41.3, y: 51.4, side: 'right', icon: '⚡', name: 'Daily 5', href: 'quiz.html#daily', done: daily.done, sub: daily.done ? '✓ done today' : (daily.streak ? `🔥 ${daily.streak} days` : 'once a day'),
+  const G = CH.game;
+  const ALL = [
+    G && { key: 'game', icon: G.icon || '🎮', name: G.name, href: G.href, done: !!arm.stars, sub: stars(arm.stars || 0), hint: G.hint || 'Play this chapter’s game!' },
+    { key: 'quest', icon: '⭐', name: 'Chapter Quest', href: 'quiz.html#quest', done: !!quest.stars, sub: stars(quest.stars || 0),
+      hint: 'Questions on the whole chapter. Your best score goes on the Champions board!' },
+    { key: 'daily', icon: '⚡', name: 'Daily 5', href: 'quiz.html#daily', done: daily.done, sub: daily.done ? '✓ done today' : (daily.streak ? `🔥 ${daily.streak} days` : 'once a day'),
       hint: '5 quick questions every day. Keep your fire streak going!' },
-    { x: 39.6, y: 38.1, side: 'left', icon: '🔁', name: 'Review', href: 'quiz.html#review', badge: due, done: false, sub: due ? `${due} waiting` : 'all clear',
+    { key: 'review', icon: '🔁', name: 'Review', href: 'quiz.html#review', badge: due, done: false, sub: due ? `${due} waiting` : 'all clear',
       hint: due ? `${due} tricky question${due > 1 ? 's are' : ' is'} waiting for you.` : 'Koko saves your tricky questions here.' },
-    { x: 68.2, y: 12.5, side: 'below', icon: '🏆', name: 'Champions', href: 'champions.html', done: false, sub: '&nbsp;',
+    { key: 'board', icon: '🏆', name: 'Champions', href: 'champions.html', done: false, sub: '&nbsp;',
       hint: 'See this week’s top players!' }
   ];
-  let next = !arm.stars ? 0 : !quest.stars ? 1 : !daily.done ? 2 : due ? 3 : 4;
+  /* positions come from the chapter (game, quest, daily, review, champions); a chapter without a game skips the first one */
+  const POS = (CH.map && CH.map.stops) || [[59.6, 82.9, 'left'], [54.6, 67.1, 'right'], [41.3, 51.4, 'right'], [39.6, 38.1, 'left'], [68.2, 12.5, 'below']];
+  const STOPS = ALL.map((s, i) => s && Object.assign(s, { x: POS[i][0], y: POS[i][1], side: POS[i][2] })).filter(Boolean);
+  const want = (G && !arm.stars) ? 'game' : !quest.stars ? 'quest' : !daily.done ? 'daily' : due ? 'review' : 'board';
+  const next = STOPS.findIndex(s => s.key === want);
   const map = $('#map');
   STOPS.forEach((s, i) => {
     const a = document.createElement('a');
@@ -136,15 +149,15 @@
     a.href = s.href; a.setAttribute('role', 'listitem'); a.style.left = s.x + '%'; a.style.top = s.y + '%';
     a.setAttribute('aria-label', `Stop ${i + 1}: ${s.name}`);
     a.innerHTML = `<span class="dot"><span class="n">${i + 1}</span>${s.icon}${s.badge ? `<span class="badge">${s.badge}</span>` : ''}</span>
-      <span class="lab">${s.name}<small id="sub${i}">${s.sub}</small></span>`;
+      <span class="lab">${s.name}<small id="sub-${s.key}">${s.sub}</small></span>`;
     map.appendChild(a);
   });
   const s = STOPS[next];
-  $('#bubble').innerHTML = `${next === 0 ? `Welcome, <b>${SI.esc(me.name)}</b>! ` : `Great work, <b>${SI.esc(me.name)}</b>! `}Next stop: <b>${s.name}</b>. ${s.hint}`;
+  $('#bubble').innerHTML = `${st.got ? `Great work, <b>${SI.esc(me.name)}</b>! ` : `Welcome, <b>${SI.esc(me.name)}</b>! `}Next stop: <b>${s.name}</b>. ${s.hint}`;
   $('#go').href = s.href;
 
   // Champions label: my rank this week
-  try { const m = await SI.LB.me(); if (m) $('#sub4').textContent = `you are #${m.rank}`; } catch (e) {}
+  try { const m = await SI.LB.me(); if (m) $('#sub-board').textContent = `you are #${m.rank}`; } catch (e) {}
 })();
 </script>
 </body>

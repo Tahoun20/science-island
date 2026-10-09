@@ -112,7 +112,7 @@ body{background:linear-gradient(rgba(255,255,255,.25),rgba(255,255,255,.25)),url
 (() => {
   'use strict';
   const $ = s => document.querySelector(s);
-  const MAP = 'map.html';
+  const MAP = SI.CHAPTERS_PAGE;   // players choose a chapter first
   const steps = ['stepWho', 'stepGrade', 'stepTrack', 'stepName'];
   const show = id => { steps.forEach(s => $('#' + s).hidden = s !== id); const f = $('#' + id).querySelector('button:not(:disabled), input'); if (f) f.focus({ preventScroll: true }); };
   const choice = { grade: 'g5', track: 'lang' };

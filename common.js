@@ -1,7 +1,7 @@
-/* Science Island · shared helpers: storage, player, XP levels, daily streak, sounds, Arabic voice, Champions board */
+/* Science Island · shared helpers: storage, player, chapters, XP levels, daily streak, sounds, Arabic voice, Champions board */
 (function () {
   'use strict';
-  const HOME = 'index.html';
+  const HOME = 'index.html', CHAPTERS_PAGE = 'chapters.html';
   const KEY = 'si.v2';
   const store = {
     load() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } },
@@ -20,9 +20,69 @@
   }
   function usePlayer(id) { store.update(s => { if ((s.players || {})[id]) s.current = id; }); return player(); }
   function requirePlayer() { const p = player(); if (!p || !p.name) { location.href = HOME; return null; } return p; }
-  /* per-player progress: xp, daily, cards (review schedule), last phrasing, best scores */
+  /* per-player progress shared by all chapters: xp, daily streak, the chapter being played (cur) */
   function prof() { const s = store.load(); return ((s.profiles || {})[s.current]) || {}; }
   function updateProf(fn) { store.update(s => { s.profiles = s.profiles || {}; const p = s.profiles[s.current] = s.profiles[s.current] || {}; fn(p); }); return prof(); }
+
+  /* ---------- chapters (the list lives in chapters.js) ----------
+     Each chapter keeps its own progress in profile.ch[chapterId]:
+     quest and game (best, stars, plays), cards (review schedule), lastVar (last phrasing), dailyLast */
+  const chapters = () => window.CHAPTERS || [];
+  const chapterById = id => chapters().find(c => c.id === id) || null;
+  const chapterId = () => prof().cur || null;
+  const chapter = () => chapterById(chapterId());
+  function setChapter(id) { if (chapterById(id)) updateProf(p => { p.cur = id; }); return chapter(); }
+  /* pages inside a chapter call this; a game page passes its own chapter id */
+  function requireChapter(id) {
+    if (id) setChapter(id);
+    const c = chapter();
+    if (!c || !c.ready) { location.href = CHAPTERS_PAGE; return null; }
+    return c;
+  }
+  function chProf(id) { id = id || chapterId(); return ((prof().ch || {})[id]) || {}; }
+  function updateChProf(fn, id) {
+    id = id || chapterId(); if (!id) return {};
+    updateProf(p => { p.ch = p.ch || {}; const c = p.ch[id] = p.ch[id] || {}; fn(c); });
+    return chProf(id);
+  }
+  function chapterStars(id) {
+    const c = chapterById(id) || {}, p = chProf(id);
+    return { got: ((p.quest || {}).stars || 0) + ((p.game || {}).stars || 0), of: c.game ? 6 : 3 };
+  }
+  function applyTheme() {
+    const c = chapter(); if (!c || !c.theme) return;
+    Object.keys(c.theme).forEach(k => document.documentElement.style.setProperty('--' + k, c.theme[k]));
+  }
+  function loadQuestions() {
+    const c = chapter();
+    return new Promise((res, rej) => {
+      if (!c || !c.questions) return rej(new Error('This chapter has no questions yet.'));
+      window.IDEAS = undefined;
+      const el = document.createElement('script'); el.src = c.questions;
+      el.onload = () => (Array.isArray(window.IDEAS) ? res(window.IDEAS) : rej(new Error('No questions in ' + c.questions)));
+      el.onerror = () => rej(new Error('Could not load ' + c.questions));
+      document.head.appendChild(el);
+    });
+  }
+  /* saves made before the site had several chapters all belong to Chapter 1: move them into ch.ch1 */
+  (function migrate() {
+    const s = store.load(); let changed = false;
+    const best = (a, b) => { if (!a) return b; if (!b) return a; return Object.assign({}, a, b, { best: Math.max(a.best || 0, b.best || 0), stars: Math.max(a.stars || 0, b.stars || 0), plays: (a.plays || 0) + (b.plays || 0) }); };
+    Object.keys(s.profiles || {}).forEach(k => {
+      const p = s.profiles[k];
+      if (!p || !(p.quest || p.arm || p.cards || p.lastVar || (p.daily && !p.ch))) return;
+      p.ch = p.ch || {}; const c = p.ch.ch1 = p.ch.ch1 || {};
+      if (p.quest) c.quest = best(c.quest, p.quest);
+      if (p.arm) c.game = best(c.game, p.arm);
+      if (p.cards) c.cards = Object.assign(c.cards || {}, p.cards);
+      if (p.lastVar) c.lastVar = Object.assign(c.lastVar || {}, p.lastVar);
+      if (p.daily && p.daily.last && !c.dailyLast) c.dailyLast = p.daily.last;
+      delete p.quest; delete p.arm; delete p.cards; delete p.lastVar;
+      if (!p.cur) p.cur = 'ch1';
+      changed = true;
+    });
+    if (changed) store.save(s);
+  })();
 
   /* names: first name or nickname, letters only, simple word filter */
   const BLOCK = ['stupid', 'idiot', 'dumb', 'fuck', 'shit', 'sex', 'kill', 'hate', 'حمار', 'غبي', 'غبية', 'كلب', 'زفت', 'وسخ', 'خول', 'شرموط', 'متخلف', 'حيوان', 'تافه'];
@@ -46,18 +106,20 @@
   const xp = () => prof().xp || 0;
   function addXP(n) { let b = 0, a = 0; updateProf(p => { b = p.xp || 0; p.xp = b + Math.max(0, Math.round(n)); a = p.xp; }); return { before: levelInfo(b), after: levelInfo(a), gained: a - b }; }
 
-  /* ---------- daily challenge streak ---------- */
+  /* ---------- daily challenge streak ----------
+     One streak for the player (any chapter's Daily 5 keeps it alive); "done today" is per chapter. */
   const pad = n => String(n).padStart(2, '0');
   const today = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
   const dayDiff = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 864e5);
   function dailyState() {
     const d = prof().daily || {}, t = today();
-    const done = d.last === t, alive = !!d.last && (done || dayDiff(d.last, t) === 1);
-    return { done, streak: alive ? (d.streak || 0) : 0 };
+    const alive = !!d.last && (d.last === t || dayDiff(d.last, t) === 1);
+    return { done: chProf().dailyLast === t, streak: alive ? (d.streak || 0) : 0 };
   }
   function completeDaily() {
     let st = 0;
     updateProf(p => { const d = p.daily || {}, t = today(); if (d.last !== t) { d.streak = d.last && dayDiff(d.last, t) === 1 ? (d.streak || 0) + 1 : 1; d.last = t; } p.daily = d; st = d.streak; });
+    updateChProf(c => { c.dailyLast = today(); });
     return st;
   }
 
@@ -226,7 +288,7 @@
       } catch (e) { console.warn('Champions board is offline:', e); this._db = null; }
       return this._db;
     },
-    board() { const p = player() || {}; return `${p.grade || 'g5'}-${p.track || 'lang'}-ch1-${weekKey()}`; },
+    board() { const p = player() || {}; return `${p.grade || 'g5'}-${p.track || 'lang'}-${chapterId() || 'ch1'}-${weekKey()}`; },   // one board per chapter
     localRows() {
       const b = (store.load().board || {})[this.board()] || {};
       return Object.entries(b).map(([id, v]) => Object.assign({ id }, v)).sort((a, c) => c.score - a.score);
@@ -282,7 +344,7 @@
      Counts page views with approximate location only. No player names are sent, and the data
      is not used for advertising. Runs on the published site only, not on local copies. */
   const GA_ID = 'G-XP595P45PX';
-  const PAGE_NAMES = { 'index.html': 'Home', 'map.html': 'Island map', 'arm.html': 'Arm Mechanic', 'champions.html': 'Champions',
+  const PAGE_NAMES = { 'index.html': 'Home', 'chapters.html': 'Chapters', 'map.html': 'Island map', 'arm.html': 'Arm Mechanic', 'champions.html': 'Champions',
     'quiz.html': 'Chapter Quest', 'quiz.html#quest': 'Chapter Quest', 'quiz.html#daily': 'Daily 5', 'quiz.html#review': 'Review' };
   function pageName() {
     const file = location.pathname.split('/').pop() || 'index.html';
@@ -300,6 +362,7 @@
     }
   } catch (e) {}
 
-  window.SI = { HOME, store, players, player, addPlayer, usePlayer, requirePlayer, prof, updateProf, checkName, LEVELS, levelInfo, xp, addXP, today, dailyState, completeDaily,
+  window.SI = { HOME, CHAPTERS_PAGE, store, players, player, addPlayer, usePlayer, requirePlayer, prof, updateProf,
+    chapters, chapterById, chapterId, chapter, setChapter, requireChapter, chProf, updateChProf, chapterStars, applyTheme, loadQuestions, checkName, LEVELS, levelInfo, xp, addXP, today, dailyState, completeDaily,
     weekKey, weekEndsIn, isMuted, setMuted, sfx, voice, speak, LB, esc, NAME: 'Koko' };
 })();
