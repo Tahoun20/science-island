@@ -62,25 +62,25 @@
 <body>
 <div class="app">
   <header class="top">
-    <a class="brand" href="chapters.html" title="All chapters">
+    <a class="brand" href="chapters.html" title="All chapters" data-ar-label="كل الفصول">
       <div class="logo" aria-hidden="true" id="logo">🏝️</div>
       <div><h1 id="chTitle">Science Island</h1><p id="chSub">Grade 5 · Languages</p></div>
     </a>
     <div class="hud">
-      <span class="pill" id="streakPill" title="Daily streak">🔥 <b id="streak">0</b></span>
-      <span class="pill" title="Stars">⭐ <b id="stars">0</b> / <span id="starsOf">6</span></span>
-      <button class="icon" id="mute" type="button" aria-label="Sound" aria-pressed="false" title="Sound on/off">♪</button>
-      <a class="icon" href="chapters.html" aria-label="All chapters" title="All chapters">📚</a>
-      <a class="icon" href="index.html" aria-label="Change player" title="Change player">👤</a>
+      <span class="pill" id="streakPill" title="Daily streak" data-ar-label="أيام متتالية">🔥 <b id="streak">0</b></span>
+      <span class="pill" title="Stars" data-ar-label="النجوم">⭐ <b id="stars">0</b> / <span id="starsOf">6</span></span>
+      <button class="icon" id="mute" type="button" aria-label="Sound" aria-pressed="false" title="Sound on/off" data-ar-label="الصوت">♪</button>
+      <a class="icon" href="chapters.html" aria-label="All chapters" title="All chapters" data-ar-label="كل الفصول">📚</a>
+      <a class="icon" href="index.html" aria-label="Change player" title="Change player" data-ar-label="تغيير اللاعب">👤</a>
     </div>
   </header>
   <main class="grid">
-    <div class="mapWrap" id="map" role="list" aria-label="Chapter map"></div>
+    <div class="mapWrap" id="map" role="list" aria-label="Chapter map" data-ar-label="خريطة الفصل"></div>
     <aside class="side">
       <div class="card coachCard">
-        <img id="parrot" src="assets/parrot_point.png" alt="Koko the parrot">
+        <img id="parrot" src="assets/parrot_point.png" alt="Koko the parrot" data-ar-label="الببغاء كوكو">
         <div class="bubble" id="bubble"></div>
-        <a class="btn primary" id="go" href="arm.html">Go ▸</a>
+        <a class="btn primary" id="go" href="arm.html" data-ar="يلّا ◂">Go ▸</a>
       </div>
       <div class="card lvl">
         <div class="hello" id="hello"></div>
@@ -100,43 +100,43 @@
   const me = SI.requirePlayer(); if (!me) return;
   const CH = SI.requireChapter(); if (!CH) return;
   SI.applyTheme();
-  const $ = s => document.querySelector(s);
+  const $ = s => document.querySelector(s), T = SI.T, AR = SI.isAr(), TITLE = SI.chTitle(CH);
   const P = SI.chProf(), now = Date.now();
   const arm = P.game || {}, quest = P.quest || {}, daily = SI.dailyState();   // "arm" = this chapter's own game
-  document.title = `${CH.title} · Science Island`;
-  $('#chTitle').textContent = CH.title;
-  $('#chSub').textContent = `Grade 5 · Languages · Chapter ${CH.n}`;
+  document.title = `${TITLE} · ${T('Science Island', 'جزيرة العلوم')}`;
+  $('#chTitle').textContent = TITLE;
+  $('#chSub').textContent = T(`Grade 5 · Languages · Chapter ${CH.n}`, `الصف الخامس · عربي · الفصل ${CH.n}`);
   if (CH.icon) $('#logo').textContent = CH.icon;
   if (CH.map && CH.map.img) $('#map').style.backgroundImage = `url(${CH.map.img})`;
   const due = Object.values(P.cards || {}).filter(c => c.due <= now).length;
   const lv = SI.levelInfo(SI.xp());
 
-  $('#hello').textContent = `Hi, ${me.name}!`;
-  $('#lvlTitle').textContent = `Level ${lv.n} · ${lv.title}`;
+  $('#hello').textContent = T(`Hi, ${me.name}!`, `أهلًا يا ${me.name}!`);
+  $('#lvlTitle').textContent = `${T('Level', 'المستوى')} ${lv.n} · ${lv.title}`;
   $('#lvlXp').textContent = `${lv.xp} XP`;
   $('#lvlBar').style.width = Math.round(lv.pct * 100) + '%';
-  $('#lvlNext').textContent = lv.to ? `${lv.to - lv.xp} XP to ${lv.next}` : 'Top level reached!';
+  $('#lvlNext').textContent = lv.to ? T(`${lv.to - lv.xp} XP to ${lv.next}`, `باقي ${lv.to - lv.xp} XP للوصول إلى ${lv.next}`) : T('Top level reached!', 'وصلت لأعلى مستوى!');
   $('#streak').textContent = daily.streak;
   const st = SI.chapterStars(CH.id);
   $('#stars').textContent = st.got; $('#starsOf').textContent = st.of;
 
   const mute = $('#mute');
-  const paint = () => { mute.setAttribute('aria-pressed', SI.isMuted()); mute.setAttribute('aria-label', SI.isMuted() ? 'Sound off' : 'Sound on'); };
+  const paint = () => { mute.setAttribute('aria-pressed', SI.isMuted()); mute.setAttribute('aria-label', SI.isMuted() ? T('Sound off', 'الصوت مغلق') : T('Sound on', 'الصوت شغال')); };
   mute.onclick = () => { SI.setMuted(!SI.isMuted()); paint(); }; paint();
   SI.rate.guard(document, 'a[href="chapters.html"], a[href="index.html"]', 'map');   // leaving the chapter: Koko asks for a rating (once per chapter)
 
   const stars = n => '★'.repeat(n) + `<span class="off">${'★'.repeat(3 - n)}</span>`;
   const G = CH.game;
   const ALL = [
-    G && { key: 'game', icon: G.icon || '🎮', name: G.name, href: G.href, done: !!arm.stars, sub: stars(arm.stars || 0), hint: G.hint || 'Play this chapter’s game!' },
-    { key: 'quest', icon: '⭐', name: 'Chapter Quest', href: 'quiz.html#quest', done: !!quest.stars, sub: stars(quest.stars || 0),
-      hint: 'Questions on the whole chapter. Your best score goes on the Champions board!' },
-    { key: 'daily', icon: '⚡', name: 'Daily 5', href: 'quiz.html#daily', done: daily.done, sub: daily.done ? '✓ done today' : (daily.streak ? `🔥 ${daily.streak} days` : 'once a day'),
-      hint: '5 quick questions every day. Keep your fire streak going!' },
-    { key: 'review', icon: '🔁', name: 'Review', href: 'quiz.html#review', badge: due, done: false, sub: due ? `${due} waiting` : 'all clear',
-      hint: due ? `${due} tricky question${due > 1 ? 's are' : ' is'} waiting for you.` : 'Koko saves your tricky questions here.' },
-    { key: 'board', icon: '🏆', name: 'Champions', href: 'champions.html', done: false, sub: '&nbsp;',
-      hint: 'See this week’s top players!' }
+    G && { key: 'game', icon: G.icon || '🎮', name: T(G.name, G.nameAr || G.name), href: G.href, done: !!arm.stars, sub: stars(arm.stars || 0), hint: T(G.hint || 'Play this chapter’s game!', G.hintAr || 'العب لعبة الفصل!') },
+    { key: 'quest', icon: '⭐', name: T('Chapter Quest', 'تحدي الفصل'), href: 'quiz.html#quest', done: !!quest.stars, sub: stars(quest.stars || 0),
+      hint: T('Questions on the whole chapter. Your best score goes on the Champions board!', 'أسئلة على الفصل كله. أعلى نتيجة ليك بتدخل لوحة الأبطال!') },
+    { key: 'daily', icon: '⚡', name: T('Daily 5', 'خماسية اليوم'), href: 'quiz.html#daily', done: daily.done, sub: daily.done ? T('✓ done today', '✓ خلصتها النهارده') : (daily.streak ? T(`🔥 ${daily.streak} days`, `🔥 ${daily.streak} يوم`) : T('once a day', 'مرة كل يوم')),
+      hint: T('5 quick questions every day. Keep your fire streak going!', '٥ أسئلة سريعة كل يوم. حافظ على سلسلة أيامك!') },
+    { key: 'review', icon: '🔁', name: T('Review', 'المراجعة'), href: 'quiz.html#review', badge: due, done: false, sub: due ? T(`${due} waiting`, `${due} مستني`) : T('all clear', 'مفيش حاجة'),
+      hint: due ? T(`${due} tricky question${due > 1 ? 's are' : ' is'} waiting for you.`, `فيه ${due} سؤال صعب مستنيك.`) : T('Koko saves your tricky questions here.', 'كوكو بيحفظ لك الأسئلة الصعبة هنا.') },
+    { key: 'board', icon: '🏆', name: T('Champions', 'الأبطال'), href: 'champions.html', done: false, sub: '&nbsp;',
+      hint: T('See this week’s top players!', 'شوف أبطال الأسبوع!') }
   ];
   /* positions come from the chapter (game, quest, daily, review, champions); a chapter without a game skips the first one */
   const POS = (CH.map && CH.map.stops) || [[59.6, 82.9, 'left'], [54.6, 67.1, 'right'], [41.3, 51.4, 'right'], [39.6, 38.1, 'left'], [68.2, 12.5, 'below']];
@@ -148,17 +148,19 @@
     const a = document.createElement('a');
     a.className = `stop ${s.side}` + (s.done ? ' done' : '') + (i === next ? ' next' : '');
     a.href = s.href; a.setAttribute('role', 'listitem'); a.style.left = s.x + '%'; a.style.top = s.y + '%';
-    a.setAttribute('aria-label', `Stop ${i + 1}: ${s.name}`);
+    a.setAttribute('aria-label', `${T('Stop', 'محطة')} ${i + 1}: ${s.name}`);
     a.innerHTML = `<span class="dot"><span class="n">${i + 1}</span>${s.icon}${s.badge ? `<span class="badge">${s.badge}</span>` : ''}</span>
       <span class="lab">${s.name}<small id="sub-${s.key}">${s.sub}</small></span>`;
     map.appendChild(a);
   });
   const s = STOPS[next];
-  $('#bubble').innerHTML = `${st.got ? `Great work, <b>${SI.esc(me.name)}</b>! ` : `Welcome, <b>${SI.esc(me.name)}</b>! `}Next stop: <b>${s.name}</b>. ${s.hint}`;
+  $('#bubble').innerHTML = AR
+    ? `${st.got ? `شغل عظيم يا <b>${SI.esc(me.name)}</b>! ` : `أهلًا يا <b>${SI.esc(me.name)}</b>! `}المحطة الجاية: <b>${s.name}</b>. ${s.hint}`
+    : `${st.got ? `Great work, <b>${SI.esc(me.name)}</b>! ` : `Welcome, <b>${SI.esc(me.name)}</b>! `}Next stop: <b>${s.name}</b>. ${s.hint}`;
   $('#go').href = s.href;
 
   // Champions label: my rank this week
-  try { const m = await SI.LB.me(); if (m) $('#sub-board').textContent = `you are #${m.rank}`; } catch (e) {}
+  try { const m = await SI.LB.me(); if (m) $('#sub-board').textContent = T(`you are #${m.rank}`, `ترتيبك #${m.rank}`); } catch (e) {}
 })();
 </script>
 </body>
