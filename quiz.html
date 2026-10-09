@@ -80,6 +80,7 @@ body{
 .cols .colhead{font-size:13px;font-weight:900;color:var(--ink);text-transform:uppercase;letter-spacing:.4px}
 .opt .num{margin-left:auto;flex:none;min-width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:15px;color:#fff;background:transparent}
 .tools{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.tools .btn:disabled{opacity:.45;box-shadow:none}
 .diagramWrap{display:grid;place-items:center;background:linear-gradient(#eaf7fc,#f6fbf4);border-radius:18px;padding:8px}
 .diagram{width:100%;height:auto;max-height:46vh;display:block}
 .hot{cursor:pointer}
@@ -560,21 +561,22 @@ function ask(q) {
         const pos = picked.indexOf(+b.dataset.ii), num = b.querySelector('.num');
         num.textContent = pos >= 0 ? pos + 1 : ''; num.style.background = pos >= 0 ? 'var(--primary)' : 'transparent';
         b.classList.toggle('sel', pos >= 0);
+        undo.disabled = !picked.length;
       });
       const tools = mk('div', 'tools');
-      const undo = mk('button', 'btn', '↺ Start over'); undo.type = 'button';
+      const undo = mk('button', 'btn', '↺ Start over'); undo.type = 'button'; undo.disabled = true;
       const check = mk('button', 'btn primary', 'Check ✓'); check.type = 'button'; check.disabled = true;
       undo.onclick = () => { if (!finished) { picked.length = 0; check.disabled = true; paint(); } };
       check.onclick = () => {
         if (finished) return;
         const ok = picked.every((v, i) => v === q.answer[i]);
         btns.forEach(b => { const pos = picked.indexOf(+b.dataset.ii); b.classList.remove('sel'); b.classList.add(q.answer[pos] === +b.dataset.ii ? 'good' : 'bad'); b.disabled = true; });
-        undo.disabled = check.disabled = true;
+        undo.disabled = check.disabled = true; tools.hidden = true;
         if (!ok) reveal();
         finish(ok, ok);
       };
       reveal = () => {
-        undo.disabled = check.disabled = true; btns.forEach(b => b.disabled = true);
+        undo.disabled = check.disabled = true; tools.hidden = true; btns.forEach(b => b.disabled = true);
         const right = mk('div', 'explain no', '<b>Right order:</b> ' + q.answer.map((ii, k) => `${k + 1}. ${esc(q.items[ii])}`).join(' &nbsp;→&nbsp; '));
         area.appendChild(right);
       };
@@ -612,11 +614,12 @@ function ask(q) {
         if (finished) return;
         let ok = true; lb.forEach(b => b.classList.remove('sel'));
         q.left.forEach((_, i) => { const good = pairs[i] === q.answer[i]; ok = ok && good; lb[i].classList.add(good ? 'good' : 'bad'); rb[pairs[i]].classList.add(good ? 'good' : 'bad'); });
+        tools.hidden = true;
         if (!ok) reveal(); else { check.disabled = true; [...lb, ...Object.values(rb)].forEach(b => b.disabled = true); }
         finish(ok, ok);
       };
       reveal = () => {
-        check.disabled = true; [...lb, ...Object.values(rb)].forEach(b => b.disabled = true);
+        check.disabled = true; tools.hidden = true; [...lb, ...Object.values(rb)].forEach(b => b.disabled = true);
         area.appendChild(mk('div', 'explain no', '<b>Right pairs:</b> ' + q.left.map((t, i) => `${esc(t)} → ${esc(q.right[q.answer[i]])}`).join(' &nbsp;·&nbsp; ')));
       };
       cols.append(lc, rc); tools.appendChild(check);
