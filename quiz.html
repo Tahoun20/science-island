@@ -202,6 +202,42 @@ body{
 .xpbar{height:10px;border-radius:99px;background:#dbe9f0;overflow:hidden}
 .xpbar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#f7c948,#f2994a)}
 .rank{font-size:18px!important;margin:0 0 8px!important}
+
+/* pop-ups always fit the visible screen (iPhone bars included): the panel scrolls inside itself
+   and its buttons stay pinned at the bottom, so they can always be reached */
+.overlay{display:flex;align-items:center;justify-content:center;overscroll-behavior:contain;
+  padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
+.panel{max-height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.panel .btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.panel .acts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;position:sticky;bottom:-22px;z-index:1;
+  margin:0 -26px -22px;padding:14px 26px 22px;background:linear-gradient(rgba(255,248,234,0),#fff8ea 12px)}
+.banner div{max-width:calc(100% - 24px)}
+@media (max-width:520px){
+  .panel{padding:16px;border-radius:24px}
+  .banner div{padding:16px 22px}
+  .banner strong{font-size:28px}
+  .panel .acts{bottom:-16px;margin:0 -16px -16px;padding:12px 16px 16px;gap:8px}
+  .panel .acts .btn{flex:1 1 40%}
+  .panel .btn{min-height:46px;font-size:16px;padding:9px 12px}
+  .panel .btn.big{font-size:19px;padding:10px 18px}
+  .panel h2{font-size:26px;margin:4px 0 2px}
+  .panel p{font-size:15.5px;margin:4px 0 10px}
+  .hero{height:clamp(84px,19vh,150px);height:clamp(84px,19svh,150px)}
+  .stars{font-size:38px}
+  .stats{gap:6px;margin:6px 0 10px}
+  .stats span{font-size:13.5px;padding:5px 11px}
+  .box{font-size:76px}
+}
+@media (max-width:360px){ .panel .btn{font-size:15px;padding:9px 8px} }
+@media (max-height:520px) and (orientation:landscape){
+  .panel{max-width:620px;padding:12px 18px}
+  .panel .acts{bottom:-12px;margin:0 -18px -12px;padding:10px 18px 12px}
+  .panel .acts .btn{flex:0 1 auto}
+  .hero{height:64px}
+  .stars{font-size:30px}
+  .stats{margin:4px 0 8px}
+  .panel p{font-size:15px;margin:4px 0 8px}
+}
 </style>
 </head>
 <body>
@@ -618,7 +654,7 @@ async function mysteryBox() {
       <h2>Mystery box!</h2><p>5 right answers in a row. Tap the box!</p>
       <button class="box" type="button" aria-label="Open the mystery box">🎁</button>
       <div class="prize" hidden>+${prize}</div>
-      <div class="row" style="margin-top:12px"><button class="btn primary" type="button" hidden>Keep going ▸</button></div></div>`);
+      <div class="row acts"><button class="btn primary" type="button" hidden>Keep going ▸</button></div></div>`);
     document.body.appendChild(o);
     const box = $('.box', o), go = $('.btn', o), pr = $('.prize', o);
     box.focus();
@@ -741,14 +777,13 @@ async function results(kind, res, total, extraXP = 0) {
     ${levelBlock(gain)}
     ${kind === 'quest' ? '<p class="rank" id="rank">Saving your score…</p>' : ''}
     <p>${res.missed.length ? `Koko saved <b>${res.missed.length}</b> tricky question${res.missed.length > 1 ? 's' : ''} for your review.` : 'Perfect! Come back tomorrow for your Daily 5.'}</p>
-    <div class="row">
+    <div class="row acts">
       ${res.missed.length ? '<a class="btn primary" href="quiz.html#review">Review now</a>' : ''}
       ${kind === 'quest' ? '<a class="btn" href="champions.html">🏆 Champions</a>' : ''}
       <a class="btn" href="map.html">Map</a>
       <button class="btn" type="button" id="again">Play again</button>
     </div></div>`);
   document.body.appendChild(o);
-  o.querySelectorAll('a.btn').forEach(a => a.style.textDecoration = 'none');
   $('#again', o).onclick = () => location.reload();
   if (levelUp) { setTimeout(() => { sfx.level(); SI.voice('level'); banner('Level up!', `Level ${gain.after.n} · ${gain.after.title}`); }, 900); }
   if (kind === 'quest') {
@@ -765,7 +800,7 @@ function intro(title, sub, text, startLabel = 'Start') {
     const o = mk('div', 'overlay', `<div class="panel">
       <img class="hero" src="assets/parrot_wave.png" alt="">
       <h2>${title}</h2><p><b>${sub}</b><br>${text}</p>
-      <div class="row"><button class="btn primary big" type="button" id="start">${startLabel}</button></div></div>`);
+      <div class="row acts"><button class="btn primary big" type="button" id="start">${startLabel}</button></div></div>`);
     document.body.appendChild(o);
     const b = $('#start', o); b.focus();
     b.onclick = () => { sfx.tick(); o.remove(); res(); };
@@ -773,9 +808,8 @@ function intro(title, sub, text, startLabel = 'Start') {
 }
 function notice(title, text, buttons) {
   const o = mk('div', 'overlay', `<div class="panel"><img class="hero" src="assets/parrot_thumbs.png" alt="">
-    <h2>${title}</h2><p>${text}</p><div class="row">${buttons}</div></div>`);
+    <h2>${title}</h2><p>${text}</p><div class="row acts">${buttons}</div></div>`);
   document.body.appendChild(o);
-  o.querySelectorAll('a.btn').forEach(a => a.style.textDecoration = 'none');
   return o;
 }
 
@@ -832,7 +866,7 @@ async function main() {
 }
 window.addEventListener('hashchange', () => location.reload());
 if (SI.requirePlayer()) main().catch(e => console.error(e));
-window.__quiz = { ask: q => ask(q), DIAGRAMS, variantOf };
+window.__quiz = { ask: q => ask(q), DIAGRAMS, variantOf, mysteryBox, notice, results: (kind, res, total, extra, sc) => { if (sc != null) score = sc; return results(kind, res, total, extra); } };
 })();
 </script>
 </body>
