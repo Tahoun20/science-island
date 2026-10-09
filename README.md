@@ -10,6 +10,6 @@ Educational games for Grade 5 Science (Egyptian curriculum), Chapter 1: Bones an
 - `questions.js`: 20 ideas from the school book, each with 2-3 phrasings
 - `common.js` / `common.css`: shared player profiles, XP levels, streaks, sounds, Arabic voice, Champions board
 - `firebase-config.js`: paste the Firebase web config here to make the Champions board online
-- `assets/voice/`: Koko's Arabic voice clips (`ok1.mp3` … see list in the project notes)
+- `assets/voice/`: Koko's Arabic voice clips: `ok1`–`ok8`, `bad1`–`bad4`, `streak`, `boss`, `box`, `finish`, `hello`, `level`, `champion` (all `.mp3`; the phrases are listed in `VOICE_TEXT` in `common.js`)
 
 Progress is saved per player on each device. Several children can share one device.

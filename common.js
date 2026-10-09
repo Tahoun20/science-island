@@ -73,46 +73,74 @@
     return end - now;
   }
 
-  /* ---------- sound effects ---------- */
+  /* ---------- sound engine: one AudioContext for the effects and for Koko's voice ---------- */
   const isMuted = () => !!store.load().muted;
-  const setMuted = v => store.update(s => { s.muted = !!v; });
-  let ac = null;
-  function tone(f, d = .12, type = 'sine', v = .08, delay = 0) {
+  let ac = null, fxOut = null, voiceOut = null, talking = null;
+  function audio() {
+    if (!ac) {
+      const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null;
+      ac = new AC();
+      fxOut = ac.createGain(); fxOut.connect(ac.destination);      // effects: levels below are set so that effect + voice never clip
+      voiceOut = ac.createGain(); voiceOut.gain.value = .8; voiceOut.connect(ac.destination);
+    }
+    if (ac.state === 'suspended') { try { const r = ac.resume(); if (r && r.catch) r.catch(() => {}); } catch (e) {} }
+    return ac;
+  }
+  function hush() {
+    try { if (talking) talking.stop(); } catch (e) {} talking = null;
+    try { Object.keys(els).forEach(id => els[id].pause()); } catch (e) {}
+    try { speechSynthesis.cancel(); } catch (e) {}
+  }
+  const setMuted = v => { store.update(s => { s.muted = !!v; }); if (v) hush(); };
+
+  /* one soft note: quick attack, bell-like decay; options: at (delay), d (length), v (volume),
+     type, parts ([multiple, level] overtones), to (slide to this pitch), lp (low-pass cut-off) */
+  function note(f, o = {}) {
     if (isMuted()) return;
     try {
-      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
-      if (ac.state === 'suspended') ac.resume();
-      const t = ac.currentTime + delay, o = ac.createOscillator(), g = ac.createGain();
-      o.type = type; o.frequency.setValueAtTime(f, t);
-      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + .02); g.gain.exponentialRampToValueAtTime(.0001, t + d);
-      o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + d + .03);
+      const a = audio(); if (!a) return;
+      const d = o.d || .25, t = a.currentTime + (o.at || 0), g = a.createGain();
+      const v = o.v || .1;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .008); g.gain.exponentialRampToValueAtTime(v * .03, t + d); g.gain.linearRampToValueAtTime(0, t + d + .03);
+      if (o.lp) { const lp = a.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = o.lp; g.connect(lp); lp.connect(fxOut); } else g.connect(fxOut);
+      (o.parts || [[1, 1]]).forEach(([mul, amp]) => {
+        const osc = a.createOscillator(), pg = a.createGain();
+        osc.type = o.type || 'sine'; osc.frequency.setValueAtTime(f * mul, t);
+        if (o.to) osc.frequency.exponentialRampToValueAtTime(o.to * mul, t + d);
+        pg.gain.value = amp; osc.connect(pg); pg.connect(g); osc.start(t); osc.stop(t + d + .06);
+      });
     } catch (e) {}
   }
+  const CHIME = [[1, 1], [2, .35], [3, .12]];                 // warm bell: the note plus two quiet overtones
+  const SOFT = [[1, 1], [2, .4], [3, .15]];                   // rounder, so low notes still sound on phone speakers
   const sfx = {
-    ok() { tone(660, .12); tone(880, .2, 'sine', .08, .1); },
-    bad() { tone(220, .25, 'triangle', .09); },
-    win() { [523, 659, 784, 1046].forEach((f, i) => tone(f, .2, 'sine', .08, i * .11)); },
-    tick() { tone(520, .05, 'sine', .04); },
-    beep() { tone(880, .06, 'square', .03); },
-    boss() { [196, 233, 262, 311].forEach((f, i) => tone(f, .25, 'sawtooth', .04, i * .14)); },
-    level() { [523, 784, 1046, 1318].forEach((f, i) => tone(f, .25, 'triangle', .07, i * .12)); }
+    ok() { note(784, { d: .25, v: .16, parts: CHIME }); note(1046.5, { d: .45, v: .18, parts: CHIME, at: .09 }); },                 // G5 up to C6
+    bad() { note(329.6, { d: .22, v: .2, parts: SOFT, to: 294 }); note(261.6, { d: .38, v: .2, parts: SOFT, to: 233, at: .17 }); },   // two soft falling notes, no buzzer
+    win() { [523.25, 659.25, 784, 1046.5].forEach((f, i) => note(f, { d: .3, v: .14, parts: CHIME, at: i * .1 })); [1046.5, 1318.5, 1568].forEach(f => note(f, { d: .9, v: .06, parts: CHIME, at: .42 })); },
+    tick() { note(1400, { d: .06, v: .1 }); },
+    beep() { note(988, { d: .12, v: .13, parts: [[1, 1], [2, .2]] }); },
+    boss() { note(110, { d: .5, v: .3, to: 55 }); [146.83, 174.61, 220, 293.66].forEach((f, i) => note(f, { d: .32, v: .13, type: 'sawtooth', lp: 900, at: .05 + i * .15 })); },
+    level() { [523.25, 659.25, 784].forEach((f, i) => note(f, { d: .18, v: .14, parts: CHIME, at: i * .09 })); [1046.5, 1318.5, 1568].forEach(f => note(f, { d: .8, v: .07, parts: CHIME, at: .3 })); }
   };
 
   /* ---------- Koko's Arabic voice ----------
-     Recorded clips go in assets/voice/<id>.mp3. Until a clip exists, the device's Arabic
-     text-to-speech is used if it has one; otherwise Koko stays silent. */
+     Recorded clips live in assets/voice/<id>.mp3 and play through the same AudioContext as the
+     effects, so one tap unlocks them all (phones block sound that does not follow a tap).
+     A clip that is missing falls back to the device's Arabic text-to-speech, or stays silent. */
   const VOICE = {
-    ok: ['ok1', 'ok2', 'ok3', 'ok4', 'ok5'], bad: ['bad1', 'bad2'], streak: ['streak'], boss: ['boss'],
+    ok: ['ok1', 'ok2', 'ok3', 'ok4', 'ok5', 'ok6', 'ok7', 'ok8'], bad: ['bad1', 'bad2', 'bad3', 'bad4'], streak: ['streak'], boss: ['boss'],
     box: ['box'], finish: ['finish'], hello: ['hello'], level: ['level'], champion: ['champion']
   };
   const VOICE_TEXT = {
-    ok1: 'رائع!', ok2: 'ممتاز!', ok3: 'أحسنت!', ok4: 'عظيم!', ok5: 'برافو عليك!',
-    bad1: 'حاول مرة أخرى', bad2: 'قربت! جرّب تاني',
+    ok1: 'رائع!', ok2: 'ممتاز!', ok3: 'أحسنت!', ok4: 'عظيم!', ok5: 'برافو عليك!', ok6: 'يا سلام عليك!', ok7: 'شاطر!', ok8: 'كده تمام!',
+    bad1: 'حاول مرة تانية', bad2: 'قربت! جرّب تاني', bad3: 'ولا يهمك، جرّب تاني', bad4: 'فكّر تاني براحتك',
     streak: 'ما شاء الله! إنت نار!', boss: 'استعد للتحدي الكبير!', box: 'مفاجأة!',
     finish: 'أحسنت يا بطل! خلّصت المهمة', hello: 'أهلًا يا بطل!', level: 'مبروك! طلعت مستوى جديد', champion: 'إنت من الأبطال!'
   };
-  const clips = {}, missing = {};
-  let lastVoiceAt = 0;
+  const LEAD = { finish: .45, box: .45, level: .35, boss: .7 };   // seconds Koko waits so the effect is heard first (default .12)
+  const ALL_CLIPS = Object.keys(VOICE_TEXT);
+  const raw = {}, decoded = {}, bufs = {}, els = {}, missing = {}, lastId = {};
+  let noFetch = location.protocol === 'file:', lastVoiceAt = 0;
   function arabicVoice() {
     try { return (speechSynthesis.getVoices() || []).find(v => /^ar/i.test(v.lang)) || null; } catch (e) { return null; }
   }
@@ -125,18 +153,64 @@
       speechSynthesis.speak(u);
     } catch (e) {}
   }
-  function voice(kind) {
-    if (isMuted()) return;
-    const list = VOICE[kind]; if (!list) return;
-    const now = Date.now(); if (now - lastVoiceAt < 700) return; lastVoiceAt = now;   // never talk over itself
-    const id = list[Math.floor(Math.random() * list.length)];
-    if (missing[id]) return speak(VOICE_TEXT[id]);
-    let a = clips[id];
-    if (!a) { a = clips[id] = new Audio(`assets/voice/${id}.mp3`); a.preload = 'auto'; a.addEventListener('error', () => { missing[id] = true; }); }
+  function fetchClip(id) {
+    if (noFetch) return Promise.resolve(null);
+    return raw[id] || (raw[id] = fetch(`assets/voice/${id}.mp3`).then(
+      r => { if (!r.ok) { missing[id] = true; return null; } return r.arrayBuffer(); },
+      () => { noFetch = true; return null; }));               // page opened from a file, or offline: use <audio> instead
+  }
+  function clip(id) {
+    if (bufs[id]) return Promise.resolve(bufs[id]);
+    return fetchClip(id).then(data => {
+      const a = audio(); if (!data || !a) return null;
+      return decoded[id] || (decoded[id] = new Promise(res => {
+        try { const p = a.decodeAudioData(data, b => res(bufs[id] = b), () => { missing[id] = true; res(null); }); if (p && p.catch) p.catch(() => {}); }
+        catch (e) { missing[id] = true; res(null); }
+      }));
+    });
+  }
+  function playBuffer(buf, lead, asked) {
+    const a = audio(); if (!a) return;
+    const go = () => {
+      if (isMuted() || Date.now() - asked > 1500) return;      // too late to make sense
+      try { if (talking) talking.stop(); } catch (e) {}
+      const s = a.createBufferSource(); s.buffer = buf; s.connect(voiceOut);
+      s.onended = () => { if (talking === s) talking = null; };
+      s.start(a.currentTime + lead); talking = s;
+    };
+    if (a.state === 'running') return go();
+    try { const r = a.resume(); if (r && r.then) r.then(go, () => {}); else go(); } catch (e) {}
+  }
+  function playElement(id) {
+    let a = els[id];
+    if (!a) { a = els[id] = new Audio(`assets/voice/${id}.mp3`); a.preload = 'auto'; a.addEventListener('error', () => { missing[id] = true; }); }
     try { a.currentTime = 0; } catch (e) {}
     const p = a.play();
-    if (p && p.catch) p.catch(() => { missing[id] = true; speak(VOICE_TEXT[id]); });
+    if (p && p.catch) p.catch(e => { if (e && e.name === 'NotAllowedError') return; missing[id] = true; speak(VOICE_TEXT[id]); });
   }
+  function pick(kind) {                                        // never the same phrase twice in a row
+    const list = VOICE[kind]; let id;
+    do { id = list[Math.floor(Math.random() * list.length)]; } while (list.length > 1 && id === lastId[kind]);
+    return (lastId[kind] = id);
+  }
+  function voice(kind) {
+    if (isMuted() || !VOICE[kind]) return;
+    const now = Date.now(); if (now - lastVoiceAt < 700) return; lastVoiceAt = now;   // never talk over itself
+    const id = pick(kind), lead = LEAD[kind] || .12;
+    if (missing[id]) return speak(VOICE_TEXT[id]);
+    if (noFetch) return playElement(id);
+    audio();                                                   // unlock inside the tap
+    clip(id).then(buf => {
+      if (buf) return playBuffer(buf, lead, now);
+      if (Date.now() - now > 1500 || isMuted()) return;
+      if (missing[id]) return speak(VOICE_TEXT[id]);
+      playElement(id);
+    });
+  }
+  /* fetch the clips while the page is idle, decode them on the first tap or key press */
+  window.addEventListener('load', () => setTimeout(() => ALL_CLIPS.forEach(fetchClip), 400));
+  const prime = () => { if (!isMuted() && audio()) ALL_CLIPS.forEach(clip); };
+  ['pointerdown', 'keydown', 'touchstart'].forEach(ev => window.addEventListener(ev, prime, { once: true, passive: true, capture: true }));
 
   /* ---------- Champions board: Firebase when configured, this device otherwise ---------- */
   const FB = 'https://www.gstatic.com/firebasejs/10.12.2/';

@@ -139,7 +139,7 @@ body{background:linear-gradient(rgba(255,255,255,.25),rgba(255,255,255,.25)),url
     if (!r.ok) { $('#nameErr').textContent = r.msg; SI.sfx.bad(); return; }
     SI.addPlayer({ name: r.name, grade: choice.grade, track: choice.track });
     SI.sfx.ok(); SI.voice('hello');
-    setTimeout(() => { location.href = MAP; }, 350);
+    setTimeout(() => { location.href = MAP; }, SI.isMuted() ? 350 : 1400);   // let Koko finish saying hello
   });
 })();
 </script>
