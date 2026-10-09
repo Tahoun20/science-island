@@ -278,6 +278,28 @@
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   ['wave', 'think', 'celebrate', 'thumbs', 'sad', 'point'].forEach(p => { const i = new Image(); i.src = `assets/parrot_${p}.png`; });
 
+  /* ---------- visitor statistics (Google Analytics 4) ----------
+     Counts page views with approximate location only. No player names are sent, and the data
+     is not used for advertising. Runs on the published site only, not on local copies. */
+  const GA_ID = 'G-XP595P45PX';
+  const PAGE_NAMES = { 'index.html': 'Home', 'map.html': 'Island map', 'arm.html': 'Arm Mechanic', 'champions.html': 'Champions',
+    'quiz.html': 'Chapter Quest', 'quiz.html#quest': 'Chapter Quest', 'quiz.html#daily': 'Daily 5', 'quiz.html#review': 'Review' };
+  function pageName() {
+    const file = location.pathname.split('/').pop() || 'index.html';
+    return PAGE_NAMES[file + location.hash] || PAGE_NAMES[file] || document.title;
+  }
+  try {
+    if (GA_ID && location.protocol === 'https:' && !/^(localhost|127\.)/.test(location.hostname)) {
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+      window.gtag('consent', 'default', { ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied', analytics_storage: 'granted' });
+      window.gtag('js', new Date());
+      window.gtag('config', GA_ID, { page_title: pageName(), allow_google_signals: false, allow_ad_personalization_signals: false });
+      const g = document.createElement('script'); g.async = true; g.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
+      document.head.appendChild(g);
+    }
+  } catch (e) {}
+
   window.SI = { HOME, store, players, player, addPlayer, usePlayer, requirePlayer, prof, updateProf, checkName, LEVELS, levelInfo, xp, addXP, today, dailyState, completeDaily,
     weekKey, weekEndsIn, isMuted, setMuted, sfx, voice, speak, LB, esc, NAME: 'Koko' };
 })();
