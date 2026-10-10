@@ -25,6 +25,10 @@ Progress is saved per player on each device, separately for each chapter (XP and
 - `SI.visit()` → intro (first time), hello (same day), back (yesterday), miss (2-6 days), missbig (7+ days); `SI.greet()` shows Reesho's welcome after the name is tapped.
 - `SI.bye()` (👋 button on chapters and map): browsers cannot talk when a tab closes, so goodbye is a button.
 
+## Releasing an update (cache stamp)
+Every page loads the shared files with a stamp, e.g. `common.js?v=20261010c`. On each release change the stamp in all pages
+(one search-and-replace of the old stamp). Without it, phones may keep an old cached `common.js` next to new pages and the site breaks.
+
 ## Owner tools
 - `admin.html`: the owner's page (not linked from the game). Google sign-in; only the owner's account passes (same Firestore rule as reviews.html: reading `feedback`). "آخر التعديلات" lists recent changes from `changes.js` with direct links; below it every question of a chapter in English and Arabic side by side. New and changed phrasings are marked on this device (it remembers what you have already seen; "علّمت الكل كمتشاف" resets the marks).
 - `quiz.html#preview`: every phrasing one by one, nothing saved. Opens only on a device where the owner signed in on admin.html in the last 30 days (otherwise it is the normal Quest). `quiz.html#preview=B6.2&lang=ar` opens one phrasing in Arabic (`lang=en` for English).
