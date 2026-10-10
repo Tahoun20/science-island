@@ -388,7 +388,7 @@ html[dir=rtl] .timer span{right:auto;left:8px}`;
     o.querySelector('[data-k="stay"]').onclick = () => { sfx.tick(); o.remove(); };
     o.querySelector('[data-k="go"]').onclick = e => {
       e.currentTarget.disabled = true; voice('bye');
-      setTimeout(() => { location.href = home || HOME; }, isMuted() ? 200 : 2800);   // let Reesho finish saying goodbye
+      setTimeout(() => { location.href = home || HOME; }, isMuted() ? 200 : 3500);   // let Reesho finish saying goodbye (about 3 s)
     };
   }
 
