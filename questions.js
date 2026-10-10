@@ -109,7 +109,8 @@ window.IDEAS = [
     variants: [
       { type: 'order', mode: 'normal', level: 'medium', q: 'Put these arm joints in order from top to bottom.', items: ['Wrist', 'Shoulder', 'Elbow'], answer: [1, 2, 0] },
       { type: 'mc', style: 'odd', mode: 'normal', level: 'medium', q: 'Which one is NOT a joint?', options: ['Elbow', 'Knee', 'Wrist', 'Skull'], answer: 3 },
-      { type: 'match', mode: 'normal', level: 'medium', q: 'Match each joint to where it is.', left: ['Elbow', 'Knee', 'Wrist'], right: ['In the middle of the arm', 'In the middle of the leg', 'Between the arm and the hand'], answer: [0, 1, 2] }
+      { type: 'match', mode: 'normal', level: 'medium', q: 'Match each joint to where it is.', left: ['Elbow', 'Knee', 'Wrist'], right: ['In the middle of the arm', 'In the middle of the leg', 'Between the arm and the hand'], answer: [0, 1, 2] },
+      { type: 'mc', mode: 'normal', level: 'medium', q: 'Let’s bend our legs! Which joints do we use?', options: ['The waist, knees and ankles', 'The elbows and wrists', 'The skull and ribs', 'The shoulders and fingers'], answer: 0 }
     ] },
 
   /* ---------- 1-3 Whole Body Skeleton ---------- */
@@ -139,14 +140,16 @@ window.IDEAS = [
     variants: [
       { type: 'fill', mode: 'timed', seconds: 15, level: 'easy', q: 'The ribs protect the heart and the ___.', options: ['lungs', 'stomach', 'brain'], answer: 0 },
       { type: 'tap', diagram: 'skeleton', mode: 'timed', seconds: 15, level: 'easy', q: 'Tap the bones that protect the heart and lungs.', answer: 'ribs' },
-      { type: 'mc', style: 'story', mode: 'normal', level: 'medium', q: 'Kareem takes a deep breath and touches his chest. What does he feel?', options: ['Many thin bones lined up sideways', 'One big flat bone', 'Bumpy bones lined up from top to bottom', 'No bones at all'], answer: 0 }
+      { type: 'mc', style: 'story', mode: 'normal', level: 'medium', q: 'Kareem takes a deep breath and touches his chest. What does he feel?', options: ['Many thin bones lined up sideways', 'One big flat bone', 'Bumpy bones lined up from top to bottom', 'No bones at all'], answer: 0 },
+      { type: 'mc', mode: 'normal', level: 'medium', q: 'Which TWO important organs do the ribs protect in a cage-like shape?', options: ['The heart and the lungs', 'The brain and the heart', 'The lungs and the stomach', 'The brain and the stomach'], answer: 0 }
     ] },
   { id: 'S5', lesson: 3, concept: 'Backbone supports the body',
     explain: 'The backbone is the pillar of the body. It supports the whole body.',
     variants: [
       { type: 'tap', diagram: 'skeleton', mode: 'timed', seconds: 15, level: 'easy', q: 'Tap the backbone.', answer: 'backbone' },
       { type: 'match', mode: 'normal', level: 'medium', q: 'Match each part to its job.', left: ['Skull', 'Ribs', 'Backbone'], right: ['Protects the brain', 'Protects the heart and lungs', 'Supports the whole body'], answer: [0, 1, 2] },
-      { type: 'mc', style: 'odd', mode: 'normal', level: 'medium', q: 'Which one does NOT describe the ribs?', options: ['Thin bones', 'A cage shape', 'In the chest', 'The pillar that supports the whole body'], answer: 3 }
+      { type: 'mc', style: 'odd', mode: 'normal', level: 'medium', q: 'Which one does NOT describe the ribs?', options: ['Thin bones', 'A cage shape', 'In the chest', 'The pillar that supports the whole body'], answer: 3 },
+      { type: 'mc', style: 'story', mode: 'normal', level: 'medium', q: 'Laila touches the middle of her back. She feels bumpy bones lined up from top to bottom. What are they?', options: ['The backbone', 'The ribs', 'The skull', 'Cartilage'], answer: 0 }
     ] },
   { id: 'S6', lesson: 3, boss: true, concept: 'The backbone bends',
     explain: 'The backbone is made of many small connected bones, so we can bend forward, backward, left and right.',
@@ -177,5 +180,27 @@ window.IDEAS = [
       { type: 'mc', mode: 'boss', level: 'hard', q: 'What does the difference in bone length and shape among animals depend on?', options: ['How the animal lives and moves (running, jumping, flying)', 'The colour of the animal’s body', 'How much water the animal drinks', 'Whether the animal has a backbone or not'], answer: 0 },
       { type: 'mc', style: 'story', mode: 'boss', level: 'hard', q: 'Omar holds a rabbit and sees that its back legs have very long bones. Why?', options: ['Long back-leg bones make it easy to jump', 'Long bones keep the rabbit warm', 'Long bones protect its heart and lungs', 'Long bones mean the rabbit has no joints'], answer: 0 },
       { type: 'mc', mode: 'boss', level: 'hard', q: 'Which statement correctly explains the body structure of animals?', options: ['Bone shapes differ because each animal is adapted to its own kind of movement', 'Animal muscles push bones, but human muscles pull them', 'Animals have no joints, so their legs do not bend', 'Every animal has exactly the same bones as a human'], answer: 0 }
+    ] },
+
+  /* ---------- Bonus: Column "The Camel" (enrichment, not in the core 23) ----------
+     bonus: true -> never part of the Quest's core questions or its stars; one bonus question comes after the Boss round */
+  { id: 'C1', lesson: 4, bonus: true, concept: 'Camel knee pads',
+    explain: 'When a camel sits, the joints that touch the ground are covered by thick skin called calluses. Soft cushioning tissue inside protects where the bones connect.',
+    variants: [
+      { type: 'mc', mode: 'normal', level: 'medium', q: 'A camel sits down on the hard ground. What protects the joints that touch the ground?', options: ['Thick skin pads (calluses) with soft cushions inside', 'Its long hair', 'Its hump', 'Nothing protects them'], answer: 0 },
+      { type: 'tf', mode: 'normal', level: 'easy', q: 'A camel has thick skin pads on the joints that touch the ground when it sits.', answer: 0 }
+    ] },
+  { id: 'C2', lesson: 4, bonus: true, concept: 'Camel toe bones',
+    explain: 'The bones in a camel’s toes spread out wide when it steps, so the foot covers more ground and does not sink into soft sand.',
+    variants: [
+      { type: 'mc', mode: 'normal', level: 'medium', q: 'Why don’t a camel’s feet sink into the soft sand?', options: ['Its toe bones spread out wide, so its weight is spread over more sand', 'Its feet are very small', 'It walks very slowly', 'Its hump makes it lighter'], answer: 0 },
+      { type: 'fill', mode: 'normal', level: 'medium', q: 'When a camel steps on the sand, the ___ in its toes spread out wide.', options: ['bones', 'hairs', 'nails'], answer: 0 }
+    ] },
+  { id: 'C3', lesson: 4, bonus: true, concept: 'The hump is fat',
+    explain: 'The hump is not full of water. It is fat. The camel breaks down this fat to make energy for its muscles on long trips, and keeping the fat on its back lets heat escape from the rest of its body.',
+    variants: [
+      { type: 'tf', mode: 'normal', level: 'easy', q: 'A camel’s hump is full of water.', answer: 1 },
+      { type: 'mc', mode: 'normal', level: 'medium', q: 'What is inside a camel’s hump?', options: ['Fat, which gives energy to its muscles', 'Water', 'Bones', 'Air'], answer: 0 },
+      { type: 'mc', mode: 'normal', level: 'hard', q: 'Why is it smart that a camel keeps its fat on its back only?', options: ['The rest of its body can let heat escape easily', 'Its back gets heavier, so it walks faster', 'The fat protects its brain', 'The fat makes its legs longer'], answer: 0 }
     ] }
 ];
