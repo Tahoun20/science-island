@@ -7,6 +7,8 @@
      game      : the chapter's own interactive game { href, name, nameAr, icon, hint, hintAr }
      map       : { img, stops } - stop positions in percent of the picture, in this order:
                  game, Chapter Quest, Daily 5, Review, Champions  ->  [x, y, label side]
+     art       : optional script with the chapter's own drawings; it adds the tap pictures of its questions
+                 to window.CH_DIAGRAMS (for example 'ch2_art.js') and is loaded before the questions
      cover     : optional picture for the chapter card (otherwise the icon is shown)
      quizBg    : optional background picture for the question pages
      theme     : optional colours, for example { primary:'#2f8f5b', 'primary-d':'#237047' }
@@ -20,8 +22,13 @@ window.CHAPTERS = [
     map: { img: 'assets/map_island.jpg', stops: [[59.6, 82.9, 'left'], [54.6, 67.1, 'right'], [41.3, 51.4, 'right'], [39.6, 38.1, 'left'], [68.2, 12.5, 'below']] },
     cover: 'assets/map_island.jpg', quizBg: 'assets/bg_park.jpg' },
 
-  { id: 'ch2', n: 2, title: 'Changes in the Seasons', titleAr: 'التغيرات في الفصول', icon: '🍂', tint: '#fdebd3', ready: false,
-    lessons: ['Changes Over a Year', 'Animals and Temperature'] },
+  { id: 'ch2', n: 2, title: 'Changes in the Seasons', titleAr: 'التغيرات في الفصول', icon: '🍂', tint: '#fdebd3', ready: true,
+    lessons: ['Changes over a Year', 'Animals and Temperature'],
+    lessonsAr: ['التغيرات خلال السنة', 'الحيوانات ودرجة الحرارة'],
+    questions: 'questions_ch2.js', questionsAr: 'questions_ch2_ar.js', art: 'ch2_art.js',
+    game: { href: 'seasons.html', name: 'Season Explorer', nameAr: 'مستكشف الفصول', icon: '🌡️', hint: 'Travel through the year and see what the temperature changes!', hintAr: 'رحلة خلال السنة: درجة الحرارة بتغيّر إيه؟' },
+    map: { img: 'assets/map_ch2.svg', stops: [[30, 82, 'right'], [63, 68, 'left'], [36, 51, 'right'], [65, 37, 'left'], [44, 14, 'below']] },
+    cover: 'assets/map_ch2.svg', quizBg: 'assets/bg_ch2.svg' },
 
   { id: 'ch3', n: 3, title: 'Conditions for Germination', titleAr: 'شروط الإنبات', icon: '🌱', tint: '#e2f4dc', ready: false,
     lessons: ['Inside the Seed', 'Water and Germination', 'Air and Germination', 'Temperature and Germination', 'Summary of Germination'] },
