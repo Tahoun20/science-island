@@ -112,6 +112,17 @@ body{background:linear-gradient(rgba(255,255,255,.25),rgba(255,255,255,.25)),url
     <button class="back" type="button" data-back="stepGrade">‹ Back</button>
   </section>
 
+  <!-- step 2b: boy or girl (so Reesho says "يا بطل" or "يا بطلة") -->
+  <section class="step" id="stepGender" hidden>
+    <h2>Boy or girl? <span class="ar">إنت ولد ولا بنت؟</span></h2>
+    <p class="hint">So Reesho talks to you the right way. <span class="ar">علشان ريشو يكلمك صح</span></p>
+    <div class="choices">
+      <button class="choice" type="button" data-g="m"><span class="ic">👦</span><span class="tx"><b>Boy</b><span class="ar">ولد · بطل</span></span><span class="go">›</span></button>
+      <button class="choice" type="button" data-g="f"><span class="ic">👧</span><span class="tx"><b>Girl</b><span class="ar">بنت · بطلة</span></span><span class="go">›</span></button>
+    </div>
+    <button class="back" type="button" data-back="stepTrack" id="genderBack">‹ Back</button>
+  </section>
+
   <!-- step 3: name -->
   <section class="step" id="stepName" hidden>
     <h2>What’s your name? <span class="ar">ما اسمك؟</span></h2>
@@ -123,7 +134,7 @@ body{background:linear-gradient(rgba(255,255,255,.25),rgba(255,255,255,.25)),url
       </div>
       <p class="err" id="nameErr" role="alert"></p>
     </form>
-    <button class="back" type="button" data-back="stepTrack">‹ Back</button>
+    <button class="back" type="button" data-back="stepGender">‹ Back</button>
   </section>
 
   <section class="says" id="says" hidden>
@@ -139,9 +150,11 @@ body{background:linear-gradient(rgba(255,255,255,.25),rgba(255,255,255,.25)),url
   'use strict';
   const $ = s => document.querySelector(s);
   const MAP = SI.CHAPTERS_PAGE;   // players choose a chapter first
-  const steps = ['stepWho', 'stepGrade', 'stepTrack', 'stepName'];
+  const steps = ['stepWho', 'stepGrade', 'stepTrack', 'stepGender', 'stepName'];
   const show = id => { steps.forEach(s => $('#' + s).hidden = s !== id); const f = $('#' + id).querySelector('button:not(:disabled), input'); if (f) f.focus({ preventScroll: true }); };
-  const choice = { grade: 'g5', track: 'lang' };
+  const choice = { grade: 'g5', track: 'lang', g: '' };
+  let fixId = null;   // an existing player who has not said boy or girl yet
+  const enter = () => SI.greet().then(() => { location.href = MAP; });
 
   const list = Object.entries(SI.players());
   if (list.length) {
@@ -149,7 +162,7 @@ body{background:linear-gradient(rgba(255,255,255,.25),rgba(255,255,255,.25)),url
     list.forEach(([id, p]) => {
       const b = document.createElement('button'); b.type = 'button'; b.className = 'who';
       b.innerHTML = `<span class="av">${SI.esc(p.name.charAt(0).toUpperCase())}</span>${SI.esc(p.name)}${p.track === 'ar' ? ' <small>(عربي)</small>' : ''}`;
-      b.onclick = () => { SI.usePlayer(id); SI.sfx.tick(); location.href = MAP; };
+      b.onclick = () => { SI.usePlayer(id); SI.sfx.tick(); if (!p.g) { fixId = id; $('#genderBack').hidden = true; show('stepGender'); } else enter(); };
       box.appendChild(b);
     });
     show('stepWho');
@@ -157,15 +170,19 @@ body{background:linear-gradient(rgba(255,255,255,.25),rgba(255,255,255,.25)),url
 
   $('#newPlayer').onclick = () => { SI.sfx.tick(); show('stepGrade'); };
   document.querySelectorAll('[data-grade]').forEach(b => b.onclick = () => { choice.grade = b.dataset.grade; SI.sfx.tick(); show('stepTrack'); });
-  document.querySelectorAll('[data-track]').forEach(b => b.onclick = () => { choice.track = b.dataset.track; SI.sfx.tick(); show('stepName'); });
+  document.querySelectorAll('[data-track]').forEach(b => b.onclick = () => { choice.track = b.dataset.track; SI.sfx.tick(); show('stepGender'); });
+  document.querySelectorAll('[data-g]').forEach(b => b.onclick = () => {
+    SI.sfx.tick();
+    if (fixId) { SI.setGender(b.dataset.g); enter(); return; }
+    choice.g = b.dataset.g; show('stepName');
+  });
   document.querySelectorAll('[data-back]').forEach(b => b.onclick = () => show(b.dataset.back));
   $('#nameForm').addEventListener('submit', e => {
     e.preventDefault();
     const r = SI.checkName($('#nameInput').value);
     if (!r.ok) { $('#nameErr').textContent = r.msg; SI.sfx.bad(); return; }
-    SI.addPlayer({ name: r.name, grade: choice.grade, track: choice.track });
-    SI.sfx.ok(); SI.voice('hello');
-    setTimeout(() => { location.href = MAP; }, SI.isMuted() ? 350 : 1400);   // let Reesho finish saying hello
+    SI.addPlayer({ name: r.name, grade: choice.grade, track: choice.track, g: choice.g });
+    SI.sfx.ok(); enter();   // Reesho introduces himself
   });
 
   /* "Players say": up to three of the answers the owner chose to show (first name and one line) */
