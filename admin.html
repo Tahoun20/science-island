@@ -44,6 +44,12 @@ h2{margin:0 0 10px;font-size:21px;font-weight:900}
 .tag.boss{background:#3a2a5e;color:#ffe08a}
 .tag.bonus{background:#fdf2c4;color:#8a6400}
 .empty{font-weight:800;color:var(--ink);padding:10px}
+.gate{display:flex;align-items:center;gap:14px}
+.gate img{height:120px;flex:none}
+.gate h2{margin:0 0 4px}
+.gate p{margin:0 0 12px;font-weight:700;line-height:1.6}
+.msg{color:#b42318;font-weight:800;font-size:14.5px;margin:8px 0 0;min-height:1em}
+@media (max-width:520px){ .gate{flex-direction:column;text-align:center} .gate img{height:90px} }
 @media (max-width:720px){ .row{grid-template-columns:1fr} }
 </style>
 </head>
@@ -54,13 +60,33 @@ h2{margin:0 0 10px;font-size:21px;font-weight:900}
       <div class="logo" aria-hidden="true">🛠️</div>
       <div><h1>لوحة الأدمن</h1><p>متفوّق · Motafawek</p></div>
     </a>
-    <div class="hud">
+    <div class="hud" id="hud" hidden>
+      <span class="pill" id="whoIn"></span>
+      <button class="pill" type="button" id="out" style="border:0;cursor:pointer;font:inherit;font-weight:800">خروج</button>
       <a class="pill" href="quiz.html#preview">المعاينة</a>
       <a class="pill" href="reviews.html">التقييمات</a>
       <a class="pill" href="index.html">الموقع</a>
     </div>
   </header>
   <main class="wrap">
+    <section class="card gate" id="gate">
+      <img src="assets/parrot_wave.png" alt="">
+      <div>
+        <h2>صفحة خاصة بصاحب الموقع</h2>
+        <p>ادخل بحساب جوجل الخاص بصاحب الموقع لمشاهدة التعديلات والأسئلة.</p>
+        <button class="btn primary" type="button" id="in">دخول بحساب جوجل</button>
+        <p class="msg" id="gateMsg" role="alert"></p>
+      </div>
+    </section>
+    <section class="card gate" id="denied" hidden>
+      <img src="assets/parrot_think.png" alt="">
+      <div>
+        <h2>هذا الحساب غير مسموح له</h2>
+        <p>الصفحة دي بتفتح بحساب صاحب الموقع بس. اخرج وادخل بالحساب الصحيح.</p>
+        <button class="btn" type="button" id="out2">خروج</button>
+      </div>
+    </section>
+    <div class="wrap" id="panel" hidden>
     <section class="card">
       <h2>آخر التعديلات</h2>
       <ul class="log" id="log"></ul>
@@ -76,15 +102,60 @@ h2{margin:0 0 10px;font-size:21px;font-weight:900}
       </div>
       <div id="list"><p class="empty">جاري التحميل…</p></div>
     </section>
+    </div>
   </main>
 </div>
+<script src="firebase-config.js"></script>
 <script src="chapters.js"></script>
 <script src="changes.js"></script>
 <script src="common.js"></script>
 <script>
-(() => {
+(async () => {
   'use strict';
   const $ = s => document.querySelector(s), esc = SI.esc;
+
+  /* ---------- owner sign-in ----------
+     Same check as reviews.html: the Firestore rules let only the owner's Google account read "feedback",
+     so a successful read of it means this is the owner. Nothing below is shown before that. */
+  const show = id => ['gate', 'denied', 'panel'].forEach(k => { $('#' + k).hidden = k !== id; });
+  const gateMsg = t => { $('#gateMsg').textContent = t || ''; };
+  let A = null, auth = null, db = null, fs = null;
+  try {
+    if (!window.FIREBASE_CONFIG) throw new Error('no config');
+    const appMod = await import(SI.LB.base + 'firebase-app.js');
+    db = await SI.LB.ready(); fs = SI.LB._fs;
+    if (!db) throw new Error('offline');
+    A = await import(SI.LB.base + 'firebase-auth.js');
+    auth = A.getAuth(appMod.getApp());
+  } catch (e) {
+    console.warn(e); $('#in').disabled = true;
+    gateMsg('تعذّر الاتصال. تأكد من الإنترنت ثم أعد تحميل الصفحة.');
+    return;
+  }
+  $('#in').onclick = async () => {
+    gateMsg('');
+    try { await A.signInWithPopup(auth, new A.GoogleAuthProvider()); }
+    catch (e) {
+      const c = (e && e.code) || '';
+      if (c === 'auth/popup-closed-by-user' || c === 'auth/cancelled-popup-request') return;
+      gateMsg(c === 'auth/popup-blocked' ? 'المتصفح منع نافذة الدخول. اسمح بالنوافذ المنبثقة لهذا الموقع ثم حاول مرة أخرى.'
+        : c === 'auth/unauthorized-domain' ? 'هذا الدومين غير مضاف في إعدادات الدخول في Firebase.'
+        : 'تعذّر الدخول. حاول مرة أخرى.');
+      console.warn(e);
+    }
+  };
+  $('#out').onclick = $('#out2').onclick = () => { SI.setOwner(false); A.signOut(auth); };
+  let started = false;
+  A.onAuthStateChanged(auth, async u => {
+    $('#hud').hidden = !u; $('#whoIn').textContent = u ? (u.email || '') : '';
+    if (!u) { SI.setOwner(false); show('gate'); return; }
+    try { await fs.getDocs(fs.query(fs.collection(db, 'feedback'), fs.limit(1))); }
+    catch (e) { SI.setOwner(false); if (e && e.code === 'permission-denied') show('denied'); else { show('gate'); gateMsg('تعذّر التحقق من الحساب. أعد تحميل الصفحة.'); } return; }
+    SI.setOwner(true); show('panel');
+    if (!started) { started = true; start(); }
+  });
+
+  function start() {
   const KEY = 'si.admin.seen';
   const loadSeen = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } };
   const saveSeen = o => { try { localStorage.setItem(KEY, JSON.stringify(o)); } catch (e) {} };
@@ -174,6 +245,7 @@ h2{margin:0 0 10px;font-size:21px;font-weight:900}
   };
   window.addEventListener('pageshow', e => { if (e.persisted) render(); });   // coming back from a preview: refresh the badges
   loadChapter(sel.value || 'ch1');
+  }
 })();
 </script>
 </body>

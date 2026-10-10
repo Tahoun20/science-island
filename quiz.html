@@ -861,7 +861,7 @@ async function preview(set) {
 
 async function main() {
   const me = SI.player();
-  const mode = /^#(daily|review)$/.test(location.hash) ? location.hash.slice(1) : /^#preview/.test(location.hash) ? 'preview' : 'quest';
+  const mode = /^#(daily|review)$/.test(location.hash) ? location.hash.slice(1) : (/^#preview/.test(location.hash) && SI.isOwner()) ? 'preview' : 'quest';   // preview opens only after the owner signs in on admin.html
   say(T(`Hi, ${esc(me.name)}! I’m Reesho.`, `أهلًا يا ${esc(me.name)}! أنا ريشو.`), 'wave');
   const set = (t, s) => { $('#title').textContent = t; $('#subtitle').textContent = s; document.title = t + T(' · Science Island', ' · جزيرة العلوم'); };
   const TITLE = SI.chTitle(CH);

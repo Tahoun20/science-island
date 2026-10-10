@@ -33,6 +33,10 @@ html[dir=rtl] .story{border-left:0;border-right:6px solid #9fdcc4}
 html[dir=rtl] .badge,html[dir=rtl] .colhead,html[dir=rtl] .banner small,html[dir=rtl] .you{text-transform:none;letter-spacing:0}
 html[dir=rtl] .float{right:auto;left:10px}
 html[dir=rtl] .timer span{right:auto;left:8px}`;
+  /* the owner signed in on admin.html on this device (kept 30 days): unlocks quiz.html#preview */
+  const OWNER_KEY = 'si.owner';
+  function isOwner() { try { return +localStorage.getItem(OWNER_KEY) > Date.now(); } catch (e) { return false; } }
+  function setOwner(v) { try { v ? localStorage.setItem(OWNER_KEY, String(Date.now() + 30 * 864e5)) : localStorage.removeItem(OWNER_KEY); } catch (e) {} }
   function applyLang() {
     const h = document.documentElement;
     if (!isAr() || h.hasAttribute('data-bilingual')) return;   // the home page stays bilingual
@@ -682,6 +686,6 @@ html[dir=rtl] .timer span{right:auto;left:8px}`;
 
   window.SI = { HOME, CHAPTERS_PAGE, store, players, player, addPlayer, usePlayer, requirePlayer, prof, updateProf,
     chapters, chapterById, chapterId, chapter, setChapter, requireChapter, chProf, updateChProf, chapterStars, chReady, applyTheme, loadQuestions, checkName, LEVELS, levelInfo, xp, addXP, today, dailyState, completeDaily,
-    weekKey, weekEndsIn, isMuted, setMuted, sfx, voice, speak, LB, rate, esc, NAME: 'Reesho', isAr, T, chTitle, applyLang };
+    weekKey, weekEndsIn, isMuted, setMuted, sfx, voice, speak, LB, rate, esc, NAME: 'Reesho', isAr, T, chTitle, applyLang, isOwner, setOwner };
   applyLang();
 })();
