@@ -61,7 +61,7 @@ a.ch:focus-visible{outline:3px solid #f7b267;outline-offset:2px}
   </header>
   <main class="wrap">
     <div class="card intro">
-      <img id="parrot" src="assets/parrot_point.png" alt="Koko the parrot" data-ar-label="الببغاء كوكو">
+      <img id="parrot" src="assets/parrot_point.png" alt="Reesho the parrot" data-ar-label="البغبغان ريشو">
       <div class="txt">
         <div class="bubble" id="bubble"></div>
         <div class="lvl">
@@ -124,7 +124,7 @@ a.ch:focus-visible{outline:3px solid #f7b267;outline-offset:2px}
   const curCh = SI.chapter();
   $('#bubble').innerHTML = started && curCh
     ? T(`Welcome back, <b>${esc(me.name)}</b>! Keep going with <b>${esc(curCh.title)}</b>, or pick another chapter.`, `أهلًا بعودتك يا <b>${esc(me.name)}</b>! كمّل في <b>${esc(SI.chTitle(curCh))}</b>، أو اختر فصلًا آخر.`)
-    : T(`Hi, <b>${esc(me.name)}</b>! I’m Koko. Pick a chapter and let’s play!`, `أهلًا يا <b>${esc(me.name)}</b>! أنا كوكو. اختر فصلًا ويلّا نلعب!`);
+    : T(`Hi, <b>${esc(me.name)}</b>! I’m Reesho. Pick a chapter and let’s play!`, `أهلًا يا <b>${esc(me.name)}</b>! أنا ريشو. اختر فصلًا ويلّا نلعب!`);
   if (started) $('#parrot').src = 'assets/parrot_thumbs.png';
 })();
 </script>

@@ -1,6 +1,6 @@
 # Science Island
 
-Educational games for Grade 5 Science (Egyptian curriculum, Languages track, first term). Koko the parrot is the coach.
+Educational games for Grade 5 Science (Egyptian curriculum, Languages track, first term). Reesho the parrot is the coach.
 Players pick a chapter first; every chapter has its own map, game, questions and Champions board.
 
 - `index.html`: home. Pick the grade, the track (Languages or Arabic) and type a first name
@@ -15,7 +15,7 @@ Players pick a chapter first; every chapter has its own map, game, questions and
 - `common.js` / `common.css`: shared player profiles, chapters, XP levels, streaks, sounds, Arabic voice, Champions board
 - Visitor statistics: Google Analytics 4, loaded from `common.js` (`GA_ID`); page views and approximate location only, no player names
 - `firebase-config.js`: paste the Firebase web config here to make the Champions board online
-- `assets/voice/`: Koko's Arabic voice clips: `ok1`–`ok8`, `bad1`–`bad4`, `streak`, `boss`, `box`, `finish`, `hello`, `level`, `champion` (all `.mp3`; the phrases are listed in `VOICE_TEXT` in `common.js`)
+- `assets/voice/`: Reesho's Arabic voice clips: `ok1`–`ok8`, `bad1`–`bad4`, `streak`, `boss`, `box`, `finish`, `hello`, `level`, `champion` (all `.mp3`; the phrases are listed in `VOICE_TEXT` in `common.js`)
 
 Progress is saved per player on each device, separately for each chapter (XP and the daily streak are shared). Several children can share one device.
 
