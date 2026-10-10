@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta property="og:title" content="متفوّق · Motafawek">
+<meta property="og:description" content="يلا نكتشفها سوا! Let’s find out together!">
+<meta property="og:image" content="https://motafawek.com/assets/banner.jpg">
 <title>متفوّق · Motafawek</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,8 +15,9 @@
 body{background:linear-gradient(rgba(255,255,255,.25),rgba(255,255,255,.25)),url(assets/map_island.jpg) center/cover #8fd3ee}
 @media (hover:none){body{background-attachment:scroll}}
 .home{max-width:620px;margin:0 auto;padding:18px 16px 28px;min-height:100vh;display:flex;flex-direction:column;gap:14px;justify-content:center}
-.hero{display:flex;align-items:flex-end;gap:12px}
-.hero img{height:150px;flex:none}
+.banner{margin:0}
+.banner img{display:block;width:100%;height:auto;border-radius:26px;box-shadow:0 8px 28px rgba(31,61,87,.16);background:#fff8ea}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .title{background:var(--card);border-radius:24px;padding:14px 18px;box-shadow:0 8px 28px rgba(31,61,87,.16);flex:1;min-width:0}
 .title h1{margin:0;font-size:34px;font-weight:900;line-height:1.1}
 .title p{margin:4px 0 0;font-weight:800;color:var(--ink);font-size:16px}
@@ -64,24 +68,23 @@ body{background:linear-gradient(rgba(255,255,255,.25),rgba(255,255,255,.25)),url
 .foot a:hover{text-decoration:underline}
 .foot a:focus-visible{outline:3px solid #f7b267;outline-offset:2px}
 @media (max-width:520px){
-  .hero img{height:100px}
   .title h1{font-size:27px}
   .title p{font-size:14px}
   .step{padding:14px}
   .field input{font-size:19px}
 }
-@media (max-height:520px) and (orientation:landscape){ .home{justify-content:flex-start} .hero img{height:80px} }
+@media (max-height:520px) and (orientation:landscape){ .home{justify-content:flex-start} .banner img{max-height:46vh;width:auto;max-width:100%;margin:0 auto} }
 </style>
 </head>
 <body>
 <main class="home">
-  <div class="hero">
-    <img src="assets/parrot_wave.png" alt="Reesho the parrot">
-    <div class="title" dir="rtl">
-      <h1><span class="brand-ar">متفوّق</span><span class="brand-en">Motafawek</span></h1>
-      <p><span class="ar tag">يلا نكتشفها سوا!</span><span class="en" dir="ltr">Let’s find out together!</span></p>
-    </div>
-  </div>
+  <header class="banner">
+    <picture>
+      <source media="(max-width:600px)" srcset="assets/banner_sm.jpg?v=20261010c">
+      <img src="assets/banner.jpg?v=20261010c" width="1400" height="700" alt="متفوّق · Motafawek · يلا نكتشفها سوا! Let’s find out together! · ريشو البغبغان">
+    </picture>
+    <h1 class="sr">متفوّق · Motafawek</h1>
+  </header>
 
   <!-- step 0: who is playing (only when this device already has players) -->
   <section class="step" id="stepWho" hidden>
