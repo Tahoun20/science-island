@@ -162,7 +162,7 @@ html[dir=rtl] .timer span{right:auto;left:8px}`;
     return end - now;
   }
 
-  /* ---------- sound engine: one AudioContext for the effects and for Koko's voice ---------- */
+  /* ---------- sound engine: one AudioContext for the effects and for Reesho's voice ---------- */
   const isMuted = () => !!store.load().muted;
   let ac = null, fxOut = null, voiceOut = null, talking = null;
   function audio() {
@@ -212,11 +212,11 @@ html[dir=rtl] .timer span{right:auto;left:8px}`;
     level() { [523.25, 659.25, 784].forEach((f, i) => note(f, { d: .18, v: .14, parts: CHIME, at: i * .09 })); [1046.5, 1318.5, 1568].forEach(f => note(f, { d: .8, v: .07, parts: CHIME, at: .3 })); }
   };
 
-  /* ---------- Koko's Arabic voice ----------
+  /* ---------- Reesho's Arabic voice ----------
      Recorded clips live in assets/voice/<id>.mp3 and play through the same AudioContext as the
      effects, so one tap unlocks them all (phones block sound that does not follow a tap).
      A clip that is missing falls back to the device's Arabic text-to-speech, or stays silent.
-     The rating clips (rate, better, thanks) are only ever played in Koko's own recorded voice. */
+     The rating clips (rate, better, thanks) are only ever played in Reesho's own recorded voice. */
   const VOICE = {
     ok: ['ok1', 'ok2', 'ok3', 'ok4', 'ok5', 'ok6', 'ok7', 'ok8'], bad: ['bad1', 'bad2', 'bad3', 'bad4'], streak: ['streak'], boss: ['boss'],
     box: ['box'], finish: ['finish'], hello: ['hello'], level: ['level'], champion: ['champion'],
@@ -230,7 +230,7 @@ html[dir=rtl] .timer span{right:auto;left:8px}`;
     rate: 'استنى يا بطل! قولّي رأيك في اللعبة', better: 'ولا يهمك! قولّي نضيف إيه علشان تبقى أحلى؟', thanks: 'شكرًا يا بطل! رأيك مهم عندي'
   };
   const NO_ROBOT = { rate: 1, better: 1, thanks: 1 };            // silent until the recorded clip is uploaded
-  const LEAD = { finish: .45, box: .45, level: .35, boss: .7, rate: .3, thanks: .3 };   // seconds Koko waits so the effect is heard first (default .12)
+  const LEAD = { finish: .45, box: .45, level: .35, boss: .7, rate: .3, thanks: .3 };   // seconds Reesho waits so the effect is heard first (default .12)
   const ALL_CLIPS = Object.keys(VOICE_TEXT);
   const raw = {}, decoded = {}, bufs = {}, els = {}, missing = {}, lastId = {};
   let noFetch = location.protocol === 'file:', lastVoiceAt = 0;
@@ -394,10 +394,10 @@ html[dir=rtl] .timer span{right:auto;left:8px}`;
     }
   } catch (e) {}
 
-  /* ---------- "How was it?" : Koko asks for a rating, once per chapter ----------
+  /* ---------- "How was it?" : Reesho asks for a rating, once per chapter ----------
      Shown when the player leaves a results screen or leaves the chapter map (a browser cannot
      show a page of ours at the moment its tab is closed, so we ask at these moments instead).
-     Koko asks out loud (voice clips rate / better / thanks). The child picks one face and may add
+     Reesho asks out loud (voice clips rate / better / thanks). The child picks one face and may add
      one line in Arabic or English. A low rating (1 or 2) always asks what to add or change: quick
      choices plus the line, and it is not sent without one of them. Skipping counts as asked.
      Answers go to Firestore `feedback/{random id}`: players can only write; the owner reads them,
@@ -410,7 +410,7 @@ html[dir=rtl] .timer span{right:auto;left:8px}`;
     { v: 4, face: '😍', en: 'Lovely', ar: 'جميل', mood: 'thumbs', say: 'That makes me so happy!', sayAr: 'فرّحتني أوي!' },
     { v: 5, face: '🤩', en: 'Amazing', ar: 'رائع', mood: 'celebrate', say: 'Woohoo! High five!', sayAr: 'يا سلام! كفّك!' }
   ];
-  const RATE_WANTS = [                                              // quick answers to "what should Koko add or change?"
+  const RATE_WANTS = [                                              // quick answers to "what should Reesho add or change?"
     { k: 'games', i: '🎮', en: 'More games', ar: 'ألعاب أكتر' },
     { k: 'easier', i: '🙂', en: 'Easier questions', ar: 'أسئلة أسهل' },
     { k: 'harder', i: '💪', en: 'Harder questions', ar: 'أسئلة أصعب' },
@@ -587,7 +587,7 @@ html[dir=rtl] .timer span{right:auto;left:8px}`;
           ${RATE_CHOICES.map(c => `<button type="button" class="rt-face" data-v="${c.v}" aria-pressed="false"><i aria-hidden="true">${c.face}</i><span>${c.en}</span><span class="rt-ar">${c.ar}</span></button>`).join('')}
         </div>
         <div class="rt-more" id="rt-more" hidden>
-          <p class="rt-lab" id="rt-wl">What should Koko add or change?<span class="rt-ar">نضيف إيه أو نغيّر إيه؟</span></p>
+          <p class="rt-lab" id="rt-wl">What should Reesho add or change?<span class="rt-ar">نضيف إيه أو نغيّر إيه؟</span></p>
           <div class="rt-wants" role="group" aria-labelledby="rt-wl">
             ${RATE_WANTS.map(w => `<button type="button" class="rt-want" data-k="${w.k}" aria-pressed="false"><span>${w.i} ${w.en}</span><span class="rt-ar">${w.ar}</span></button>`).join('')}
           </div>
@@ -603,7 +603,7 @@ html[dir=rtl] .timer span{right:auto;left:8px}`;
       document.body.appendChild(o);
       const q = s => o.querySelector(s), faces = [...o.querySelectorAll('.rt-face')], input = q('#rt-in'), send = q('#rt-send'), koko = q('#rt-koko');
       const more = q('#rt-more'), wantBtns = [...o.querySelectorAll('.rt-want')];
-      const LAB = { free: 'Tell Koko more, in one line (if you like)<span class="rt-ar">اكتب رأيك في سطر واحد (لو تحب)</span>',
+      const LAB = { free: 'Tell Reesho more, in one line (if you like)<span class="rt-ar">اكتب رأيك في سطر واحد (لو تحب)</span>',
         low: 'Or write your idea in one line<span class="rt-ar">أو اكتب فكرتك في سطر واحد</span>' };
       q('#rt-lab').innerHTML = LAB.free;
       const wanted = () => wantBtns.filter(b => b.getAttribute('aria-pressed') === 'true').map(b => b.dataset.k);
@@ -623,7 +623,7 @@ html[dir=rtl] .timer span{right:auto;left:8px}`;
         send.disabled = false; sfx.tick();
         koko.src = `assets/parrot_${pick.mood}.png`; koko.classList.remove('rt-hop'); void koko.offsetWidth; koko.classList.add('rt-hop');
         bub(pick.say, pick.sayAr);
-        const low = pick.v <= RATE_LOW;                              // a low rating: Koko must ask what to add or change
+        const low = pick.v <= RATE_LOW;                              // a low rating: Reesho must ask what to add or change
         if (low && more.hidden) voice('better');
         more.hidden = !low; q('.rt-p').classList.toggle('rt-low', low); q('#rt-lab').innerHTML = low ? LAB.low : LAB.free;
         input.placeholder = low ? 'I want… · عايز…' : 'I wish… · نفسي في…';
@@ -642,8 +642,8 @@ html[dir=rtl] .timer span{right:auto;left:8px}`;
         rateSave(pick, input.value, from, id, wants);
         sfx.ok(); voice('thanks');
         q('.rt-p').innerHTML = `<div class="rt-done" role="status"><img src="assets/parrot_celebrate.png" alt="">
-          <h2>Thank you, ${esc(p.name)}!</h2><p class="rt-ar">شكرًا يا بطل! رأيك وصل لكوكو</p></div>`;
-        const said = bufs.thanks ? (LEAD.thanks + bufs.thanks.duration) * 1000 + 250 : 0;   // wait for Koko's whole "thank you" before moving on
+          <h2>Thank you, ${esc(p.name)}!</h2><p class="rt-ar">شكرًا يا بطل! رأيك وصل لريشو</p></div>`;
+        const said = bufs.thanks ? (LEAD.thanks + bufs.thanks.duration) * 1000 + 250 : 0;   // wait for Reesho's whole "thank you" before moving on
         setTimeout(() => close(true), isMuted() ? 1500 : Math.max(1800, Math.min(said, 6000)));
       };
       send.onclick = submit;
@@ -662,7 +662,7 @@ html[dir=rtl] .timer span{right:auto;left:8px}`;
       }
       document.addEventListener('keydown', onKey, true);
       try { faces[faces.length - 1].focus({ preventScroll: true }); } catch (e) {}
-      voice('rate');                                               // Koko asks out loud (the pop-up always follows a tap, so phones allow the sound)
+      voice('rate');                                               // Reesho asks out loud (the pop-up always follows a tap, so phones allow the sound)
     }));
   }
   /* asks before the player follows one of the "leaving" links or buttons inside `root`, then lets the click go on */
@@ -681,6 +681,6 @@ html[dir=rtl] .timer span{right:auto;left:8px}`;
 
   window.SI = { HOME, CHAPTERS_PAGE, store, players, player, addPlayer, usePlayer, requirePlayer, prof, updateProf,
     chapters, chapterById, chapterId, chapter, setChapter, requireChapter, chProf, updateChProf, chapterStars, chReady, applyTheme, loadQuestions, checkName, LEVELS, levelInfo, xp, addXP, today, dailyState, completeDaily,
-    weekKey, weekEndsIn, isMuted, setMuted, sfx, voice, speak, LB, rate, esc, NAME: 'Koko', isAr, T, chTitle, applyLang };
+    weekKey, weekEndsIn, isMuted, setMuted, sfx, voice, speak, LB, rate, esc, NAME: 'Reesho', isAr, T, chTitle, applyLang };
   applyLang();
 })();

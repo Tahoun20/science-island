@@ -351,7 +351,7 @@ html[dir=rtl] .bubble::before{left:auto;right:-12px;border-left:0;border-bottom:
 
     <aside class="card coach">
       <div class="coachRow">
-        <img id="robot" src="assets/parrot_wave.png" alt="Koko the parrot" data-ar-label="الببغاء كوكو">
+        <img id="robot" src="assets/parrot_wave.png" alt="Reesho the parrot" data-ar-label="البغبغان ريشو">
         <div class="bubble" id="bubble" aria-live="polite"></div>
       </div>
       <div class="actions" id="actions"></div>
@@ -888,7 +888,7 @@ function results() {
     </div>
   </div>`;
   document.body.appendChild(o);
-  SI.rate.guard(o, 'a[href="map.html"]', 'results');   // Koko asks for a rating before the player leaves (once per chapter)
+  SI.rate.guard(o, 'a[href="map.html"]', 'results');   // Reesho asks for a rating before the player leaves (once per chapter)
   $('#again', o).onclick = () => location.reload();
 }
 
@@ -899,7 +899,7 @@ function intro() {
     o.innerHTML = `<div class="panel">
       <img class="hero" src="assets/parrot_wave.png" alt="">
       <h2>${T('Arm Mechanic', 'ميكانيكي الذراع')}</h2>
-      <p>${T(`Hi, <b>${SI.esc(SI.player().name)}</b>! Help Koko find out how <b>muscles</b> move the <b>bones</b> in your arm.`, `أهلًا يا <b>${SI.esc(SI.player().name)}</b>! ساعد كوكو يكتشف إزاي <b>العضلات</b> بتحرك <b>العظام</b> في ذراعك.`)}</p>
+      <p>${T(`Hi, <b>${SI.esc(SI.player().name)}</b>! Help Reesho find out how <b>muscles</b> move the <b>bones</b> in your arm.`, `أهلًا يا <b>${SI.esc(SI.player().name)}</b>! ساعد ريشو يكتشف إزاي <b>العضلات</b> بتحرك <b>العظام</b> في ذراعك.`)}</p>
       <div class="skins"><span>${T('Arm colour:', 'لون الذراع:')}</span>${SKINS.map((c, i) => `<button type="button" class="sw" data-i="${i}" aria-label="${T('Skin tone', 'لون البشرة')} ${i + 1}" aria-pressed="${i === (s.skin || 0)}" style="background:${c[0]}"></button>`).join('')}</div>
       ${s.best ? `<div class="stats"><span>${T('Best score', 'أعلى نتيجة')}: ${s.best}</span><span>${T('Stars', 'النجوم')}: ${'★'.repeat(s.stars || 0)}${'☆'.repeat(3 - (s.stars || 0))}</span></div>` : ''}
       <div class="acts"><button class="btn primary big" id="start" type="button">${T('Start', 'ابدأ')}</button></div>
@@ -919,7 +919,7 @@ async function main() {
   setUI({ chips: true, meters: true, controls: true });
   applySkin(store.load().skin || 0);
   setTheta(0);
-  say(T(`Hi! I’m Koko the parrot.`, `أهلًا! أنا كوكو الببغاء.`), 'wave');
+  say(T(`Hi! I’m Reesho the parrot.`, `أهلًا! أنا ريشو البغبغان.`), 'wave');
   await intro();
   await stage1();
   await stage2();

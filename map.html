@@ -78,7 +78,7 @@
     <div class="mapWrap" id="map" role="list" aria-label="Chapter map" data-ar-label="خريطة الفصل"></div>
     <aside class="side">
       <div class="card coachCard">
-        <img id="parrot" src="assets/parrot_point.png" alt="Koko the parrot" data-ar-label="الببغاء كوكو">
+        <img id="parrot" src="assets/parrot_point.png" alt="Reesho the parrot" data-ar-label="البغبغان ريشو">
         <div class="bubble" id="bubble"></div>
         <a class="btn primary" id="go" href="arm.html" data-ar="يلّا ◂">Go ▸</a>
       </div>
@@ -123,7 +123,7 @@
   const mute = $('#mute');
   const paint = () => { mute.setAttribute('aria-pressed', SI.isMuted()); mute.setAttribute('aria-label', SI.isMuted() ? T('Sound off', 'الصوت مغلق') : T('Sound on', 'الصوت شغال')); };
   mute.onclick = () => { SI.setMuted(!SI.isMuted()); paint(); }; paint();
-  SI.rate.guard(document, 'a[href="chapters.html"], a[href="index.html"]', 'map');   // leaving the chapter: Koko asks for a rating (once per chapter)
+  SI.rate.guard(document, 'a[href="chapters.html"], a[href="index.html"]', 'map');   // leaving the chapter: Reesho asks for a rating (once per chapter)
 
   const stars = n => '★'.repeat(n) + `<span class="off">${'★'.repeat(3 - n)}</span>`;
   const G = CH.game;
@@ -134,7 +134,7 @@
     { key: 'daily', icon: '⚡', name: T('Daily 5', 'خماسية اليوم'), href: 'quiz.html#daily', done: daily.done, sub: daily.done ? T('✓ done today', '✓ خلصتها النهارده') : (daily.streak ? T(`🔥 ${daily.streak} days`, `🔥 ${daily.streak} يوم`) : T('once a day', 'مرة كل يوم')),
       hint: T('5 quick questions every day. Keep your fire streak going!', '٥ أسئلة سريعة كل يوم. حافظ على سلسلة أيامك!') },
     { key: 'review', icon: '🔁', name: T('Review', 'المراجعة'), href: 'quiz.html#review', badge: due, done: false, sub: due ? T(`${due} waiting`, `${due} مستني`) : T('all clear', 'مفيش حاجة'),
-      hint: due ? T(`${due} tricky question${due > 1 ? 's are' : ' is'} waiting for you.`, `فيه ${due} سؤال صعب مستنيك.`) : T('Koko saves your tricky questions here.', 'كوكو بيحفظ لك الأسئلة الصعبة هنا.') },
+      hint: due ? T(`${due} tricky question${due > 1 ? 's are' : ' is'} waiting for you.`, `فيه ${due} سؤال صعب مستنيك.`) : T('Reesho saves your tricky questions here.', 'ريشو بيحفظ لك الأسئلة الصعبة هنا.') },
     { key: 'board', icon: '🏆', name: T('Champions', 'الأبطال'), href: 'champions.html', done: false, sub: '&nbsp;',
       hint: T('See this week’s top players!', 'شوف أبطال الأسبوع!') }
   ];

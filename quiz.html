@@ -272,7 +272,7 @@ body{
     </section>
     <aside class="card coach">
       <div class="coachRow">
-        <img id="robot" src="assets/parrot_wave.png" alt="Koko the parrot" data-ar-label="الببغاء كوكو">
+        <img id="robot" src="assets/parrot_wave.png" alt="Reesho the parrot" data-ar-label="البغبغان ريشو">
         <div class="bubble" id="bubble"></div>
       </div>
     </aside>
@@ -783,7 +783,7 @@ async function results(kind, res, total, extraXP = 0) {
     <div class="stats"><span>${T('Score', 'النقاط')}: ${score}</span><span>${T('Right first time', 'صح من أول مرة')}: ${res.firstRight} / ${total}</span>${kind === 'quest' ? `<span>${T('Best', 'أعلى نتيجة')}: ${bestScore}</span>` : ''}${extraXP ? `<span>🔥 ${T('Daily bonus', 'مكافأة اليوم')} +${extraXP}</span>` : ''}</div>
     ${levelBlock(gain)}
     ${kind === 'quest' ? `<p class="rank" id="rank">${T('Saving your score…', 'بنحفظ نتيجتك…')}</p>` : ''}
-    <p>${res.missed.length ? T(`Koko saved <b>${res.missed.length}</b> tricky question${res.missed.length > 1 ? 's' : ''} for your review.`, `كوكو حفظ لك <b>${res.missed.length}</b> سؤال صعب علشان تراجعه.`) : T('Perfect! Come back tomorrow for your Daily 5.', 'ممتاز! ارجع بكرة لخماسية اليوم.')}</p>
+    <p>${res.missed.length ? T(`Reesho saved <b>${res.missed.length}</b> tricky question${res.missed.length > 1 ? 's' : ''} for your review.`, `ريشو حفظ لك <b>${res.missed.length}</b> سؤال صعب علشان تراجعه.`) : T('Perfect! Come back tomorrow for your Daily 5.', 'ممتاز! ارجع بكرة لخماسية اليوم.')}</p>
     <div class="row acts">
       ${res.missed.length ? `<a class="btn primary" href="quiz.html#review">${T('Review now', 'راجع دلوقتي')}</a>` : ''}
       ${kind === 'quest' ? `<a class="btn" href="champions.html">🏆 ${T('Champions', 'الأبطال')}</a>` : ''}
@@ -791,7 +791,7 @@ async function results(kind, res, total, extraXP = 0) {
       <button class="btn" type="button" id="again">${T('Play again', 'العب تاني')}</button>
     </div></div>`);
   document.body.appendChild(o);
-  SI.rate.guard(o, 'a[href="map.html"], a[href="champions.html"]', 'results');   // Koko asks for a rating before the player leaves (once per chapter)
+  SI.rate.guard(o, 'a[href="map.html"], a[href="champions.html"]', 'results');   // Reesho asks for a rating before the player leaves (once per chapter)
   $('#again', o).onclick = () => location.reload();
   if (levelUp) { setTimeout(() => { sfx.level(); SI.voice('level'); banner(T('Level up!', 'مستوى جديد!'), `${T('Level', 'المستوى')} ${gain.after.n} · ${gain.after.title}`); }, 900); }
   if (kind === 'quest') {
@@ -824,7 +824,7 @@ function notice(title, text, buttons) {
 async function main() {
   const me = SI.player();
   const mode = /^#(daily|review)$/.test(location.hash) ? location.hash.slice(1) : 'quest';
-  say(T(`Hi, ${esc(me.name)}! I’m Koko.`, `أهلًا يا ${esc(me.name)}! أنا كوكو.`), 'wave');
+  say(T(`Hi, ${esc(me.name)}! I’m Reesho.`, `أهلًا يا ${esc(me.name)}! أنا ريشو.`), 'wave');
   const set = (t, s) => { $('#title').textContent = t; $('#subtitle').textContent = s; document.title = t + T(' · Science Island', ' · جزيرة العلوم'); };
   const TITLE = SI.chTitle(CH);
 
@@ -865,7 +865,7 @@ async function main() {
       const cards = SI.chProf().cards || {};
       const next = Object.values(cards).map(c => c.due).sort((a, b) => a - b)[0];
       const when = next ? Math.max(1, Math.round((next - Date.now()) / DAY)) : 0;
-      notice(T('All caught up!', 'مفيش حاجة متأخرة!'), next ? T(`Nothing to review right now. Come back in about <b>${when} day${when > 1 ? 's' : ''}</b>.`, `مفيش مراجعة دلوقتي. ارجع بعد حوالي <b>${when} يوم</b>.`) : T('Play the Chapter Quest first. Koko will save the tricky questions here.', 'العب تحدي الفصل الأول، وكوكو هيحفظ لك الأسئلة الصعبة هنا.'),
+      notice(T('All caught up!', 'مفيش حاجة متأخرة!'), next ? T(`Nothing to review right now. Come back in about <b>${when} day${when > 1 ? 's' : ''}</b>.`, `مفيش مراجعة دلوقتي. ارجع بعد حوالي <b>${when} يوم</b>.`) : T('Play the Chapter Quest first. Reesho will save the tricky questions here.', 'العب تحدي الفصل الأول، وريشو هيحفظ لك الأسئلة الصعبة هنا.'),
         `<a class="btn primary" href="map.html">${T('Map', 'الخريطة')}</a>`);
       return;
     }

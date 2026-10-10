@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Science Island</title>
+<title>متفوّق · Motafawek</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
@@ -17,6 +17,11 @@ body{background:linear-gradient(rgba(255,255,255,.25),rgba(255,255,255,.25)),url
 .title{background:var(--card);border-radius:24px;padding:14px 18px;box-shadow:0 8px 28px rgba(31,61,87,.16);flex:1;min-width:0}
 .title h1{margin:0;font-size:34px;font-weight:900;line-height:1.1}
 .title p{margin:4px 0 0;font-weight:800;color:var(--ink);font-size:16px}
+.title h1{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px}
+.brand-ar{font-family:"Cairo",sans-serif;font-size:1.15em;color:var(--primary)}
+.brand-en{font-size:.62em;color:var(--navy);letter-spacing:.3px}
+.title p .en{display:block;text-align:right}
+.title p .tag{font-family:"Cairo",sans-serif;font-size:19px;font-weight:900;color:var(--navy)}
 .step{background:var(--card);border-radius:24px;padding:18px;box-shadow:0 8px 28px rgba(31,61,87,.16)}
 .step h2{margin:0 0 4px;font-size:22px;font-weight:900;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline}
 .step h2 .ar{font-size:19px;color:var(--ink);display:block;width:100%}
@@ -71,10 +76,10 @@ body{background:linear-gradient(rgba(255,255,255,.25),rgba(255,255,255,.25)),url
 <body>
 <main class="home">
   <div class="hero">
-    <img src="assets/parrot_wave.png" alt="Koko the parrot">
-    <div class="title">
-      <h1>Science Island</h1>
-      <p>Learn science by playing<span class="ar">تعلّم العلوم وانت بتلعب</span></p>
+    <img src="assets/parrot_wave.png" alt="Reesho the parrot">
+    <div class="title" dir="rtl">
+      <h1><span class="brand-ar">متفوّق</span><span class="brand-en">Motafawek</span></h1>
+      <p><span class="ar tag">يلا نكتشفها سوا!</span><span class="en" dir="ltr">Let’s find out together!</span></p>
     </div>
   </div>
 
@@ -160,7 +165,7 @@ body{background:linear-gradient(rgba(255,255,255,.25),rgba(255,255,255,.25)),url
     if (!r.ok) { $('#nameErr').textContent = r.msg; SI.sfx.bad(); return; }
     SI.addPlayer({ name: r.name, grade: choice.grade, track: choice.track });
     SI.sfx.ok(); SI.voice('hello');
-    setTimeout(() => { location.href = MAP; }, SI.isMuted() ? 350 : 1400);   // let Koko finish saying hello
+    setTimeout(() => { location.href = MAP; }, SI.isMuted() ? 350 : 1400);   // let Reesho finish saying hello
   });
 
   /* "Players say": up to three of the answers the owner chose to show (first name and one line) */
