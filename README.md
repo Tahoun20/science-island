@@ -19,6 +19,12 @@ Players pick a chapter first; every chapter has its own map, game, questions and
 
 Progress is saved per player on each device, separately for each chapter (XP and the daily streak are shared). Several children can share one device.
 
+## Owner tools
+- `admin.html`: the owner's page (not linked from the game). Google sign-in; only the owner's account passes (same Firestore rule as reviews.html: reading `feedback`). "آخر التعديلات" lists recent changes from `changes.js` with direct links; below it every question of a chapter in English and Arabic side by side. New and changed phrasings are marked on this device (it remembers what you have already seen; "علّمت الكل كمتشاف" resets the marks).
+- `quiz.html#preview`: every phrasing one by one, nothing saved. Opens only on a device where the owner signed in on admin.html in the last 30 days (otherwise it is the normal Quest). `quiz.html#preview=B6.2&lang=ar` opens one phrasing in Arabic (`lang=en` for English).
+- `arm.html#stage2` / `#stage3`: jump straight to a stage of Arm Mechanic.
+- After each change, add a line to `changes.js`.
+
 ## Arabic track
 A player who picks **Arabic** on the home page sees every page in Arabic, right to left (the home page stays bilingual).
 `common.js` gives `SI.isAr()`, `SI.T(en, ar)` and `SI.chTitle(chapter)`; static HTML carries `data-ar` (text), `data-ar-label` (aria-label/title) and `data-ar-ph` (placeholder).

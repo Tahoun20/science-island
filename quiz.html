@@ -97,6 +97,9 @@ body{
 .explain.ok{background:var(--ok-bg)}
 .explain.no{background:var(--bad-bg)}
 .actions{margin-top:12px;display:flex;justify-content:flex-end}
+.pvbar{display:flex;gap:8px;margin-bottom:12px}
+.pvbar select{flex:1 1 0;width:0;min-width:0;text-overflow:ellipsis;font:inherit;font-weight:800;font-size:15px;border:3px solid #cfe3ee;border-radius:14px;padding:8px 10px;background:#fff;color:var(--navy)}
+.pvbar .btn{min-height:46px;padding:8px 16px}
 
 /* coach */
 .coachRow{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
@@ -826,13 +829,44 @@ function notice(title, text, buttons) {
   return o;
 }
 
+/* Preview (for the owner): quiz.html#preview shows every phrasing of every question, one by one.
+   No score, no XP, nothing saved. quiz.html#preview=B6.2 opens that phrasing directly. */
+async function preview(set) {
+  set(T('Preview', 'معاينة'), T('All questions · nothing is saved', 'كل الأسئلة · مفيش حاجة بتتسجل'));
+  const all = [];
+  window.IDEAS.forEach(I => I.variants.forEach((v, vi) => all.push(Object.assign({ id: I.id, lesson: I.lesson, concept: I.concept, explain: I.explain, vi }, I.bonus ? { src: 'bonus' } : {}, I.boss ? { boss: true } : {}, v, v.explain ? { explain: v.explain } : {}))));
+  const bar = mk('div', 'pvbar');
+  const prev = mk('button', 'btn', T('‹', '›')), next = mk('button', 'btn', T('›', '‹')), sel = mk('select');
+  prev.type = next.type = 'button'; sel.setAttribute('aria-label', T('Question', 'السؤال'));
+  all.forEach((q, i) => { const o = mk('option'); o.value = i; o.textContent = `${q.id}.${q.vi + 1} · ${TYPE_LABEL[q.style] || TYPE_LABEL[q.type]} · ${q.concept}${q.src === 'bonus' ? ' ★' : ''}`; sel.appendChild(o); });
+  bar.append(prev, sel, next); $('#qcard').prepend(bar);
+  let k = 0, token = 0;
+  const m = /^#preview=([A-Z]\d+)\.(\d+)/.exec(location.hash), langTag = (/&lang=(ar|en)/.exec(location.hash) || [''])[0];
+  if (m) { const f = all.findIndex(q => q.id === m[1] && q.vi === +m[2] - 1); if (f >= 0) k = f; }
+  async function show(i) {
+    k = (i + all.length) % all.length; sel.value = k; const run = ++token, q = all[k];
+    if (timerStop) timerStop(); hideTimer(); $('#actions').innerHTML = '';
+    history.replaceState(null, '', `#preview=${q.id}.${q.vi + 1}${langTag}`);
+    header(q, 0, 0, []); $('#countPill').textContent = `${k + 1} / ${all.length}`;
+    say(`<b>${q.id}.${q.vi + 1}</b> · ${esc(q.concept)}`, 'point');
+    const r = await ask(q);
+    if (run !== token) return;
+    hideTimer();
+    const ex = $('#explain'); ex.className = 'explain ' + (r.correct ? 'ok' : 'no'); ex.innerHTML = (r.correct ? '✓ ' : '') + esc(q.explain); ex.hidden = false;
+    say(r.correct ? T('Right!', 'صح!') : T('Wrong answer shown.', 'دي الإجابة الصح.'), r.correct ? 'thumbs' : 'sad');
+  }
+  prev.onclick = () => show(k - 1); next.onclick = () => show(k + 1); sel.onchange = () => show(+sel.value);
+  show(k);
+}
+
 async function main() {
   const me = SI.player();
-  const mode = /^#(daily|review)$/.test(location.hash) ? location.hash.slice(1) : 'quest';
+  const mode = /^#(daily|review)$/.test(location.hash) ? location.hash.slice(1) : (/^#preview/.test(location.hash) && SI.isOwner()) ? 'preview' : 'quest';   // preview opens only after the owner signs in on admin.html
   say(T(`Hi, ${esc(me.name)}! I’m Reesho.`, `أهلًا يا ${esc(me.name)}! أنا ريشو.`), 'wave');
   const set = (t, s) => { $('#title').textContent = t; $('#subtitle').textContent = s; document.title = t + T(' · Science Island', ' · جزيرة العلوم'); };
   const TITLE = SI.chTitle(CH);
 
+  if (mode === 'preview') return preview(set);
   if (mode === 'quest') {
     const N = window.IDEAS.filter(I => !I.bonus).length;
     set(T('Chapter Quest', 'تحدي الفصل'), T(`${CH.title} · ${N} questions`, `${TITLE} · ${N} سؤال`));
