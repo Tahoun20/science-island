@@ -10,8 +10,8 @@ Players pick a chapter first; every chapter has its own map, game, questions and
 - `arm.html`: Arm Mechanic, Chapter 1's game: an interactive arm showing muscles contracting and relaxing
 - `quiz.html`: `#quest` (questions on the whole chapter), `#daily` (Daily 5), `#review` (spaced repetition) for the chosen chapter
 - `champions.html`: this week's top 10 for the chosen chapter (resets every Saturday)
-- `questions.js`: Chapter 1, 23 ideas from the school book (all four lessons 1-1 to 1-4), each with 2-3 phrasings. Other chapters get their own file (`questions_ch2.js`, ...)
-- `questions_ar.js`: the same 23 ideas (same ids) in Arabic, worded like the Arabic school book, for the Arabic track
+- `questions.js`: Chapter 1, 23 ideas from the school book (all four lessons 1-1 to 1-4), each with 2-4 phrasings, plus 3 bonus ideas from the Column "The Camel" (`bonus: true`: one comes after the Boss round, never counts for the stars, not in Daily 5). Other chapters get their own file (`questions_ch2.js`, ...)
+- `questions_ar.js`: the same ideas (same ids) in Arabic, worded like the Arabic school book, for the Arabic track
 - `common.js` / `common.css`: shared player profiles, chapters, XP levels, streaks, sounds, Arabic voice, Champions board
 - Visitor statistics: Google Analytics 4, loaded from `common.js` (`GA_ID`); page views and approximate location only, no player names
 - `firebase-config.js`: paste the Firebase web config here to make the Champions board online

@@ -681,7 +681,7 @@ function variantOf(idea) {
   let pool = idea.variants.map((_, i) => i);
   if (pool.length > 1) pool = pool.filter(i => i !== last);
   const vi = pool[Math.floor(Math.random() * pool.length)], v = idea.variants[vi];
-  return Object.assign({ id: idea.id, lesson: idea.lesson, concept: idea.concept, explain: idea.explain, vi }, v, v.explain ? { explain: v.explain } : {});
+  return Object.assign({ id: idea.id, lesson: idea.lesson, concept: idea.concept, explain: idea.explain, vi }, idea.bonus ? { src: 'bonus' } : {}, v, v.explain ? { explain: v.explain } : {});
 }
 function rememberVariants(list) { SI.updateChProf(p => { p.lastVar = p.lastVar || {}; list.forEach(q => { p.lastVar[q.id] = q.vi; }); }); }
 const ideaById = id => window.IDEAS.find(I => I.id === id);
@@ -691,7 +691,10 @@ async function playList(list, label) {
   let firstRight = 0;
   for (let i = 0; i < list.length; i++) {
     const q = list[i];
-    if (q.mode === 'boss' && list[i - 1] && list[i - 1].mode !== 'boss') {
+    if (q.src === 'bonus' && list[i - 1] && list[i - 1].src !== 'bonus') {
+      sfx.boss(); await banner(T('Bonus', 'إضافي'), T('Extra question!', 'سؤال إضافي!'));
+      say(T('A bonus question from the chapter’s extra reading. Extra points!', 'سؤال إضافي من الجزء الإثرائي في الكتاب. نقط زيادة!'), 'point');
+    } else if (q.mode === 'boss' && list[i - 1] && list[i - 1].mode !== 'boss') {
       sfx.boss(); SI.voice('boss'); await banner(T('Get ready', 'استعد'), T('Boss Round!', 'التحدي الكبير!'), 'boss');
       say(T('Boss questions mix two ideas. Take your time!', 'أسئلة التحدي الكبير بتجمع فكرتين. خد وقتك!'), 'point');
     } else if (i === 0) {
@@ -707,7 +710,7 @@ async function playList(list, label) {
     results[i] = r.firstTry;
     const ex = $('#explain');
     if (r.correct) {
-      if (r.firstTry) { streak++; firstRight++; } else streak = 0;
+      if (r.firstTry) { streak++; if (q.src !== 'bonus' || label !== 'quest') firstRight++; } else streak = 0;
       best = Math.max(best, streak);
       let pts = label === 'retry' ? 5 : r.firstTry ? PTS[q.level] + (q.mode === 'boss' ? 5 : 0) : 5;
       let extra = '';
@@ -718,7 +721,7 @@ async function playList(list, label) {
       say(`${PRAISE[Math.floor(Math.random() * PRAISE.length)]}${extra}`, q.mode === 'boss' ? 'celebrate' : 'thumbs');
       ex.className = 'explain ok'; ex.innerHTML = `✓ ${esc(q.explain)}`; ex.hidden = false;
     } else {
-      streak = 0; sfx.bad(); SI.voice('bad'); missed.push(q);
+      streak = 0; sfx.bad(); SI.voice('bad'); if (q.src !== 'bonus' || label !== 'quest') missed.push(q);
       say(r.timeout ? T('Time’s up! Here is the answer.', 'الوقت خلص! دي الإجابة.') : T('Good try! Look at the right answer.', 'محاولة حلوة! بص على الإجابة الصح.'), 'sad');
       ex.className = 'explain no'; ex.innerHTML = `${r.timeout ? T('⏱ Time’s up. ', '⏱ الوقت خلص. ') : ''}${esc(q.explain)}`; ex.hidden = false;
       const card = $('#qcard'); card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
@@ -733,7 +736,8 @@ async function playList(list, label) {
 /* Chapter Quest: 20 ideas, one phrasing each; normal and timed mixed, Boss ideas last */
 function buildQuest() {
   const normal = [], timed = [], boss = [];
-  window.IDEAS.forEach(I => {
+  const bonus = window.IDEAS.filter(I => I.bonus);
+  window.IDEAS.filter(I => !I.bonus).forEach(I => {
     const q = variantOf(I);
     if (I.boss) { q.mode = 'boss'; boss.push(q); } else (q.mode === 'timed' ? timed : normal).push(q);
   });
@@ -743,13 +747,14 @@ function buildQuest() {
     if (T.length) seq.push(T.shift());
     if (N.length && T.length < N.length) seq.push(N.shift());
   }
-  return seq.concat(shuffle(boss));
+  const extra = bonus.length ? [Object.assign(variantOf(bonus[Math.floor(Math.random() * bonus.length)]), { mode: 'normal' })] : [];
+  return seq.concat(shuffle(boss), extra);   // one bonus question after the Boss round; it never counts for the stars
 }
 /* Daily 5: ideas due for review first, then the ones the player knows least */
 function buildDaily() {
   const cards = SI.chProf().cards || {}, due = dueCards();
   const box = id => (cards[id] ? cards[id].box : -1);
-  const rest = shuffle(window.IDEAS.map(I => I.id).filter(id => !due.includes(id))).sort((a, b) => box(a) - box(b));
+  const rest = shuffle(window.IDEAS.filter(I => !I.bonus).map(I => I.id).filter(id => !due.includes(id))).sort((a, b) => box(a) - box(b));
   return due.concat(rest).slice(0, 5).map(id => { const q = variantOf(ideaById(id)); if (q.mode === 'boss') q.mode = 'normal'; return q; });
 }
 function buildReview() {
@@ -829,7 +834,7 @@ async function main() {
   const TITLE = SI.chTitle(CH);
 
   if (mode === 'quest') {
-    const N = window.IDEAS.length;
+    const N = window.IDEAS.filter(I => !I.bonus).length;
     set(T('Chapter Quest', 'تحدي الفصل'), T(`${CH.title} · ${N} questions`, `${TITLE} · ${N} سؤال`));
     const list = buildQuest(); rememberVariants(list);
     await intro(T(`Ready, ${esc(me.name)}?`, `جاهز يا ${esc(me.name)}؟`), T(`Chapter ${CH.n} Quest · ${N} questions`, `تحدي الفصل ${CH.n} · ${N} سؤال`),
@@ -841,7 +846,7 @@ async function main() {
       await banner(T('Second chance', 'فرصة تانية'), T('Try them again!', 'جرّبهم تاني!'));
       await playList(retry.map(q => Object.assign({}, q, { mode: 'normal' })), 'retry');
     }
-    await results('quest', res, list.length);
+    await results('quest', res, list.filter(q => q.src !== 'bonus').length);
   } else if (mode === 'daily') {
     set(T('Daily 5', 'خماسية اليوم'), T(`${CH.title} · five quick questions every day`, `${TITLE} · خمس أسئلة سريعة كل يوم`));
     const st = SI.dailyState();
