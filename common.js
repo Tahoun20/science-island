@@ -2,6 +2,10 @@
 (function () {
   'use strict';
   const HOME = 'index.html', CHAPTERS_PAGE = 'chapters.html';
+  /* the release stamp from <script src="common.js?v=..."> is added to every file this script loads,
+     so after an update no phone mixes new pages with old cached files. Change it in every page on each release. */
+  const VER = ((/[?&]v=([^&]+)/.exec((document.currentScript || {}).src || '') || [])[1]) || '';
+  const vq = u => (VER ? u + (u.includes('?') ? '&' : '?') + 'v=' + VER : u);
   const KEY = 'si.v2';
   const store = {
     load() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } },
@@ -100,7 +104,7 @@ html[dir=rtl] .timer span{right:auto;left:8px}`;
       const src = c && ((isAr() && c.questionsAr) || c.questions);   // Arabic-track players get the Arabic file
       if (!src) return rej(new Error('This chapter has no questions yet.'));
       window.IDEAS = undefined;
-      const el = document.createElement('script'); el.src = src;
+      const el = document.createElement('script'); el.src = vq(src);
       el.onload = () => (Array.isArray(window.IDEAS) ? res(window.IDEAS) : rej(new Error('No questions in ' + src)));
       el.onerror = () => rej(new Error('Could not load ' + src));
       document.head.appendChild(el);
@@ -279,7 +283,7 @@ html[dir=rtl] .timer span{right:auto;left:8px}`;
   }
   function fetchClip(id) {
     if (noFetch) return Promise.resolve(null);
-    return raw[id] || (raw[id] = fetch(`assets/voice/${id}.mp3`).then(
+    return raw[id] || (raw[id] = fetch(vq(`assets/voice/${id}.mp3`)).then(
       r => { if (!r.ok) { missing[id] = true; return null; } return r.arrayBuffer(); },
       () => { noFetch = true; return null; }));               // page opened from a file, or offline: use <audio> instead
   }
@@ -307,7 +311,7 @@ html[dir=rtl] .timer span{right:auto;left:8px}`;
   }
   function playElement(id) {
     let a = els[id];
-    if (!a) { a = els[id] = new Audio(`assets/voice/${id}.mp3`); a.preload = 'auto'; a.addEventListener('error', () => { missing[id] = true; }); }
+    if (!a) { a = els[id] = new Audio(vq(`assets/voice/${id}.mp3`)); a.preload = 'auto'; a.addEventListener('error', () => { missing[id] = true; }); }
     try { a.currentTime = 0; } catch (e) {}
     const p = a.play();
     if (p && p.catch) p.catch(e => { if (e && e.name === 'NotAllowedError') return; missing[id] = true; robot(id); });
