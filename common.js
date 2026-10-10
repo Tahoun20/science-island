@@ -247,7 +247,7 @@ html[dir=rtl] .timer span{right:auto;left:8px}`;
     rate: 'استنى يا بطل! قولّي رأيك في اللعبة', better: 'ولا يهمك! قولّي نضيف إيه علشان تبقى أحلى؟', thanks: 'شكرًا يا بطل! رأيك مهم عندي',
     intro: 'أهلًا يا بطل! أنا ريشو، صاحبك في متفوّق. هنلعب ونتعلم سوا. مستعد للمغامرة؟',
     back: 'أهلًا بيك تاني يا بطل! يلا نكمل', miss: 'وحشتني يا بطل! يلا نكمّل اللي بدأناه',
-    missbig: 'أخيرًا رجعت! وحشتني أوي أوي! يلا بينا', bye: 'باي يا بطل! هستناك بكرة عشان نكمّل سوا',
+    missbig: 'أخيرًا شوفتك! وحشتني أوي أوي! يلا بينا', bye: 'باي يا بطل! هستناك بكرة عشان نكمّل سوا',
     /* girls: the same phrase in the feminine (file name ends in _f). A phrase that is the same for both has no _f. */
     ok3_f: 'عاش يا بطلة!', ok5_f: 'برافو عليكي!', ok6_f: 'يا سلام عليكي!', ok7_f: 'شاطرة!',
     bad1_f: 'حاولي تاني', bad2_f: 'هانت! مرة كمان', bad3_f: 'ولا يهمّك، حاولي مرة كمان', bad4_f: 'فكّري تاني براحتك',
@@ -256,7 +256,7 @@ html[dir=rtl] .timer span{right:auto;left:8px}`;
     rate_f: 'استنّي يا بطلة! إيه رايك في اللعبة؟', better_f: 'ولا يهمّك! عايزانا نضيف إيه؟', thanks_f: 'شكرًا يا بطلة! رايك يهمّني أوي',
     intro_f: 'أهلًا يا بطلة! أنا ريشو، صاحبك في متفوّق. هنلعب ونتعلم سوا. مستعدة للمغامرة؟',
     back_f: 'أهلًا بيكي تاني يا بطلة! يلا نكمل', miss_f: 'وحشتيني يا بطلة! يلا نكمّل اللي بدأناه',
-    missbig_f: 'أخيرًا رجعتي! وحشتيني أوي أوي! يلا بينا', bye_f: 'باي يا بطلة! هستناكي بكرة عشان نكمّل سوا'
+    missbig_f: 'أخيرًا شوفتك! وحشتيني أوي أوي! يلا بينا', bye_f: 'باي يا بطلة! هستناكي بكرة عشان نكمّل سوا'
   };
   const NO_ROBOT = { rate: 1, better: 1, thanks: 1, intro: 1, back: 1, miss: 1, missbig: 1, bye: 1 };   // silent until the recorded clip is uploaded
   Object.keys(VOICE_TEXT).forEach(id => { if (/_f$/.test(id)) NO_ROBOT[id] = 1; });   // a girl never hears the boy's phrase or the robot voice
