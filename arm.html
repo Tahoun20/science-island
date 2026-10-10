@@ -920,9 +920,10 @@ async function main() {
   applySkin(store.load().skin || 0);
   setTheta(0);
   say(T(`Hi! I’m Reesho the parrot.`, `أهلًا! أنا ريشو البغبغان.`), 'wave');
+  const jump = +((/^#stage([23])$/.exec(location.hash) || [])[1] || 1);   // arm.html#stage2 or #stage3 jumps straight there (to check changes quickly)
   await intro();
-  await stage1();
-  await stage2();
+  if (jump <= 1) await stage1();
+  if (jump <= 2) await stage2();
   await stage3();
   results();
 }
