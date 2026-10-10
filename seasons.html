@@ -1,0 +1,817 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Season Explorer · Changes in the Seasons</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1f3d57; --ink:#3a5c75; --card:rgba(255,250,240,.94);
+  --primary:#23799f; --primary-d:#1b6182; --mint:#bfe8d6; --mint-d:#8fd3b8;
+  --coral:#e2603f; --ok:#2e9e6b; --ok-bg:#d4f4e1; --bad-bg:#fde0d8;
+  --radius:22px;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;min-height:100%}
+body{
+  font-family:"Nunito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color:var(--navy);
+  background:linear-gradient(rgba(255,255,255,.42),rgba(255,255,255,.42)),url(assets/bg_ch2.svg) center/cover fixed #f4e7c6;
+  -webkit-tap-highlight-color:transparent;overflow-x:hidden;
+}
+.app{max-width:1120px;margin:0 auto;padding:12px 14px 24px;display:flex;flex-direction:column;gap:12px}
+
+/* top bar */
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:40px;height:40px;border-radius:14px;background:linear-gradient(135deg,#ffe9a8,#9fdcc4);display:grid;place-items:center;box-shadow:0 4px 12px rgba(31,61,87,.18);font-size:21px}
+.brand h1{margin:0;font-size:22px;font-weight:900;letter-spacing:.2px}
+.brand p{margin:0;font-size:13px;font-weight:700;color:var(--ink)}
+.hud{display:flex;align-items:center;gap:8px}
+.pill{background:var(--card);border-radius:999px;padding:8px 14px;font-weight:800;font-size:14px;box-shadow:0 3px 10px rgba(31,61,87,.12);position:relative;white-space:nowrap}
+.pill b{font-size:18px}
+.pill.pop{animation:pop .4s}
+.icon{width:40px;height:40px;border-radius:50%;border:0;background:var(--card);color:var(--navy);font-size:18px;font-weight:900;cursor:pointer;box-shadow:0 3px 10px rgba(31,61,87,.12)}
+.icon[aria-pressed="true"]{opacity:.55;text-decoration:line-through}
+.float{position:absolute;right:10px;top:-6px;color:var(--ok);font-weight:900;animation:rise 1s forwards;pointer-events:none}
+
+/* layout */
+.grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:14px;align-items:start}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:0 8px 28px rgba(31,61,87,.14);padding:14px}
+.stageCard svg{display:block;width:100%;height:auto;max-height:62vh;touch-action:none;margin:0 auto;border-radius:16px;
+  background:linear-gradient(#eaf7fc,#f6fbf4)}
+.stageCard svg:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+
+/* meters + controls */
+.meters{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.meter .mhead{display:flex;justify-content:space-between;gap:6px;font-size:13px;font-weight:800;margin-bottom:4px}
+.meter small{font-weight:700;color:var(--ink)}
+.track{height:12px;border-radius:99px;background:#dbe9f0;overflow:hidden}
+.track i{display:block;height:100%;width:0;border-radius:99px;transition:width .05s linear}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+
+/* buttons */
+.btn{font:inherit;font-weight:900;font-size:18px;border:0;border-radius:16px;padding:12px 18px;min-height:52px;cursor:pointer;
+  background:var(--mint);color:var(--navy);box-shadow:0 4px 0 var(--mint-d);transition:transform .08s}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 var(--mint-d)}
+.btn.primary{background:var(--primary);color:#fff;box-shadow:0 4px 0 var(--primary-d)}
+.btn.big{font-size:22px;padding:14px 34px}
+.btn:disabled{opacity:.5;cursor:default}
+.btn:focus-visible{outline:3px solid #f7b267;outline-offset:2px}
+.btn.choice{background:#fff;border:3px solid #cfe3ee;box-shadow:none;text-align:left;font-size:17px}
+.btn.choice.good{background:var(--ok-bg);border-color:var(--ok)}
+.btn.choice.bad{background:var(--bad-bg);border-color:var(--coral)}
+
+/* coach */
+.coachRow{display:flex;align-items:flex-end;gap:10px}
+#robot{height:150px;width:auto;flex:none;transform-origin:50% 100%}
+#robot.hop{animation:hop .5s}
+.bubble{position:relative;background:#fff;border:3px solid #cfe3ee;border-radius:20px;padding:12px 14px;font-weight:700;font-size:17px;line-height:1.4;flex:1;min-height:92px}
+.bubble::before{content:"";position:absolute;left:-12px;bottom:26px;width:18px;height:18px;background:#fff;border-left:3px solid #cfe3ee;border-bottom:3px solid #cfe3ee;transform:rotate(45deg)}
+html[dir=rtl] .bubble::before{left:auto;right:-12px;border-left:0;border-bottom:0;border-right:3px solid #cfe3ee;border-top:3px solid #cfe3ee}
+.kw{color:#c2410c;background:#fff0d9;border-radius:6px;padding:0 4px}
+.actions{margin-top:12px;display:flex;flex-direction:column;gap:10px}
+.choices{display:grid;gap:10px}
+.dots{display:flex;gap:8px;justify-content:center}
+.dots i{width:16px;height:16px;border-radius:50%;background:#dbe9f0}
+.dots i.on{background:var(--ok)}
+.timer{height:14px;border-radius:99px;background:#dbe9f0;margin-top:12px;overflow:hidden}
+.timer i{display:block;height:100%;width:100%;background:var(--primary);border-radius:99px}
+.timer i.low{background:var(--coral)}
+
+/* overlays */
+.overlay{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:16px;background:rgba(143,211,238,.45);backdrop-filter:blur(4px)}
+.panel{background:#fff8ea;border-radius:28px;padding:22px 26px;max-width:460px;width:100%;text-align:center;box-shadow:0 14px 40px rgba(31,61,87,.25)}
+.panel h2{margin:6px 0 4px;font-size:34px;font-weight:900}
+.panel p{margin:6px 0 14px;font-weight:700;font-size:17px;line-height:1.45}
+.hero{height:170px;width:auto}
+.stats{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:8px 0 16px}
+.stats span{background:#fff;border-radius:999px;padding:6px 14px;font-weight:800;font-size:15px}
+.stars{font-size:46px;letter-spacing:6px;color:#f2b134;line-height:1}
+.stars .off{color:#e3d9c4}
+.banner{position:fixed;inset:0;z-index:40;display:grid;place-items:center;background:rgba(143,211,238,.4);backdrop-filter:blur(3px);animation:fade .25s;pointer-events:none}
+.banner.out{opacity:0;transition:opacity .3s}
+.banner div{background:#fff8ea;border-radius:28px;padding:20px 44px;text-align:center;box-shadow:0 14px 40px rgba(31,61,87,.25)}
+.banner small{display:block;font-weight:800;color:var(--ink);font-size:16px;letter-spacing:1px;text-transform:uppercase}
+.banner strong{font-size:36px;font-weight:900}
+.confetti{position:fixed;top:-14px;width:9px;height:14px;border-radius:2px;z-index:50;pointer-events:none;animation:fall 2.1s ease-in forwards}
+
+@keyframes pop{50%{transform:scale(1.15)}}
+@keyframes rise{to{transform:translateY(-26px);opacity:0}}
+@keyframes hop{0%{transform:translateY(0) scale(1,1)}35%{transform:translateY(-14px) scale(.97,1.04)}70%{transform:translateY(0) scale(1.04,.96)}100%{transform:none}}
+@keyframes pulse{50%{stroke:#23799f;stroke-width:4}}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+@keyframes fade{from{opacity:0}}
+@keyframes fall{to{transform:translate(var(--dx),105vh) rotate(540deg)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+@media (max-width:820px){
+  .grid{grid-template-columns:1fr}
+  .coach{order:-1}
+  #robot{height:104px}
+  .bubble{font-size:16px;min-height:84px}
+  .stageCard svg{max-height:52vh}
+  .brand p{display:none}
+}
+
+/* touch screens: a fixed background is unreliable on phones and tablets */
+@media (hover:none){body{background-attachment:scroll}}
+
+@media (max-width:820px){
+  .app{padding:8px 12px 18px;gap:8px}
+  .top{gap:6px}
+  .logo{width:34px;height:34px}
+  .brand h1{font-size:19px}
+  .hud{gap:6px;flex-wrap:wrap}
+  .pill{padding:6px 11px;font-size:13px}
+  .pill b{font-size:16px}
+  .icon{width:36px;height:36px;font-size:16px}
+  #stagePill .long{display:none}
+  .card{padding:10px}
+  #robot{height:70px}
+  .bubble{font-size:15px;min-height:0;padding:9px 12px}
+  .bubble::before{bottom:18px}
+  .stageCard svg{max-height:42vh}
+  .meters{gap:8px;margin-top:8px}
+  .meter .mhead{flex-direction:column;gap:0;font-size:12.5px}
+  .controls{margin-top:8px}
+  .btn{min-height:48px;font-size:17px;padding:10px 14px}
+  .choices{gap:8px}
+}
+@media (max-height:520px) and (orientation:landscape){
+  .app{padding:6px 12px 12px;gap:6px}
+  .brand p{display:none}
+  .grid{grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);gap:10px}
+  .coach{order:0}
+  .coachRow{align-items:flex-start}
+  #robot{height:62px}
+  .bubble{font-size:14px;min-height:0;padding:8px 10px}
+  .stageCard svg{max-height:56vh}
+  .meters{margin-top:4px}
+  .meter .mhead{font-size:11px}
+  .controls{margin-top:6px}
+  .btn{min-height:40px;font-size:15px;padding:7px 12px}
+  .panel{padding:14px 18px}
+  .hero{height:90px}
+  .panel h2{font-size:24px}
+}
+
+/* phones: fit the visible screen (svh excludes the browser bars) and keep the buttons above the meters */
+@media (max-width:820px){
+  .stageCard{display:flex;flex-direction:column}
+  .stageCard svg{max-height:max(190px, calc(100vh - 400px));max-height:max(190px, calc(100svh - 400px))}
+  .controls{order:2;margin-top:8px}
+  .meters{order:3;margin-top:8px}
+  .bubble{font-size:14.5px}
+}
+/* pop-ups always fit the visible screen (iPhone bars included): the panel scrolls inside itself
+   and its buttons stay pinned at the bottom, so they can always be reached */
+.overlay{display:flex;align-items:center;justify-content:center;overscroll-behavior:contain;
+  padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
+.panel{max-height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.panel .btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.panel .acts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;position:sticky;bottom:-22px;z-index:1;
+  margin:0 -26px -22px;padding:14px 26px 22px;background:linear-gradient(rgba(255,248,234,0),#fff8ea 12px)}
+.banner div{max-width:calc(100% - 24px)}
+@media (max-width:520px){
+  .panel{padding:16px;border-radius:24px}
+  .banner div{padding:16px 22px}
+  .banner strong{font-size:28px}
+  .panel .acts{bottom:-16px;margin:0 -16px -16px;padding:12px 16px 16px;gap:8px}
+  .panel .acts .btn{flex:1 1 40%}
+  .panel .btn{min-height:46px;font-size:16px;padding:9px 12px}
+  .panel .btn.big{font-size:19px;padding:10px 18px}
+  .panel h2{font-size:26px;margin:4px 0 2px}
+  .panel p{font-size:15.5px;margin:4px 0 10px}
+  .hero{height:clamp(84px,19vh,150px);height:clamp(84px,19svh,150px)}
+  .stars{font-size:38px}
+  .stats{gap:6px;margin:6px 0 10px}
+  .stats span{font-size:13.5px;padding:5px 11px}
+  .box{font-size:76px}
+}
+@media (max-width:360px){ .panel .btn{font-size:15px;padding:9px 8px} }
+@media (max-height:520px) and (orientation:landscape){
+  .panel{max-width:620px;padding:12px 18px}
+  .panel .acts{bottom:-12px;margin:0 -18px -12px;padding:10px 18px 12px}
+  .panel .acts .btn{flex:0 1 auto}
+  .hero{height:64px}
+  .stars{font-size:30px}
+  .stats{margin:4px 0 8px}
+  .panel p{font-size:15px;margin:4px 0 8px}
+}
+
+/* ---------- Season Explorer ---------- */
+.sceneBox{position:relative}
+.stageCard svg#scene{touch-action:auto}
+.shake{animation:shake .4s}
+.hot{cursor:pointer}
+.hot .ring{fill:rgba(255,255,255,.2);stroke:#1b6182;stroke-width:3;stroke-dasharray:7 6}
+.hot:hover .ring,.hot:focus .ring{fill:rgba(35,121,159,.28)}
+.hot:focus{outline:none}
+.hot.good .ring{fill:rgba(46,158,107,.34);stroke:var(--ok);stroke-dasharray:none}
+.hot.bad .ring{fill:rgba(226,96,63,.3);stroke:var(--coral);stroke-dasharray:none}
+.info{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.chip{background:#fff;border-radius:14px;padding:6px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;font-weight:800;color:var(--ink);min-height:38px}
+.chip b{font-size:16px;font-weight:900;color:var(--navy);white-space:nowrap}
+.yearRow{display:flex;align-items:flex-start;gap:10px;margin-top:10px}
+.btn.play{flex:none;width:56px;min-height:48px;padding:0;font-size:19px;line-height:1}
+.yearTrack{flex:1;min-width:0}
+#year{-webkit-appearance:none;appearance:none;width:100%;height:40px;background:transparent;margin:0;display:block;cursor:pointer}
+#year::-webkit-slider-runnable-track{height:16px;border-radius:99px;background:linear-gradient(90deg,#8fc3ee,#f6c25b 34%,#ef8a4a 50%,#f6c25b 66%,#8fc3ee);box-shadow:inset 0 1px 3px rgba(31,61,87,.28)}
+#year::-moz-range-track{height:16px;border-radius:99px;background:linear-gradient(90deg,#8fc3ee,#f6c25b 34%,#ef8a4a 50%,#f6c25b 66%,#8fc3ee);box-shadow:inset 0 1px 3px rgba(31,61,87,.28)}
+#year::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:38px;height:38px;border-radius:50%;background:#fff;border:6px solid var(--primary);margin-top:-11px;box-shadow:0 3px 8px rgba(31,61,87,.32);cursor:grab}
+#year::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:#fff;border:6px solid var(--primary);box-shadow:0 3px 8px rgba(31,61,87,.32);cursor:grab}
+#year:disabled{opacity:.5;cursor:default}
+#year:focus-visible{outline:3px solid #f7b267;outline-offset:2px;border-radius:99px}
+.yearLabs{display:flex;justify-content:space-between;gap:6px;font-size:12.5px;font-weight:900;color:var(--ink)}
+.btn.hc{font-size:17px;min-height:60px;display:flex;align-items:center;justify-content:center;gap:8px;line-height:1.25}
+.btn.hc.hot{background:#ffe2b8;box-shadow:0 4px 0 #f0b467}
+.btn.hc.cold{background:#d3e8fb;box-shadow:0 4px 0 #9cc4ea}
+.veil{position:absolute;inset:0;display:grid;place-items:center;padding:12px;background:rgba(255,248,234,.9);border-radius:16px}
+.veilCard{text-align:center;display:flex;flex-direction:column;gap:8px;max-width:520px}
+.veilCard small{font-weight:900;color:var(--ink);font-size:13px}
+.veilCard strong{font-size:clamp(20px,4.4vw,30px);font-weight:900;line-height:1.35}
+.veilCard span{font-weight:800;color:#b45309;font-size:15px}
+.pcards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.pcard{position:relative;border:3px solid #cfe3ee;border-radius:16px;overflow:hidden;padding:0;background:#fff;cursor:pointer;font:inherit;color:inherit;display:flex;flex-direction:column}
+.pcard:focus-visible{outline:3px solid #f7b267;outline-offset:2px}
+.stageCard .pcard svg{display:block;width:100%;height:auto;max-height:none;border-radius:0;background:#e6f2f7;touch-action:auto}
+.pcard .num{position:absolute;top:6px;inset-inline-start:6px;width:28px;height:28px;border-radius:50%;background:var(--ok);color:#fff;font-weight:900;font-size:15px;display:none;place-items:center}
+.pcard .cap{display:block;font-weight:900;font-size:13.5px;line-height:1.25;padding:5px 6px;min-height:44px}
+.pcard.done{border-color:var(--ok);cursor:default}
+.pcard.done .num{display:grid}
+@media (max-width:820px){
+  .yearRow{order:2;margin-top:8px}
+  .info{order:3;gap:8px;margin-top:6px}
+  .chip{flex-direction:column;align-items:flex-start;gap:0;padding:5px 10px;font-size:12px}
+  .chip b{font-size:15px}
+  .btn.play{width:50px}
+  .pcards{grid-template-columns:1fr 1fr;gap:8px}
+  .stageCard .pcard svg{max-height:max(96px, calc((100vh - 350px) / 2));max-height:max(96px, calc((100svh - 350px) / 2))}
+  .pcard .cap{min-height:34px;font-size:12.5px;padding:3px 5px}
+  .btn.hc{font-size:15px;min-height:56px;padding:8px 8px}
+  .stageCard svg#scene{max-height:max(180px, calc(100vh - 420px));max-height:max(180px, calc(100svh - 420px))}
+}
+@media (max-height:520px) and (orientation:landscape){
+  .info{display:none}
+  .yearRow{margin-top:6px}
+  .stageCard svg#scene{max-height:max(150px, calc(100vh - 150px));max-height:max(150px, calc(100svh - 150px))}
+  .pcards{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+  .stageCard .pcard svg{max-height:calc(100vh - 150px);max-height:calc(100svh - 150px)}
+  .btn.hc{min-height:44px;font-size:14px}
+  .btn.play{min-height:40px}
+}
+</style>
+</head>
+<body>
+<noscript>Please turn on JavaScript to play Season Explorer.</noscript>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">🌡️</div>
+      <div><h1 data-ar="مستكشف الفصول">Season Explorer</h1><p data-ar="الفصل ٢ · التغيرات في الفصول">Chapter 2 · Changes in the Seasons</p></div>
+    </div>
+    <div class="hud">
+      <div class="pill" id="stagePill">Stage 1 of 3</div>
+      <div class="pill" id="scorePill"><span data-ar="النقاط">Score</span> <b id="score">0</b></div>
+      <button class="icon" id="mute" aria-label="Sound" aria-pressed="false" title="Sound on/off" data-ar-label="الصوت">♪</button>
+      <a class="icon" href="map.html" aria-label="Back to the map" title="Back to the map" data-ar-label="رجوع للخريطة" style="display:grid;place-items:center;text-decoration:none">⌂</a>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="card stageCard">
+      <div class="sceneBox" id="sceneBox">
+        <svg id="scene" viewBox="0 0 420 280" role="img" aria-label="A luffa plant on a trellis, a rock with a lizard, and a thermometer" data-ar-label="نبات لوف على تعريشة، وصخرة عليها سحلية، وترمومتر">
+          <g id="gBack"></g>
+          <g id="gPlant"></g>
+          <g id="gRock"></g>
+          <g id="lizSleep" opacity="0"></g>
+          <text id="zzz" x="352" y="186" font-size="15" font-weight="900" fill="#fff" opacity="0">z z</text>
+          <g id="lizRun"><g id="lizA"></g><g id="lizB" style="display:none"></g></g>
+          <g id="gThermo"></g>
+          <g id="gSpots"></g>
+        </svg>
+        <div class="veil" id="veil" hidden><div class="veilCard" id="veilCard"></div></div>
+      </div>
+      <div class="pcards" id="pcards" hidden></div>
+      <div class="info" id="info">
+        <div class="chip"><span data-ar="درجة الحرارة">Temperature</span><b id="tempTxt"></b></div>
+        <div class="chip"><span data-ar="الوقت من السنة">Time of year</span><b id="seasonTxt"></b></div>
+      </div>
+      <div class="yearRow" id="yearRow">
+        <button class="btn play" id="btnPlay" type="button" aria-label="Play the year" data-ar-label="شغّل السنة">▶</button>
+        <div class="yearTrack">
+          <input id="year" type="range" min="0" max="1000" step="1" value="0" aria-label="Time of year" data-ar-label="الوقت من السنة">
+          <div class="yearLabs" aria-hidden="true"><span data-ar="❄️ الشتاء">❄️ Winter</span><span data-ar="☀️ الصيف">☀️ Summer</span><span data-ar="الشتاء ❄️">Winter ❄️</span></div>
+        </div>
+      </div>
+      <div class="controls" id="hotcold" hidden>
+        <button class="btn hc hot" id="btnHot" type="button"><span aria-hidden="true">☀️</span> <span data-ar="درجة الحرارة مرتفعة">High temperature</span></button>
+        <button class="btn hc cold" id="btnCold" type="button"><span aria-hidden="true">❄️</span> <span data-ar="درجة الحرارة منخفضة">Low temperature</span></button>
+      </div>
+    </section>
+
+    <aside class="card coach">
+      <div class="coachRow">
+        <img id="robot" src="assets/parrot_wave.png" alt="Reesho the parrot" data-ar-label="البغبغان ريشو">
+        <div class="bubble" id="bubble" aria-live="polite"></div>
+      </div>
+      <div class="actions" id="actions"></div>
+      <div class="timer" id="timer" hidden><i></i></div>
+    </aside>
+  </main>
+</div>
+
+<script src="firebase-config.js?v=20261011a"></script>
+<script src="chapters.js?v=20261011a"></script>
+<script src="common.js?v=20261011a"></script>
+<script src="ch2_art.js?v=20261011a"></script>
+<script>
+(() => {
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const el = id => document.getElementById(id);
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const T = SI.T, G = SI.G, AR = SI.isAr(), A = window.CH2ART, GEO = A.GEO;
+if (AR) document.title = 'مستكشف الفصول · التغيرات في الفصول';
+
+/* ---------- the year: u goes from 0 (cold winter, seeds in the soil) through summer (0.5) to 1 (winter again) ---------- */
+let u = 0, locked = false, hideLizard = false;
+const listeners = new Set();
+const slider = el('year'), playBtn = el('btnPlay');
+const SEASON = AR ? { cold: 'الشتاء', hot: 'الصيف', warming: 'الجو يدفأ', cooling: 'الجو يبرد' } : { cold: 'Winter', hot: 'Summer', warming: 'Getting warmer', cooling: 'Getting colder' };
+const TEMP = AR ? { cold: 'منخفضة', hot: 'مرتفعة', warming: 'ترتفع', cooling: 'تنخفض' } : { cold: 'Low', hot: 'High', warming: 'Getting higher', cooling: 'Getting lower' };
+
+el('gRock').innerHTML = A.rocks();
+el('gPlant').setAttribute('transform', `translate(${GEO.plant[0]} ${GEO.plant[1]})`);
+el('lizSleep').innerHTML = `<g transform="translate(${GEO.sleep.x} ${GEO.sleep.y}) scale(${GEO.sleep.s})">${A.lizard({ closed: true })}</g>`;
+el('lizA').innerHTML = A.lizard({ step: false }); el('lizB').innerHTML = A.lizard({ step: true });
+
+const liz = { x: (GEO.run.x1 + GEO.run.x2) / 2, dir: 1, walked: 0, frame: 0 };
+function placeLizard() {
+  el('lizRun').setAttribute('transform', `translate(${liz.x.toFixed(1)} ${GEO.run.y}) scale(${liz.dir * GEO.run.s} ${GEO.run.s})`);
+  el('lizA').style.display = liz.frame ? 'none' : ''; el('lizB').style.display = liz.frame ? '' : 'none';
+}
+function render() {
+  const tm = A.temp(u), se = A.season(u), hib = tm < A.COLD;
+  el('gBack').innerHTML = A.back(tm);
+  el('gPlant').innerHTML = A.plant(u);
+  el('gThermo').innerHTML = A.thermo(tm);
+  el('tempTxt').textContent = TEMP[se]; el('seasonTxt').textContent = SEASON[se];
+  el('tempTxt').style.color = A.mix('#2f6fb5', '#c2410c', tm);
+  el('lizSleep').setAttribute('opacity', hideLizard ? 0 : hib ? 1 : 0);
+  el('zzz').setAttribute('opacity', hideLizard ? 0 : hib ? .9 : 0);
+  el('lizRun').setAttribute('opacity', hideLizard ? 0 : hib ? 0 : 1);
+  if (+slider.value !== Math.round(u * 1000)) slider.value = Math.round(u * 1000);
+  slider.setAttribute('aria-valuetext', `${SEASON[se]} · ${T('temperature', 'درجة الحرارة')}: ${TEMP[se]}`);
+}
+function setU(v) { u = clamp(v, 0, 1); render(); listeners.forEach(f => f(u)); }
+
+/* the lizard walks on its rock: fast when the temperature is high, slowly when it is low */
+let lastT = 0;
+function tick(t) {
+  const dt = Math.min(.05, (t - lastT) / 1000 || 0); lastT = t;
+  const tm = A.temp(u);
+  if (tm >= A.COLD && !reduceMotion) {
+    const k = (tm - A.COLD) / (1 - A.COLD), speed = lerp(3, 92, Math.pow(k, 1.7));
+    const d = speed * dt; liz.x += liz.dir * d; liz.walked += d;
+    if (liz.x > GEO.run.x2) { liz.x = GEO.run.x2; liz.dir = -1; } else if (liz.x < GEO.run.x1) { liz.x = GEO.run.x1; liz.dir = 1; }
+    if (liz.walked > 6) { liz.walked = 0; liz.frame = 1 - liz.frame; }
+    placeLizard();
+  }
+  requestAnimationFrame(tick);
+}
+
+let tweenId = 0;
+function cancelTween() { tweenId++; playing = false; playBtn.textContent = '▶'; }
+function tweenTo(target, ms = 900) {
+  const id = ++tweenId, from = u;
+  if (reduceMotion || ms <= 0) { setU(target); return Promise.resolve(); }
+  return new Promise(res => {
+    const t0 = performance.now();
+    const step = now => {
+      if (id !== tweenId) return res();
+      const k = clamp((now - t0) / ms, 0, 1); setU(lerp(from, target, k * k * (3 - 2 * k)));
+      if (k < 1) requestAnimationFrame(step); else res();
+    };
+    requestAnimationFrame(step);
+  });
+}
+function waitU(pred) {
+  return new Promise(res => {
+    if (pred(u)) return res();
+    const f = v => { if (pred(v)) { listeners.delete(f); res(); } };
+    listeners.add(f);
+  });
+}
+/* ▶ plays the year forward by itself; dragging the slider stops it */
+let playing = false;
+async function play() {
+  if (locked) return;
+  if (playing) { cancelTween(); return; }
+  if (u > .985) setU(0);
+  const id = ++tweenId, from = u, ms = (1 - from) * 11000, t0 = performance.now();
+  playing = true; playBtn.textContent = '❚❚';
+  await new Promise(res => {
+    const step = now => {
+      if (id !== tweenId) return res();
+      const k = clamp((now - t0) / ms, 0, 1); setU(lerp(from, 1, k));
+      if (k < 1 && !locked) requestAnimationFrame(step); else res();
+    };
+    requestAnimationFrame(step);
+  });
+  if (id === tweenId) { playing = false; playBtn.textContent = '▶'; }
+}
+playBtn.onclick = () => { SI.sfx.tick(); play(); };
+slider.addEventListener('input', () => { if (locked) { slider.value = Math.round(u * 1000); return; } cancelTween(); setU(slider.value / 1000); });
+function lock(v) { locked = v; slider.disabled = v; playBtn.disabled = v; if (v && playing) cancelTween(); }
+function setUI({ year = true, info = true, hotcold = false, cards = false }) {
+  el('yearRow').hidden = !year; el('info').hidden = !info; el('hotcold').hidden = !hotcold;
+  el('pcards').hidden = !cards; el('sceneBox').hidden = cards;
+}
+
+/* ---------- sound + per-player progress (shared module) ---------- */
+const store = {
+  load() { return Object.assign({}, SI.chProf('ch2').game || {}); },
+  save(o) { SI.updateChProf(c => { c.game = o; }, 'ch2'); }
+};
+const sfx = {
+  ok() { SI.sfx.ok(); SI.voice('ok'); },
+  bad() { SI.sfx.bad(); SI.voice('bad'); },
+  win() { SI.sfx.win(); },
+  tick() { SI.sfx.tick(); }
+};
+const muteBtn = el('mute');
+function paintMute() { const m = SI.isMuted(); muteBtn.setAttribute('aria-pressed', m); muteBtn.setAttribute('aria-label', m ? T('Sound off', 'الصوت مغلق') : T('Sound on', 'الصوت شغال')); }
+muteBtn.onclick = () => { SI.setMuted(!SI.isMuted()); paintMute(); };
+paintMute();
+
+/* ---------- coach, score, helpers ---------- */
+const robot = $('#robot'), bubble = $('#bubble'), actions = $('#actions');
+function pose(name) { robot.src = `assets/parrot_${name}.png`; robot.classList.remove('hop'); void robot.offsetWidth; robot.classList.add('hop'); }
+function say(html, p) { bubble.innerHTML = html; if (p) pose(p); }
+function mk(tag, cls, html) { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+function btn(text, cls = '') { const b = mk('button', 'btn ' + cls, text); b.type = 'button'; return b; }
+function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const kw = s => `<b class="kw">${s}</b>`;
+
+let score = 0, mistakes = 0;
+function addScore(n) {
+  if (!n) return;
+  score += n; $('#score').textContent = score;
+  const p = $('#scorePill'); p.classList.remove('pop'); void p.offsetWidth; p.classList.add('pop');
+  const f = mk('span', 'float', '+' + n); p.appendChild(f); setTimeout(() => f.remove(), 1000);
+}
+function setStage(n, name) { $('#stagePill').innerHTML = T(`Stage ${n}<span class="long"> of 3 · ${name}</span>`, `المرحلة ${n}<span class="long"> من ٣ · ${name}</span>`); }
+function confetti(n = 32) {
+  if (reduceMotion) return;
+  const colors = ['#f08a6c', '#8fd3ee', '#9fdcc4', '#f7d58a', '#c7a7e0'];
+  for (let i = 0; i < n; i++) {
+    const c = mk('i', 'confetti'); c.style.left = Math.random() * 100 + 'vw'; c.style.background = colors[i % colors.length];
+    c.style.animationDelay = Math.random() * .4 + 's'; c.style.setProperty('--dx', (Math.random() * 140 - 70) + 'px');
+    document.body.appendChild(c); setTimeout(() => c.remove(), 2800);
+  }
+}
+async function banner(a, b) {
+  const e = mk('div', 'banner', `<div><small>${a}</small><strong>${b}</strong></div>`);
+  document.body.appendChild(e); await sleep(reduceMotion ? 900 : 1500); e.classList.add('out'); await sleep(320); e.remove();
+}
+function nextBtn(label = T('Next ▸', 'التالي ◂')) {
+  return new Promise(res => {
+    actions.innerHTML = '';
+    const b = btn(label, 'primary'); b.onclick = () => { actions.innerHTML = ''; sfx.tick(); res(); };
+    actions.appendChild(b); b.focus({ preventScroll: true });
+  });
+}
+
+/* multiple choice */
+function askChoice({ options, correct, hint, ok, count = true, points = 20 }) {
+  return new Promise(res => {
+    actions.innerHTML = '';
+    const wrap = mk('div', 'choices'); let tries = 0, done = false;
+    const bs = shuffle(options.map(o => ({ o, right: o === correct }))).map(({ o, right }) => {
+      const b = btn(o, 'choice');
+      b.onclick = () => {
+        if (done) return;
+        tries++;
+        if (right) { done = true; b.classList.add('good'); sfx.ok(); if (points) addScore(tries === 1 ? points : 5); say(ok, 'thumbs'); finish(); }
+        else {
+          b.classList.add('bad'); b.disabled = true; sfx.bad(); if (count) mistakes++;
+          if (tries >= 2 || options.length <= 2) { done = true; bs.forEach(x => { if (x.dataset.right) x.classList.add('good'); }); say(T(`The answer is <b>${correct}</b>. ${ok}`, `الإجابة هي <b>${correct}</b>. ${ok}`), 'think'); finish(); }
+          else say(hint, 'sad');
+        }
+      };
+      if (right) b.dataset.right = '1';
+      wrap.appendChild(b); return b;
+    });
+    actions.appendChild(wrap);
+    function finish() { bs.forEach(b => b.disabled = true); setTimeout(() => nextBtn().then(res), 500); }
+  });
+}
+
+/* tap a place in the picture: rock (in the sun), crevice, open sand */
+const SPOT_NAME = AR ? { rock: 'فوق الصخرة تحت أشعة الشمس', crevice: 'داخل شق الصخرة', sand: 'على الرمال المكشوفة' } : { rock: 'On top of the rock, in the sun', crevice: 'Inside the rock crevice', sand: 'Out on the open sand' };
+function askSpot(correct, { ok, hint, points = 20 }) {
+  return new Promise(res => {
+    const box = el('gSpots'); let tries = 0, done = false;
+    box.innerHTML = Object.keys(GEO.spots).map(k => { const [x, y, r] = GEO.spots[k]; return `<g class="hot" data-id="${k}" role="button" tabindex="0" aria-label="${SPOT_NAME[k]}"><circle class="ring" cx="${x}" cy="${y}" r="${r}"/></g>`; }).join('');
+    const hots = [...box.querySelectorAll('.hot')];
+    const finish = good => {
+      hots.forEach(h => { h.setAttribute('tabindex', '-1'); if (h.dataset.id === correct) h.classList.add('good'); });
+      hideLizard = false; render();
+      if (good) { addScore(tries === 1 ? points : 5); sfx.ok(); confetti(18); say(ok, 'celebrate'); }
+      else { sfx.bad(); say(T(`The answer is <b>${SPOT_NAME[correct].toLowerCase()}</b>. ${ok}`, `الإجابة: <b>${SPOT_NAME[correct]}</b>. ${ok}`), 'think'); }
+      nextBtn().then(() => { box.innerHTML = ''; res(); });
+    };
+    const pick = h => {
+      if (done) return;
+      tries++;
+      if (h.dataset.id === correct) { done = true; finish(true); }
+      else { mistakes++; h.classList.add('bad'); sfx.bad(); if (tries >= 2) { done = true; finish(false); } else say(hint, 'sad'); }
+    };
+    hots.forEach(h => {
+      h.addEventListener('click', () => pick(h));
+      h.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(h); } });
+    });
+  });
+}
+
+/* "set the time of year": the player moves the slider, then presses Check */
+function askSet({ test, show, hint, ok, points = 20 }) {
+  return new Promise(res => {
+    let tries = 0;
+    lock(false); actions.innerHTML = '';
+    const b = btn(T('Check ✓', 'تحقق ✓'), 'primary');
+    b.onclick = async () => {
+      tries++; cancelTween();
+      if (test(u)) { lock(true); addScore(tries === 1 ? points : 5); sfx.ok(); confetti(18); say(ok, 'celebrate'); nextBtn().then(res); }
+      else {
+        mistakes++; sfx.bad();
+        if (tries >= 2) { lock(true); actions.innerHTML = ''; say(T(`Let me show you. ${ok}`, G(`هوريك أنا. ${ok}`, `هوريكي أنا. ${ok}`)), 'think'); await tweenTo(show, 1100); nextBtn().then(res); }
+        else say(hint, 'sad');
+      }
+    };
+    actions.appendChild(b);
+  });
+}
+
+/* timed choice for the speed round */
+function timedPick(ms) {
+  return new Promise(res => {
+    const timer = $('#timer'), bar = timer.firstElementChild; timer.hidden = false; bar.style.width = '100%'; bar.classList.remove('low');
+    const t0 = performance.now(); let done = false;
+    const hot = el('btnHot'), cold = el('btnCold'); hot.disabled = cold.disabled = false;
+    const end = r => { if (done) return; done = true; clearInterval(iv); hot.onclick = cold.onclick = null; hot.disabled = cold.disabled = true; timer.hidden = true; res(r); };
+    const iv = setInterval(() => {
+      const left = 1 - (performance.now() - t0) / ms;
+      bar.style.width = Math.max(0, left * 100) + '%'; bar.classList.toggle('low', left < .3);
+      if (left <= 0) end({ pick: null, timeout: true, left: 0 });
+    }, 50);
+    const left = () => Math.max(0, 1 - (performance.now() - t0) / ms);
+    hot.onclick = () => end({ pick: 'hot', timeout: false, left: left() });
+    cold.onclick = () => end({ pick: 'cold', timeout: false, left: left() });
+  });
+}
+function veil(html) { const v = el('veil'); if (html == null) { v.hidden = true; return; } el('veilCard').innerHTML = html; v.hidden = false; }
+
+/* ---------- the game ---------- */
+async function stage1() {
+  setStage(1, T('Warm Up', 'إحماء'));
+  setUI({}); lock(false); hideLizard = false;
+  await tweenTo(.02, 300);
+  say(T(`It is the cold <b>winter</b>. The temperature is ${kw('low')}. The luffa <b>seeds</b> are waiting in the soil. <b>Drag the slider</b> (or press ▶) to move through the year!`,
+    G(`إحنا في <b>الشتاء</b> البارد، ودرجة الحرارة ${kw('منخفضة')}. <b>بذور</b> اللوف مستنية في التربة. <b>اسحب المؤشر</b> (أو اضغط ▶) علشان تتحرك خلال السنة!`,
+      `إحنا في <b>الشتاء</b> البارد، ودرجة الحرارة ${kw('منخفضة')}. <b>بذور</b> اللوف مستنية في التربة. <b>اسحبي المؤشر</b> (أو اضغطي ▶) علشان تتحركي خلال السنة!`)), 'point');
+  await waitU(v => v >= .2);
+  addScore(10); sfx.ok();
+  say(T(`The temperature is getting ${kw('higher')}, and the seeds ${kw('sprout')}! The lizard came out too. Keep going to the <b>summer</b>.`,
+    G(`درجة الحرارة ${kw('بترتفع')}، والبذور ${kw('نبتت')}! والسحلية كمان خرجت. كمّل لحد <b>الصيف</b>.`, `درجة الحرارة ${kw('بترتفع')}، والبذور ${kw('نبتت')}! والسحلية كمان خرجت. كمّلي لحد <b>الصيف</b>.`)), 'thumbs');
+  await waitU(v => v >= .5);
+  lock(true); addScore(10); sfx.ok();
+  say(T(`<b>Summer!</b> The temperature is ${kw('high')}. The stems grew <b>tall</b>, the leaves spread <b>wide</b>, and the plant produced ${kw('flowers')}.`,
+    `<b>الصيف!</b> درجة الحرارة ${kw('مرتفعة')}. السيقان نمت وبقت <b>طويلة</b>، والأوراق <b>انتشرت</b> على نطاق واسع، والنبات أنتج ${kw('الأزهار')}.`), 'celebrate');
+  await nextBtn();
+
+  say(T(`Now look at the <b>lizard</b> on the rock. How is it moving in this high temperature?`, G(`بص دلوقتي على <b>السحلية</b> فوق الصخرة. بتتحرك إزاي ودرجة الحرارة مرتفعة كده؟`, `بصّي دلوقتي على <b>السحلية</b> فوق الصخرة. بتتحرك إزاي ودرجة الحرارة مرتفعة كده؟`)), 'think');
+  await askChoice({ options: [T('Quickly: it is very active', 'بسرعة: هي نشيطة جدًا'), T('Slowly: it hardly moves', 'ببطء: مش بتتحرك كتير')], correct: T('Quickly: it is very active', 'بسرعة: هي نشيطة جدًا'), count: false, points: 10,
+    hint: '', ok: T(`When the temperature is high, lizards become ${kw('more active')}. They move quickly to find food or escape danger.`, `لما درجة الحرارة تكون مرتفعة، السحالي بتبقى ${kw('أكثر نشاطًا')}، وبتتحرك بسرعة للبحث عن الطعام أو الهروب من الخطر.`) });
+
+  lock(false);
+  say(T(`Keep moving through the year. Watch what comes after the flowers, and watch the thermometer.`, G(`كمّل تحريك السنة. شوف إيه اللي بييجي بعد الأزهار، وخلّي عينك على الترمومتر.`, `كمّلي تحريك السنة. شوفي إيه اللي بييجي بعد الأزهار، وخلّي عينك على الترمومتر.`)), 'point');
+  await waitU(v => v >= .74);
+  sfx.tick();
+  say(T(`After the flowers, the ${kw('fruit')} grew. Now it is turning <b>brown</b>. The temperature is getting ${kw('lower')}, and the lizard is getting ${kw('slow')}. Go on to the winter.`,
+    G(`بعد الأزهار نمت ${kw('الثمار')}، ودلوقتي بتتحول للون <b>البُني</b>. درجة الحرارة ${kw('بتنخفض')}، وحركة السحلية بقت ${kw('بطيئة')}. كمّل لحد الشتاء.`, `بعد الأزهار نمت ${kw('الثمار')}، ودلوقتي بتتحول للون <b>البُني</b>. درجة الحرارة ${kw('بتنخفض')}، وحركة السحلية بقت ${kw('بطيئة')}. كمّلي لحد الشتاء.`)), 'think');
+  await waitU(v => v >= .96);
+  lock(true); addScore(10); sfx.ok();
+  say(T(`<b>Winter.</b> The temperature is ${kw('low')} and the plant has ${kw('withered')}. But look at the ground: it left ${kw('seeds')} for the next generation!`,
+    G(`<b>الشتاء.</b> درجة الحرارة ${kw('منخفضة')} والنبات ${kw('ذبل')}. لكن بص على الأرض: ساب ${kw('بذور')} للجيل التالي!`, `<b>الشتاء.</b> درجة الحرارة ${kw('منخفضة')} والنبات ${kw('ذبل')}. لكن بصّي على الأرض: ساب ${kw('بذور')} للجيل التالي!`)), 'thumbs');
+  await nextBtn();
+
+  say(T(`And the lizard? It is not on top of the rock any more. What is it doing?`, `والسحلية؟ مبقتش فوق الصخرة. بتعمل إيه؟`), 'think');
+  const crev = T('Staying still in the rock crevice', 'ساكنة في شق الصخرة');
+  await askChoice({ options: [crev, T('Running on the sand', 'بتجري على الرمال'), T('Looking for food', 'بتدوّر على طعام')], correct: crev, count: false, points: 10,
+    hint: T(`Look closely at the dark crevice in the rock. Try again!`, G(`بص كويس على الشق الغامق في الصخرة. جرّب تاني!`, `بصّي كويس على الشق الغامق في الصخرة. جرّبي تاني!`)),
+    ok: T(`In the cold winter, lizards stay still in the soil or in rock crevices to conserve energy. This is called ${kw('hibernation')}.`, `في فصل الشتاء البارد السحالي بتبقى ساكنة في التربة أو في شقوق الصخور للحفاظ على طاقتها، وده اسمه ${kw('البيات الشتوي')}.`) });
+
+  say(T(`What happens to the seeds when the warm season comes back? Let’s start a new year!`, `البذور هيحصل لها إيه لما الفصل الدافئ يرجع؟ يلّا نبدأ سنة جديدة!`), 'point');
+  await nextBtn(T('New year ▸', 'سنة جديدة ◂'));
+  await tweenTo(1, 300); setU(0); await tweenTo(.22, 2200);
+  addScore(10); sfx.win(); confetti();
+  say(T(`The seeds ${kw('sprout')} again! Plants don’t just wither and die: their seeds continue the life cycle the following year.`, `البذور ${kw('نبتت')} من جديد! النباتات مش بتذبل وتموت وخلاص: بذورها بتكمل دورة حياتها في السنة التالية.`), 'celebrate');
+  await nextBtn(T('Go to Stage 2 ▸', 'على المرحلة ٢ ◂'));
+}
+
+const ALBUM = [
+  { id: 'sprout', u: .19, cap: T('Seeds sprout', 'تنبت البذور') },
+  { id: 'flower', u: .47, cap: T('Flowers bloom', 'تتفتح الأزهار') },
+  { id: 'fruit', u: .7, cap: T('Fruit grows', 'تنمو الثمار') },
+  { id: 'wither', u: .99, cap: T('Withers and leaves seeds', 'يذبل ويترك بذورًا') }
+];
+function album() {
+  return new Promise(res => {
+    const box = el('pcards'); box.innerHTML = ''; let next = 0, wrong = 0;
+    const HINTS = [
+      T(`Not yet. What happens <b>first</b>, when the temperature gets higher?`, `لسه. إيه اللي بيحصل <b>الأول</b> لما درجة الحرارة ترتفع؟`),
+      T(`Not yet. After the seeds sprout and the plant grows, what does it produce in summer?`, `لسه. بعد ما البذور تنبت والنبات ينمو، بينتج إيه في الصيف؟`),
+      T(`Not yet. What grows after the flowers bloom?`, `لسه. إيه اللي بينمو بعد ما الأزهار تتفتح؟`),
+      T(`Not yet. What happens in winter, when the temperature is low?`, `لسه. إيه اللي بيحصل في الشتاء لما درجة الحرارة تنخفض؟`)
+    ];
+    shuffle(ALBUM).forEach(c => {
+      const tm = A.temp(c.u);
+      const b = mk('button', 'pcard', `<svg viewBox="0 0 150 150" aria-hidden="true"><rect width="150" height="150" fill="${A.mix('#dbe6ee', '#d6f1fb', tm)}"/><rect y="124" width="150" height="26" fill="${A.mix('#d8d1c1', '#efdcab', tm)}"/>
+        <g transform="translate(75 128) scale(.74)">${A.plant(c.u)}</g></svg><span class="num"></span><span class="cap"></span>`);
+      b.type = 'button'; b.dataset.id = c.id; b.setAttribute('aria-label', T('A photo of the luffa', 'صورة لنبات اللوف'));
+      b.onclick = () => {
+        if (b.classList.contains('done')) return;
+        if (ALBUM[next].id === c.id) {
+          next++; b.classList.add('done'); b.querySelector('.num').textContent = next; b.querySelector('.cap').textContent = c.cap; b.setAttribute('aria-label', `${next}. ${c.cap}`); SI.sfx.ok();
+          if (next === ALBUM.length) res(wrong);
+        } else { wrong++; mistakes++; SI.sfx.bad(); b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); say(HINTS[next], 'sad'); }
+      };
+      box.appendChild(b);
+    });
+  });
+}
+
+async function stage2() {
+  setStage(2, T('Missions', 'المهمات'));
+  await banner(T('Stage 2', 'المرحلة ٢'), T('Missions', 'المهمات'));
+
+  // Mission 1: put the luffa photos in order
+  setUI({ cards: true, year: false, info: false }); lock(true);
+  say(T(`<b>Mission 1:</b> Reesho’s photos of the luffa got mixed up! <b>Tap them in the order of the year</b>, starting with what happens first.`,
+    G(`<b>المهمة ١:</b> صور ريشو لنبات اللوف اتلخبطت! <b>اضغط عليها بترتيب السنة</b>، وابدأ باللي بيحصل الأول.`, `<b>المهمة ١:</b> صور ريشو لنبات اللوف اتلخبطت! <b>اضغطي عليها بترتيب السنة</b>، وابدئي باللي بيحصل الأول.`)), 'point');
+  actions.innerHTML = '';
+  const wrong = await album();
+  addScore(Math.max(10, 30 - wrong * 5)); sfx.win(); confetti(18);
+  say(T(`That’s the yearly cycle: the seeds ${kw('sprout')}, the flowers ${kw('bloom')}, the fruit ${kw('grows')}, then the plant withers and leaves seeds.`, `دي الدورة السنوية للنبات: ${kw('تنبت')} البذور، ${kw('تتفتح')} الأزهار، ${kw('تنمو')} الثمار، وبعدين النبات يذبل ويسيب بذور.`), 'celebrate');
+  await nextBtn();
+
+  // Mission 2: where is the lizard?
+  setUI({ year: false }); hideLizard = true; render();
+  await tweenTo(.97, 700);
+  say(T(`<b>Mission 2:</b> It is a cold winter day. You search everywhere but cannot find the lizard. <b>Where is it staying still? Tap the place!</b>`,
+    G(`<b>المهمة ٢:</b> يوم بارد من أيام الشتاء. دوّرت في كل حتة ومش لاقي السحلية. <b>هي ساكنة فين؟ اضغط على المكان!</b>`, `<b>المهمة ٢:</b> يوم بارد من أيام الشتاء. دوّرتي في كل حتة ومش لاقية السحلية. <b>هي ساكنة فين؟ اضغطي على المكان!</b>`)), 'think');
+  actions.innerHTML = '';
+  await askSpot('crevice', {
+    hint: T(`Not there. When the temperature is low, the lizard does not move much. Where can it stay still? Try again!`, G(`مش هنا. لما درجة الحرارة تنخفض السحلية مش بتتحرك كتير. تقدر تفضل ساكنة فين؟ جرّب تاني!`, `مش هنا. لما درجة الحرارة تنخفض السحلية مش بتتحرك كتير. تقدر تفضل ساكنة فين؟ جرّبي تاني!`)),
+    ok: T(`In the cold winter it stays still in the soil or in <b>rock crevices</b> to conserve energy: ${kw('hibernation')}.`, `في الشتاء البارد بتبقى ساكنة في التربة أو في <b>شقوق الصخور</b> للحفاظ على طاقتها: ${kw('البيات الشتوي')}.`)
+  });
+  hideLizard = true; render();
+  await tweenTo(.5, 1100);
+  say(T(`Now it is a hot summer day. <b>Where is the lizard lying in the sun? Tap the place!</b>`, G(`دلوقتي يوم حار من أيام الصيف. <b>السحلية مستلقية تحت أشعة الشمس فين؟ اضغط على المكان!</b>`, `دلوقتي يوم حار من أيام الصيف. <b>السحلية مستلقية تحت أشعة الشمس فين؟ اضغطي على المكان!</b>`)), 'think');
+  await askSpot('rock', {
+    hint: T(`Not there. Think of a warm place right under the sun. Try again!`, G(`مش هنا. فكّر في مكان سخن تحت أشعة الشمس على طول. جرّب تاني!`, `مش هنا. فكّري في مكان سخن تحت أشعة الشمس على طول. جرّبي تاني!`)),
+    ok: T(`On top of the hot rock, right in the sun! When the temperature is high, the lizard is ${kw('active')} and quick.`, `فوق الصخرة الساخنة تحت أشعة الشمس! ولما درجة الحرارة تكون مرتفعة السحلية بتبقى ${kw('نشيطة')} وسريعة.`)
+  });
+
+  // Mission 3: set the time of year
+  setUI({}); hideLizard = false; render();
+  say(T(`<b>Mission 3:</b> You control the year! Move the slider to the time when the plant produces its <b>flowers</b>, then press <b>Check</b>.`,
+    G(`<b>المهمة ٣:</b> السنة في إيدك! حرّك المؤشر للوقت اللي النبات بينتج فيه <b>الأزهار</b>، وبعدين اضغط <b>تحقق</b>.`, `<b>المهمة ٣:</b> السنة في إيدك! حرّكي المؤشر للوقت اللي النبات بينتج فيه <b>الأزهار</b>، وبعدين اضغطي <b>تحقق</b>.`)), 'point');
+  await askSet({ test: v => v >= .42 && v <= .64, show: .5,
+    hint: T(`Not quite. Flowers are produced when the temperature is <b>high</b>. Look at the thermometer and try again!`, G(`قرّبت! الأزهار بتتنتج لما درجة الحرارة تكون <b>مرتفعة</b>. بص على الترمومتر وجرّب تاني!`, `قرّبتي! الأزهار بتتنتج لما درجة الحرارة تكون <b>مرتفعة</b>. بصّي على الترمومتر وجرّبي تاني!`)),
+    ok: T(`In summer, when the temperature is ${kw('high')}, plants produce flowers.`, `في الصيف، لما درجة الحرارة تكون ${kw('مرتفعة')}، النباتات بتنتج الأزهار.`) });
+  say(T(`Now find the time when the lizard is in ${kw('hibernation')}, then press <b>Check</b>.`, G(`دلوقتي دوّر على الوقت اللي السحلية بتكون فيه في ${kw('بيات شتوي')}، واضغط <b>تحقق</b>.`, `دلوقتي دوّري على الوقت اللي السحلية بتكون فيه في ${kw('بيات شتوي')}، واضغطي <b>تحقق</b>.`)), 'point');
+  await askSet({ test: v => A.temp(v) < A.COLD, show: .97,
+    hint: T(`Not quite. Hibernation happens in the cold <b>winter</b>, when the temperature is low. Try again!`, G(`قرّبت! البيات الشتوي بيحصل في <b>الشتاء</b> البارد لما درجة الحرارة تكون منخفضة. جرّب تاني!`, `قرّبتي! البيات الشتوي بيحصل في <b>الشتاء</b> البارد لما درجة الحرارة تكون منخفضة. جرّبي تاني!`)),
+    ok: T(`In the cold winter the lizard stays still in the rock crevice to conserve energy.`, `في الشتاء البارد السحلية بتبقى ساكنة في شق الصخرة للحفاظ على طاقتها.`) });
+  say(T(`Last one! Find the time when the seeds ${kw('sprout')}, then press <b>Check</b>.`, G(`آخر واحدة! دوّر على الوقت اللي البذور ${kw('بتنبت')} فيه، واضغط <b>تحقق</b>.`, `آخر واحدة! دوّري على الوقت اللي البذور ${kw('بتنبت')} فيه، واضغطي <b>تحقق</b>.`)), 'point');
+  await askSet({ test: v => v >= .1 && v <= .3, show: .2,
+    hint: T(`Not quite. Seeds sprout when the temperature starts getting <b>higher</b> after the winter. Try again!`, G(`قرّبت! البذور بتنبت لما درجة الحرارة تبدأ <b>ترتفع</b> بعد الشتاء. جرّب تاني!`, `قرّبتي! البذور بتنبت لما درجة الحرارة تبدأ <b>ترتفع</b> بعد الشتاء. جرّبي تاني!`)),
+    ok: T(`When the temperature gets ${kw('higher')}, the seeds sprout and the plant starts growing fast.`, `لما درجة الحرارة ${kw('ترتفع')} البذور بتنبت والنبات يبدأ ينمو بسرعة.`) });
+  sfx.win(); confetti();
+  say(T(`Stage 2 complete! You really know how the year changes.`, G(`خلّصت المرحلة ٢! إنت فاهم السنة بتتغير إزاي.`, `خلّصتي المرحلة ٢! إنتي فاهمة السنة بتتغير إزاي.`)), 'celebrate');
+  await nextBtn(T('Go to Stage 3 ▸', 'على المرحلة ٣ ◂'));
+}
+
+const FACTS = [
+  ['hot', T('Seeds sprout', 'تنبت البذور')], ['hot', T('Stems grow tall', 'تنمو السيقان وتصبح طويلة')], ['hot', T('Leaves spread wide', 'تنتشر الأوراق على نطاق واسع')],
+  ['hot', T('Plants produce flowers', 'تنتج النباتات الأزهار')], ['hot', T('Lizards become more active', 'تصبح السحالي أكثر نشاطًا')], ['hot', T('Lizards move quickly to find food', 'تتحرك السحالي بسرعة للبحث عن الطعام')],
+  ['cold', T('Plants start to wither', 'تبدأ النباتات في الذبول')], ['cold', T('Lizards’ movements become slow', 'تصبح حركات السحالي بطيئة')], ['cold', T('Lizards do not move much', 'لا تتحرك السحالي كثيرًا')],
+  ['cold', T('Lizards stay still in the soil or in rock crevices', 'تبقى السحالي ساكنة في التربة أو في شقوق الصخور')], ['cold', T('Lizards are in hibernation', 'تدخل السحالي في بيات شتوي')]
+];
+async function stage3() {
+  setStage(3, T('Speed Round', 'جولة السرعة'));
+  await banner(T('Stage 3', 'المرحلة ٣'), T('Speed Round', 'جولة السرعة'));
+  const ROUNDS = 8, WORD = { hot: T('high', 'مرتفعة'), cold: T('low', 'منخفضة') };
+  setUI({ year: false, info: false, hotcold: true }); lock(true); hideLizard = false; el('btnHot').disabled = el('btnCold').disabled = true;
+  await tweenTo(.28, 500);
+  say(T(`Speed Round! I will show you a sentence. Does it happen when the temperature is <b>high</b> or <b>low</b>? Press the right button before time runs out. ${ROUNDS} rounds!`,
+    G(`جولة السرعة! هوريك جملة: بتحصل لما درجة الحرارة تكون <b>مرتفعة</b> ولا <b>منخفضة</b>؟ اضغط على الزرار الصح قبل ما الوقت يخلص. ${ROUNDS} جولات!`, `جولة السرعة! هوريكي جملة: بتحصل لما درجة الحرارة تكون <b>مرتفعة</b> ولا <b>منخفضة</b>؟ اضغطي على الزرار الصح قبل ما الوقت يخلص. ${ROUNDS} جولات!`)), 'point');
+  await nextBtn(T('Go! ▸', 'يلّا! ◂'));
+  const hot = shuffle(FACTS.filter(f => f[0] === 'hot')).slice(0, 4), cold = shuffle(FACTS.filter(f => f[0] === 'cold')).slice(0, 4);
+  const list = shuffle(hot.concat(cold));
+  let streak = 0;
+  for (let i = 1; i <= ROUNDS; i++) {
+    const [ans, text] = list[i - 1];
+    veil(`<small>${T(`Round ${i} of ${ROUNDS}`, `الجولة ${i} من ${ROUNDS}`)}</small><strong>${text}</strong><span>${T('High or low temperature?', 'درجة الحرارة مرتفعة ولا منخفضة؟')}</span>`);
+    say(T(`When does this happen?`, `ده بيحصل إمتى؟`), 'think');
+    const r = await timedPick(10000);
+    veil(null);
+    tweenTo(ans === 'hot' ? .5 : .97, 600);
+    if (r.pick === ans) {
+      streak++;
+      const pts = 10 + Math.round(r.left * 10) + (streak >= 3 ? 5 : 0);
+      addScore(pts); sfx.ok();
+      say(T(`Correct! ${streak >= 3 ? `<b class="kw">Streak ×${streak}</b> ` : ''}“${text}” when the temperature is <b>${WORD[ans]}</b>.`, `صح! ${streak >= 3 ? `<b class="kw">سلسلة ×${streak}</b> ` : ''}«${text}» لما درجة الحرارة تكون <b>${WORD[ans]}</b>.`), 'thumbs');
+    } else {
+      streak = 0; mistakes++; sfx.bad();
+      say(T(`${r.timeout ? 'Time’s up!' : 'Not quite.'} “${text}” when the temperature is <b>${WORD[ans]}</b>.`, `${r.timeout ? 'الوقت خلص!' : G('قرّبت!', 'قرّبتي!')} «${text}» لما درجة الحرارة تكون <b>${WORD[ans]}</b>.`), 'sad');
+    }
+    await sleep(2100);
+  }
+}
+
+function results() {
+  const stars = mistakes <= 1 ? 3 : mistakes <= 4 ? 2 : 1;
+  const prev = store.load();
+  const best = Math.max(prev.best || 0, score);
+  store.save({ ...prev, best, stars: Math.max(prev.stars || 0, stars), plays: (prev.plays || 0) + 1 });
+  const gain = SI.addXP(score);
+  sfx.win(); SI.voice('finish'); confetti(60);
+  const o = mk('div', 'overlay');
+  o.innerHTML = `<div class="panel">
+    <img class="hero" src="assets/parrot_celebrate.png" alt="">
+    <h2>${T('Season Explorer done!', G('خلّصت مستكشف الفصول!', 'خلّصتي مستكشف الفصول!'))}</h2>
+    <div class="stars" aria-label="${T(`${stars} of 3 stars`, `${stars} من ٣ نجوم`)}">${'★'.repeat(stars)}<span class="off">${'★'.repeat(3 - stars)}</span></div>
+    <div class="stats"><span>${T('Score', 'النقاط')}: ${score}</span><span>${T('Best', 'أعلى نتيجة')}: ${best}</span><span>+${gain.gained} XP · ${T('Level', 'المستوى')} ${gain.after.n}</span></div>
+    <p>${T('When the temperature is <b>high</b>, plants grow and flower and lizards are active. In the cold <b>winter</b>, plants wither and leave seeds, and lizards hibernate.', 'لما درجة الحرارة تكون <b>مرتفعة</b> النباتات بتنمو وتنتج الأزهار والسحالي بتنشط. وفي <b>الشتاء</b> البارد النباتات بتذبل وتسيب بذور، والسحالي بتدخل في بيات شتوي.')}</p>
+    <div class="acts">
+      <a class="btn primary" href="quiz.html#quest">${T('Chapter Quest ▸', 'تحدي الفصل ◂')}</a>
+      <a class="btn" href="map.html">${T('Map', 'الخريطة')}</a>
+      <button class="btn" id="again" type="button">${T('Play again', 'العب تاني')}</button>
+    </div>
+  </div>`;
+  document.body.appendChild(o);
+  SI.rate.guard(o, 'a[href="map.html"]', 'results');   // Reesho asks for a rating before the player leaves (once per chapter)
+  $('#again', o).onclick = () => location.reload();
+}
+
+function intro() {
+  return new Promise(res => {
+    const s = store.load();
+    const o = mk('div', 'overlay');
+    o.innerHTML = `<div class="panel">
+      <img class="hero" src="assets/parrot_wave.png" alt="">
+      <h2>${T('Season Explorer', 'مستكشف الفصول')}</h2>
+      <p>${T(`Hi, <b>${SI.esc(SI.player().name)}</b>! Travel through a whole year with Reesho. See how a <b>plant</b> and a <b>lizard</b> change when the <b>temperature</b> changes.`,
+        G(`أهلًا يا <b>${SI.esc(SI.player().name)}</b>! سافر مع ريشو خلال سنة كاملة، وشوف <b>النبات</b> و<b>السحلية</b> بيتغيروا إزاي لما <b>درجة الحرارة</b> تتغير.`, `أهلًا يا <b>${SI.esc(SI.player().name)}</b>! سافري مع ريشو خلال سنة كاملة، وشوفي <b>النبات</b> و<b>السحلية</b> بيتغيروا إزاي لما <b>درجة الحرارة</b> تتغير.`))}</p>
+      ${s.best ? `<div class="stats"><span>${T('Best score', 'أعلى نتيجة')}: ${s.best}</span><span>${T('Stars', 'النجوم')}: ${'★'.repeat(s.stars || 0)}${'☆'.repeat(3 - (s.stars || 0))}</span></div>` : ''}
+      <div class="acts"><button class="btn primary big" id="start" type="button">${T('Start', 'ابدأ')}</button></div>
+    </div>`;
+    document.body.appendChild(o);
+    const b = $('#start', o); b.focus();
+    b.onclick = () => { sfx.tick(); o.remove(); res(); };
+  });
+}
+
+async function main() {
+  if (!SI.requirePlayer() || !SI.requireChapter('ch2')) return;   // this game belongs to Chapter 2
+  SI.applyTheme();
+  setUI({}); setU(.02); placeLizard(); requestAnimationFrame(tick);
+  say(T(`Hi! I’m Reesho the parrot.`, `أهلًا! أنا ريشو البغبغان.`), 'wave');
+  const jump = +((/^#stage([23])$/.exec(location.hash) || [])[1] || 1);   // seasons.html#stage2 or #stage3 jumps straight there (to check changes quickly)
+  await intro();
+  if (jump <= 1) await stage1();
+  if (jump <= 2) await stage2();
+  await stage3();
+  results();
+}
+main().catch(err => console.error(err));
+
+// small hook for automated tests
+window.__seasons = { setU, get u() { return u; }, results, get mistakes() { return mistakes; } };
+})();
+</script>
+</body>
+</html>

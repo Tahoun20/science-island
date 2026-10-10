@@ -282,9 +282,9 @@ body{
   </main>
 </div>
 
-<script src="firebase-config.js?v=20261010c"></script>
-<script src="chapters.js?v=20261010c"></script>
-<script src="common.js?v=20261010c"></script>
+<script src="firebase-config.js?v=20261011a"></script>
+<script src="chapters.js?v=20261011a"></script>
+<script src="common.js?v=20261011a"></script>
 <script>
 (() => {
 'use strict';
@@ -634,7 +634,7 @@ function ask(q) {
     }
 
     else if (q.type === 'tap') {
-      const wrap = mk('div', 'diagramWrap', DIAGRAMS[q.diagram]());
+      const wrap = mk('div', 'diagramWrap', (DIAGRAMS[q.diagram] || (window.CH_DIAGRAMS || {})[q.diagram])());   // Chapter 1's pictures are here; other chapters bring their own (chapters.js: art)
       area.appendChild(wrap);
       const hots = [...wrap.querySelectorAll('.hot')];
       const pick = h => {

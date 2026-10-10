@@ -1,7 +1,15 @@
 /* What changed on the site, newest first. Shown on admin.html under "آخر التعديلات".
    Each item: text (Arabic), and optional links [{label, href}] that open the change directly.
-   Preview links: quiz.html#preview=ID.n&lang=ar|en  ·  game stages: arm.html#stage2 / #stage3 */
+   Preview links: quiz.html#preview=ID.n&lang=ar|en  ·  game stages: arm.html#stage2 / #stage3, seasons.html#stage2 / #stage3
+   A link can name its chapter (ch: 'ch2'); without it the chapter chosen in the list on admin.html is used. */
 window.CHANGES = [
+  { date: '2026-10-11', title: 'الفصل الثاني: التغيرات في الفصول (عربي وإنجليزي)',
+    items: [
+      { text: 'الفصل الثاني اتفتح للمسارين: ١٥ فكرة من كتاب الوزارة (درس ٢-١ ودرس ٢-٢) بـ ٥٠ صياغة، و٣ أفكار إضافية من العمود الإثرائي «حكمة الصحراء».', links: [{ label: 'كل الأسئلة بالعربي', href: 'quiz.html#preview&lang=ar', ch: 'ch2' }, { label: 'English', href: 'quiz.html#preview&lang=en', ch: 'ch2' }] },
+      { text: 'لعبة الفصل «مستكشف الفصول»: الطالب بيحرّك السنة ويشوف نبات اللوف والسحلية بيتغيروا مع درجة الحرارة. ٣ مراحل.', links: [{ label: 'اللعبة', href: 'seasons.html' }, { label: 'المرحلة ٢', href: 'seasons.html#stage2' }, { label: 'المرحلة ٣', href: 'seasons.html#stage3' }] },
+      { text: 'أسئلة «اضغط على الصورة» جديدة: صور النبات خلال السنة، ومكان السحلية في الصيف وفي الشتاء.', links: [{ label: 'صور النبات', href: 'quiz.html#preview=P4.2&lang=ar', ch: 'ch2' }, { label: 'السحلية في الشتاء', href: 'quiz.html#preview=T4.2&lang=ar', ch: 'ch2' }, { label: 'السحلية في الصيف', href: 'quiz.html#preview=T2.4&lang=ar', ch: 'ch2' }] },
+      { text: 'خريطة جديدة للفصل الثاني (جزيرة الصيف والشتاء) وخلفية خاصة بيه.', links: [{ label: 'الخريطة', href: 'map.html', ch: 'ch2' }] }
+    ] },
   { date: '2026-10-10', title: 'واجهة الصفحة الرئيسية الجديدة',
     items: [
       { text: 'صورة «متفوّق» الجديدة مع ريشو بدل العنوان القديم، بنسخة أصغر للموبايل علشان تفتح بسرعة.', links: [{ label: 'الصفحة الرئيسية', href: 'index.html' }] }

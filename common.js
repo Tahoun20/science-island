@@ -104,10 +104,10 @@ html[dir=rtl] .timer span{right:auto;left:8px}`;
       const src = c && ((isAr() && c.questionsAr) || c.questions);   // Arabic-track players get the Arabic file
       if (!src) return rej(new Error('This chapter has no questions yet.'));
       window.IDEAS = undefined;
-      const el = document.createElement('script'); el.src = vq(src);
-      el.onload = () => (Array.isArray(window.IDEAS) ? res(window.IDEAS) : rej(new Error('No questions in ' + src)));
-      el.onerror = () => rej(new Error('Could not load ' + src));
-      document.head.appendChild(el);
+      const add = (file, ok, bad) => { const el = document.createElement('script'); el.src = vq(file); el.onload = ok; el.onerror = bad; document.head.appendChild(el); };
+      const questions = () => add(src, () => (Array.isArray(window.IDEAS) ? res(window.IDEAS) : rej(new Error('No questions in ' + src))), () => rej(new Error('Could not load ' + src)));
+      if (c.art && !window.CH_DIAGRAMS) add(c.art, questions, () => rej(new Error('Could not load ' + c.art)));   // the chapter's own tap pictures
+      else questions();
     });
   }
   /* saves made before the site had several chapters all belong to Chapter 1: move them into ch.ch1 */
@@ -466,7 +466,7 @@ html[dir=rtl] .timer span{right:auto;left:8px}`;
      Counts page views with approximate location only. No player names are sent, and the data
      is not used for advertising. Runs on the published site only, not on local copies. */
   const GA_ID = 'G-XP595P45PX';
-  const PAGE_NAMES = { 'index.html': 'Home', 'chapters.html': 'Chapters', 'map.html': 'Island map', 'arm.html': 'Arm Mechanic', 'champions.html': 'Champions', 'contact.html': 'Contact', 'reviews.html': 'Owner page',
+  const PAGE_NAMES = { 'index.html': 'Home', 'chapters.html': 'Chapters', 'map.html': 'Island map', 'arm.html': 'Arm Mechanic', 'seasons.html': 'Season Explorer', 'champions.html': 'Champions', 'contact.html': 'Contact', 'reviews.html': 'Owner page',
     'quiz.html': 'Chapter Quest', 'quiz.html#quest': 'Chapter Quest', 'quiz.html#daily': 'Daily 5', 'quiz.html#review': 'Review' };
   function pageName() {
     const file = location.pathname.split('/').pop() || 'index.html';
