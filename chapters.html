@@ -57,6 +57,7 @@ a.ch:focus-visible{outline:3px solid #f7b267;outline-offset:2px}
       <span class="pill" title="Stars in all chapters" data-ar-label="النجوم في كل الفصول">⭐ <b id="stars">0</b></span>
       <button class="icon" id="mute" type="button" aria-label="Sound" aria-pressed="false" title="Sound on/off" data-ar-label="الصوت">♪</button>
       <a class="icon" href="index.html" aria-label="Change player" title="Change player" data-ar-label="تغيير اللاعب">👤</a>
+      <button class="icon" id="bye" type="button" aria-label="Goodbye" title="Goodbye" data-ar-label="باي">👋</button>
     </div>
   </header>
   <main class="wrap">
@@ -93,6 +94,7 @@ a.ch:focus-visible{outline:3px solid #f7b267;outline-offset:2px}
   $('#lvlNext').textContent = lv.to ? T(`${lv.to - lv.xp} XP to ${lv.next}`, `باقي ${lv.to - lv.xp} XP للوصول إلى ${lv.next}`) : T('Top level reached!', 'وصلت لأعلى مستوى!');
   $('#streak').textContent = SI.dailyState().streak;
 
+  $('#bye').onclick = () => { SI.sfx.tick(); SI.bye(); };
   const mute = $('#mute');
   const paint = () => { mute.setAttribute('aria-pressed', SI.isMuted()); mute.setAttribute('aria-label', SI.isMuted() ? T('Sound off', 'الصوت مغلق') : T('Sound on', 'الصوت شغال')); };
   mute.onclick = () => { SI.setMuted(!SI.isMuted()); paint(); }; paint();
@@ -123,8 +125,8 @@ a.ch:focus-visible{outline:3px solid #f7b267;outline-offset:2px}
 
   const curCh = SI.chapter();
   $('#bubble').innerHTML = started && curCh
-    ? T(`Welcome back, <b>${esc(me.name)}</b>! Keep going with <b>${esc(curCh.title)}</b>, or pick another chapter.`, `أهلًا بعودتك يا <b>${esc(me.name)}</b>! كمّل في <b>${esc(SI.chTitle(curCh))}</b>، أو اختر فصلًا آخر.`)
-    : T(`Hi, <b>${esc(me.name)}</b>! I’m Reesho. Pick a chapter and let’s play!`, `أهلًا يا <b>${esc(me.name)}</b>! أنا ريشو. اختر فصلًا ويلّا نلعب!`);
+    ? T(`Welcome back, <b>${esc(me.name)}</b>! Keep going with <b>${esc(curCh.title)}</b>, or pick another chapter.`, SI.G(`أهلًا بعودتك يا <b>${esc(me.name)}</b>! كمّل في <b>${esc(SI.chTitle(curCh))}</b>، أو اختر فصلًا آخر.`, `أهلًا بعودتك يا <b>${esc(me.name)}</b>! كمّلي في <b>${esc(SI.chTitle(curCh))}</b>، أو اختاري فصلًا آخر.`))
+    : T(`Hi, <b>${esc(me.name)}</b>! I’m Reesho. Pick a chapter and let’s play!`, SI.G(`أهلًا يا <b>${esc(me.name)}</b>! أنا ريشو. اختر فصلًا ويلّا نلعب!`, `أهلًا يا <b>${esc(me.name)}</b>! أنا ريشو. اختاري فصلًا ويلّا نلعب!`));
   if (started) $('#parrot').src = 'assets/parrot_thumbs.png';
 })();
 </script>

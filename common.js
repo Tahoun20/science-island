@@ -15,7 +15,7 @@
   const player = () => { const s = store.load(); return (s.players || {})[s.current] ? Object.assign({ id: s.current }, s.players[s.current]) : null; };
   function addPlayer(p) {
     const id = rid();
-    store.update(s => { s.players = s.players || {}; s.players[id] = { name: p.name, grade: p.grade || 'g5', track: p.track || 'lang' }; s.current = id; });
+    store.update(s => { s.players = s.players || {}; s.players[id] = { name: p.name, grade: p.grade || 'g5', track: p.track || 'lang', g: p.g || '' }; s.current = id; });
     return player();
   }
   /* ---------- language: an Arabic-track player sees the site in Arabic, right to left ----------
@@ -45,6 +45,17 @@ html[dir=rtl] .timer span{right:auto;left:8px}`;
     document.querySelectorAll('[data-ar]').forEach(e => { e.innerHTML = e.dataset.ar; });
     document.querySelectorAll('[data-ar-label]').forEach(e => { e.setAttribute('aria-label', e.dataset.arLabel); if (e.hasAttribute('title')) e.title = e.dataset.arLabel; });
     document.querySelectorAll('[data-ar-ph]').forEach(e => { e.placeholder = e.dataset.arPh; });
+  }
+  /* boy or girl: Reesho talks to each child the right way ("يا بطل" / "يا بطلة") */
+  const gender = () => ((player() || {}).g || '');
+  const G = (m, f) => (gender() === 'f' ? f : m);
+  function setGender(g) { store.update(s => { const p = (s.players || {})[s.current]; if (p) p.g = g === 'f' ? 'f' : 'm'; }); }
+  /* how long since this player was last here: decides Reesho's greeting */
+  function visit() {
+    const p = player(); if (!p) return { kind: 'hello', days: 0 };
+    const t = today(), days = p.seen ? Math.max(0, dayDiff(p.seen, t)) : -1;
+    store.update(s => { const q = (s.players || {})[s.current]; if (q) q.seen = t; });
+    return { kind: days < 0 ? 'intro' : days === 0 ? 'hello' : days === 1 ? 'back' : days < 7 ? 'miss' : 'missbig', days };
   }
   function usePlayer(id) { store.update(s => { if ((s.players || {})[id]) s.current = id; }); return player(); }
   function requirePlayer() { const p = player(); if (!p || !p.name) { location.href = HOME; return null; } return p; }
@@ -225,18 +236,32 @@ html[dir=rtl] .timer span{right:auto;left:8px}`;
   const VOICE = {
     ok: ['ok1', 'ok2', 'ok3', 'ok4', 'ok5', 'ok6', 'ok7', 'ok8'], bad: ['bad1', 'bad2', 'bad3', 'bad4'], streak: ['streak'], boss: ['boss'],
     box: ['box'], finish: ['finish'], hello: ['hello'], level: ['level'], champion: ['champion'],
-    rate: ['rate'], better: ['better'], thanks: ['thanks']
+    rate: ['rate'], better: ['better'], thanks: ['thanks'],
+    intro: ['intro'], back: ['back'], miss: ['miss'], missbig: ['missbig'], bye: ['bye']
   };
   const VOICE_TEXT = {
     ok1: 'رائع!', ok2: 'ممتاز!', ok3: 'أحسنت!', ok4: 'عظيم!', ok5: 'برافو عليك!', ok6: 'يا سلام عليك!', ok7: 'شاطر!', ok8: 'كده تمام!',
     bad1: 'حاول مرة تانية', bad2: 'قربت! جرّب تاني', bad3: 'ولا يهمك، جرّب تاني', bad4: 'فكّر تاني براحتك',
     streak: 'ما شاء الله! إنت نار!', boss: 'استعد للتحدي الكبير!', box: 'مفاجأة!',
     finish: 'أحسنت يا بطل! خلّصت المهمة', hello: 'أهلًا يا بطل!', level: 'مبروك! طلعت مستوى جديد', champion: 'إنت من الأبطال!',
-    rate: 'استنى يا بطل! قولّي رأيك في اللعبة', better: 'ولا يهمك! قولّي نضيف إيه علشان تبقى أحلى؟', thanks: 'شكرًا يا بطل! رأيك مهم عندي'
+    rate: 'استنى يا بطل! قولّي رأيك في اللعبة', better: 'ولا يهمك! قولّي نضيف إيه علشان تبقى أحلى؟', thanks: 'شكرًا يا بطل! رأيك مهم عندي',
+    intro: 'أهلًا يا بطل! أنا ريشو، صاحبك في متفوّق. هنلعب ونتعلم سوا. يلا نكتشفها سوا!',
+    back: 'أهلًا بيك تاني يا بطل! يلا نكمل', miss: 'وحشتني يا بطل! يلا نكمل من مكان ما وقفنا',
+    missbig: 'أخيرًا رجعت! وحشتني أوي أوي! يلا بينا', bye: 'باي يا بطل! هستناك بكرة علشان نكمل سوا',
+    /* girls: the same phrase in the feminine (file name ends in _f). A phrase that is the same for both has no _f. */
+    ok3_f: 'أحسنتِ!', ok5_f: 'برافو عليكي!', ok6_f: 'يا سلام عليكي!', ok7_f: 'شاطرة!',
+    bad1_f: 'حاولي مرة تانية', bad2_f: 'قربتي! جرّبي تاني', bad3_f: 'ولا يهمك، جرّبي تاني', bad4_f: 'فكّري تاني براحتك',
+    streak_f: 'ما شاء الله! إنتي نار!', finish_f: 'أحسنتِ يا بطلة! خلّصتي المهمة', hello_f: 'أهلًا يا بطلة!',
+    level_f: 'مبروك! طلعتي مستوى جديد', champion_f: 'إنتي من البطلات!',
+    rate_f: 'استني يا بطلة! قوليلي رأيك في اللعبة', better_f: 'ولا يهمك! قوليلي نضيف إيه علشان تبقى أحلى؟', thanks_f: 'شكرًا يا بطلة! رأيك مهم عندي',
+    intro_f: 'أهلًا يا بطلة! أنا ريشو، صاحبك في متفوّق. هنلعب ونتعلم سوا. يلا نكتشفها سوا!',
+    back_f: 'أهلًا بيكي تاني يا بطلة! يلا نكمل', miss_f: 'وحشتيني يا بطلة! يلا نكمل من مكان ما وقفنا',
+    missbig_f: 'أخيرًا رجعتي! وحشتيني أوي أوي! يلا بينا', bye_f: 'باي يا بطلة! هستناكي بكرة علشان نكمل سوا'
   };
-  const NO_ROBOT = { rate: 1, better: 1, thanks: 1 };            // silent until the recorded clip is uploaded
+  const NO_ROBOT = { rate: 1, better: 1, thanks: 1, intro: 1, back: 1, miss: 1, missbig: 1, bye: 1 };   // silent until the recorded clip is uploaded
+  Object.keys(VOICE_TEXT).forEach(id => { if (/_f$/.test(id)) NO_ROBOT[id] = 1; });   // a girl never hears the boy's phrase or the robot voice
   const LEAD = { finish: .45, box: .45, level: .35, boss: .7, rate: .3, thanks: .3 };   // seconds Reesho waits so the effect is heard first (default .12)
-  const ALL_CLIPS = Object.keys(VOICE_TEXT);
+  const clipsFor = () => Object.keys(VOICE_TEXT).filter(id => (/_f$/.test(id) ? gender() === 'f' : !(gender() === 'f' && VOICE_TEXT[id + '_f'])));   // only this child's versions
   const raw = {}, decoded = {}, bufs = {}, els = {}, missing = {}, lastId = {};
   let noFetch = location.protocol === 'file:', lastVoiceAt = 0;
   function arabicVoice() {
@@ -295,7 +320,8 @@ html[dir=rtl] .timer span{right:auto;left:8px}`;
   function voice(kind) {
     if (isMuted() || !VOICE[kind]) return;
     const now = Date.now(); if (now - lastVoiceAt < 700) return; lastVoiceAt = now;   // never talk over itself
-    const id = pick(kind), lead = LEAD[kind] || .12;
+    let id = pick(kind); const lead = LEAD[kind] || .12;
+    if (gender() === 'f' && VOICE_TEXT[id + '_f']) id += '_f';   // the girl's version of a gendered phrase
     if (missing[id]) return robot(id);
     if (noFetch) return playElement(id);
     audio();                                                   // unlock inside the tap
@@ -307,9 +333,64 @@ html[dir=rtl] .timer span{right:auto;left:8px}`;
     });
   }
   /* fetch the clips while the page is idle, decode them on the first tap or key press */
-  window.addEventListener('load', () => setTimeout(() => ALL_CLIPS.forEach(fetchClip), 400));
-  const prime = () => { if (!isMuted() && audio()) ALL_CLIPS.forEach(clip); };
+  window.addEventListener('load', () => setTimeout(() => clipsFor().forEach(fetchClip), 400));
+  const prime = () => { if (!isMuted() && audio()) clipsFor().forEach(clip); };
   ['pointerdown', 'keydown', 'touchstart'].forEach(ev => window.addEventListener(ev, prime, { once: true, passive: true, capture: true }));
+
+  /* ---------- Reesho says hello and goodbye ----------
+     greet(): after the child taps their name (so the voice may play). Kind from visit(): intro (first time),
+     hello (same day), back (yesterday), miss (2-6 days), missbig (a week or more).
+     bye(): the 👋 button. Browsers do not let a page talk when the tab is being closed, so goodbye is a button. */
+  function greetText(kind, days) {
+    const n = esc((player() || {}).name || ''), ar = isAr();
+    const A = {
+      intro: G(`أهلًا يا <b>${n}</b>! 👋 أنا <b>ريشو</b>، صاحبك في متفوّق. هنلعب ونتعلم سوا، وكل إجابة صح هتكسبك نجوم ونقط. يلا نكتشفها سوا!`,
+               `أهلًا يا <b>${n}</b>! 👋 أنا <b>ريشو</b>، صاحبك في متفوّق. هنلعب ونتعلم سوا، وكل إجابة صح هتكسبك نجوم ونقط. يلا نكتشفها سوا!`),
+      hello: G(`أهلًا يا <b>${n}</b>! جاهز نكمل؟`, `أهلًا يا <b>${n}</b>! جاهزة نكمل؟`),
+      back: G(`أهلًا بيك تاني يا <b>${n}</b>! 😊 مبسوط إنك رجعت النهارده.`, `أهلًا بيكي تاني يا <b>${n}</b>! 😊 مبسوط إنك رجعتي النهارده.`),
+      miss: G(`وحشتني يا <b>${n}</b>! 🥰 بقالك ${days} أيام مجيتش. يلا نكمل من مكان ما وقفنا!`, `وحشتيني يا <b>${n}</b>! 🥰 بقالك ${days} أيام مجيتيش. يلا نكمل من مكان ما وقفنا!`),
+      missbig: G(`أخيرًا رجعت يا <b>${n}</b>! 🎉 وحشتني أوي أوي، وكنت مستنيك. يلا بينا!`, `أخيرًا رجعتي يا <b>${n}</b>! 🎉 وحشتيني أوي أوي، وكنت مستنيكي. يلا بينا!`)
+    };
+    const E = {
+      intro: `Hi <b>${n}</b>! 👋 I’m <b>Reesho</b>, your friend on Motafawek. We’ll play and learn together, and every right answer wins you stars and points. Let’s find out together!`,
+      hello: `Hi <b>${n}</b>! Ready to carry on?`,
+      back: `Welcome back, <b>${n}</b>! 😊 Great to see you again today.`,
+      miss: `I missed you, <b>${n}</b>! 🥰 It’s been ${days} days. Let’s pick up where we left off!`,
+      missbig: `You’re back, <b>${n}</b>! 🎉 I missed you so much. Let’s go!`
+    };
+    return ar ? A[kind] : E[kind];
+  }
+  function popup(html) {
+    const o = document.createElement('div'); o.className = 'overlay'; o.innerHTML = `<div class="panel" role="dialog" aria-modal="true" dir="${isAr() ? 'rtl' : 'ltr'}" style="font-family:${isAr() ? 'Cairo,Nunito' : 'Nunito,Cairo'},sans-serif">${html}</div>`;
+    document.body.appendChild(o); return o;
+  }
+  function greet(v) {
+    v = v || visit();
+    const big = v.kind === 'intro' || v.kind === 'missbig';
+    return new Promise(res => {
+      const o = popup(`<img src="assets/parrot_${big ? 'celebrate' : 'wave'}.png" alt="" style="height:${big ? 170 : 140}px;width:auto">
+        <p style="font-size:19px">${greetText(v.kind, v.days)}</p>
+        <div class="acts"><button class="btn primary big" type="button">${T('Let’s go ▸', 'يلا بينا ◂')}</button></div>`);
+      voice(v.kind);
+      const go = () => { if (o.isConnected) { o.remove(); res(); } };
+      o.querySelector('button').onclick = () => { sfx.tick(); go(); };
+      o.querySelector('button').focus();
+    });
+  }
+  function bye(home) {
+    const n = esc((player() || {}).name || ''), st = dailyState().streak, ar = isAr();
+    const txt = ar
+      ? G(`باي يا <b>${n}</b>! 👋 النهارده اتعلمت حاجات حلوة. ارجع بكرة علشان خماسية اليوم ونكمل سوا!`, `باي يا <b>${n}</b>! 👋 النهارده اتعلمتي حاجات حلوة. ارجعي بكرة علشان خماسية اليوم ونكمل سوا!`)
+        + (st ? G(` متنساش سلسلتك 🔥 ${st} يوم!`, ` متنسيش سلسلتك 🔥 ${st} يوم!`) : '')
+      : `Bye, <b>${n}</b>! 👋 You learned great things today. Come back tomorrow for your Daily 5 and we’ll carry on together!` + (st ? ` Don’t lose your 🔥 ${st} day streak!` : '');
+    const o = popup(`<img src="assets/parrot_wave.png" alt="" style="height:150px;width:auto"><p style="font-size:19px">${txt}</p>
+      <div class="acts"><button class="btn primary" type="button" data-k="go">${T('Bye 👋', 'باي 👋')}</button><button class="btn" type="button" data-k="stay">${T('I’ll play a bit more', G('هكمّل شوية', 'هكمّل شوية'))}</button></div>`);
+    o.querySelector('[data-k="stay"]').onclick = () => { sfx.tick(); o.remove(); };
+    o.querySelector('[data-k="go"]').onclick = e => {
+      e.currentTarget.disabled = true; voice('bye');
+      setTimeout(() => { location.href = home || HOME; }, isMuted() ? 200 : 2800);   // let Reesho finish saying goodbye
+    };
+  }
 
   /* ---------- Champions board: Firebase when configured, this device otherwise ---------- */
   const FB = 'https://www.gstatic.com/firebasejs/10.12.2/';
@@ -686,6 +767,7 @@ html[dir=rtl] .timer span{right:auto;left:8px}`;
 
   window.SI = { HOME, CHAPTERS_PAGE, store, players, player, addPlayer, usePlayer, requirePlayer, prof, updateProf,
     chapters, chapterById, chapterId, chapter, setChapter, requireChapter, chProf, updateChProf, chapterStars, chReady, applyTheme, loadQuestions, checkName, LEVELS, levelInfo, xp, addXP, today, dailyState, completeDaily,
-    weekKey, weekEndsIn, isMuted, setMuted, sfx, voice, speak, LB, rate, esc, NAME: 'Reesho', isAr, T, chTitle, applyLang, isOwner, setOwner };
+    weekKey, weekEndsIn, isMuted, setMuted, sfx, voice, speak, LB, rate, esc, NAME: 'Reesho', isAr, T, chTitle, applyLang, isOwner, setOwner,
+    gender, G, setGender, visit, greet, bye, VOICE_TEXT };
   applyLang();
 })();

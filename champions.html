@@ -90,8 +90,8 @@
   const mine = $('#mine');
   if (m) {
     const above = rows[m.rank - 2];
-    mine.innerHTML = T(`<div>Your best this week: <b>${m.score}</b><br>Rank <b>#${m.rank}</b></div>`, `<div>أعلى نتيجة ليك الأسبوع ده: <b>${m.score}</b><br>ترتيبك <b>#${m.rank}</b></div>`) +
-      (m.rank === 1 ? T('<div>👑 You are number 1!</div>', '<div>👑 إنت رقم ١!</div>') : above ? T(`<div>${above.score - m.score + 1} more points to pass <b>${SI.esc(above.name)}</b>!</div>`, `<div>محتاج ${above.score - m.score + 1} نقطة كمان علشان تعدّي <b>${SI.esc(above.name)}</b>!</div>`) : '');
+    mine.innerHTML = T(`<div>Your best this week: <b>${m.score}</b><br>Rank <b>#${m.rank}</b></div>`, SI.G(`<div>أعلى نتيجة ليك الأسبوع ده: <b>${m.score}</b><br>ترتيبك <b>#${m.rank}</b></div>`, `<div>أعلى نتيجة ليكي الأسبوع ده: <b>${m.score}</b><br>ترتيبك <b>#${m.rank}</b></div>`)) +
+      (m.rank === 1 ? T('<div>👑 You are number 1!</div>', SI.G('<div>👑 إنت رقم ١!</div>', '<div>👑 إنتي رقم ١!</div>')) : above ? T(`<div>${above.score - m.score + 1} more points to pass <b>${SI.esc(above.name)}</b>!</div>`, `<div>محتاج ${above.score - m.score + 1} نقطة كمان علشان تعدّي <b>${SI.esc(above.name)}</b>!</div>`) : '');
     mine.hidden = false;
     if (m.rank <= 3) SI.voice('champion');
   }

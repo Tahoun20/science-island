@@ -72,6 +72,7 @@
       <button class="icon" id="mute" type="button" aria-label="Sound" aria-pressed="false" title="Sound on/off" data-ar-label="الصوت">♪</button>
       <a class="icon" href="chapters.html" aria-label="All chapters" title="All chapters" data-ar-label="كل الفصول">📚</a>
       <a class="icon" href="index.html" aria-label="Change player" title="Change player" data-ar-label="تغيير اللاعب">👤</a>
+      <button class="icon" id="bye" type="button" aria-label="Goodbye" title="Goodbye" data-ar-label="باي">👋</button>
     </div>
   </header>
   <main class="grid">
@@ -120,6 +121,7 @@
   const st = SI.chapterStars(CH.id);
   $('#stars').textContent = st.got; $('#starsOf').textContent = st.of;
 
+  $('#bye').onclick = () => { SI.sfx.tick(); SI.bye(); };
   const mute = $('#mute');
   const paint = () => { mute.setAttribute('aria-pressed', SI.isMuted()); mute.setAttribute('aria-label', SI.isMuted() ? T('Sound off', 'الصوت مغلق') : T('Sound on', 'الصوت شغال')); };
   mute.onclick = () => { SI.setMuted(!SI.isMuted()); paint(); }; paint();
@@ -130,13 +132,13 @@
   const ALL = [
     G && { key: 'game', icon: G.icon || '🎮', name: T(G.name, G.nameAr || G.name), href: G.href, done: !!arm.stars, sub: stars(arm.stars || 0), hint: T(G.hint || 'Play this chapter’s game!', G.hintAr || 'العب لعبة الفصل!') },
     { key: 'quest', icon: '⭐', name: T('Chapter Quest', 'تحدي الفصل'), href: 'quiz.html#quest', done: !!quest.stars, sub: stars(quest.stars || 0),
-      hint: T('Questions on the whole chapter. Your best score goes on the Champions board!', 'أسئلة على الفصل كله. أعلى نتيجة ليك بتدخل لوحة الأبطال!') },
+      hint: T('Questions on the whole chapter. Your best score goes on the Champions board!', SI.G('أسئلة على الفصل كله. أعلى نتيجة ليك بتدخل لوحة الأبطال!', 'أسئلة على الفصل كله. أعلى نتيجة ليكي بتدخل لوحة الأبطال!')) },
     { key: 'daily', icon: '⚡', name: T('Daily 5', 'خماسية اليوم'), href: 'quiz.html#daily', done: daily.done, sub: daily.done ? T('✓ done today', '✓ خلصتها النهارده') : (daily.streak ? T(`🔥 ${daily.streak} days`, `🔥 ${daily.streak} يوم`) : T('once a day', 'مرة كل يوم')),
-      hint: T('5 quick questions every day. Keep your fire streak going!', '٥ أسئلة سريعة كل يوم. حافظ على سلسلة أيامك!') },
+      hint: T('5 quick questions every day. Keep your fire streak going!', SI.G('٥ أسئلة سريعة كل يوم. حافظ على سلسلة أيامك!', '٥ أسئلة سريعة كل يوم. حافظي على سلسلة أيامك!')) },
     { key: 'review', icon: '🔁', name: T('Review', 'المراجعة'), href: 'quiz.html#review', badge: due, done: false, sub: due ? T(`${due} waiting`, `${due} مستني`) : T('all clear', 'مفيش حاجة'),
-      hint: due ? T(`${due} tricky question${due > 1 ? 's are' : ' is'} waiting for you.`, `فيه ${due} سؤال صعب مستنيك.`) : T('Reesho saves your tricky questions here.', 'ريشو بيحفظ لك الأسئلة الصعبة هنا.') },
+      hint: due ? T(`${due} tricky question${due > 1 ? 's are' : ' is'} waiting for you.`, SI.G(`فيه ${due} سؤال صعب مستنيك.`, `فيه ${due} سؤال صعب مستنيكي.`)) : T('Reesho saves your tricky questions here.', 'ريشو بيحفظ لك الأسئلة الصعبة هنا.') },
     { key: 'board', icon: '🏆', name: T('Champions', 'الأبطال'), href: 'champions.html', done: false, sub: '&nbsp;',
-      hint: T('See this week’s top players!', 'شوف أبطال الأسبوع!') }
+      hint: T('See this week’s top players!', SI.G('شوف أبطال الأسبوع!', 'شوفي أبطال الأسبوع!')) }
   ];
   /* positions come from the chapter (game, quest, daily, review, champions); a chapter without a game skips the first one */
   const POS = (CH.map && CH.map.stops) || [[59.6, 82.9, 'left'], [54.6, 67.1, 'right'], [41.3, 51.4, 'right'], [39.6, 38.1, 'left'], [68.2, 12.5, 'below']];

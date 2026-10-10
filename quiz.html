@@ -295,7 +295,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const mk = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
-const esc = SI.esc, T = SI.T, AR = SI.isAr();
+const esc = SI.esc, T = SI.T, G = SI.G, AR = SI.isAr();
 
 /* ---------- per-player review schedule (Leitner boxes), sound, mute ---------- */
 const CH = SI.chapter() || {};                             // the chapter being played (questions come from CH.questions)
@@ -539,7 +539,7 @@ function ask(q) {
           } else {
             b.classList.add('bad'); b.disabled = true; sfx.bad();
             if (tries >= maxTries) { reveal(); finish(false, false); }
-            else say(T('Not quite. Try once more!', 'قرّبت! جرّب مرة كمان.'), 'think');
+            else say(T('Not quite. Try once more!', G('قرّبت! جرّب مرة كمان.', 'قرّبتي! جرّبي مرة كمان.')), 'think');
           }
         };
         wrap.appendChild(b); return b;
@@ -654,7 +654,7 @@ function ask(q) {
 }
 
 /* ---------- session ---------- */
-const PRAISE = AR ? ['شغل عظيم!', 'ممتاز!', 'صح عليك!', 'رائع!', 'أحسنت!', 'برافو!', 'جامد!'] : ['Great job!', 'Super!', 'You got it!', 'Brilliant!', 'Well done!', 'Fantastic!', 'Awesome!'];
+const PRAISE = AR ? ['شغل عظيم!', 'ممتاز!', G('صح عليك!', 'صح عليكي!'), 'رائع!', 'أحسنت!', 'برافو!', 'جامد!'] : ['Great job!', 'Super!', 'You got it!', 'Brilliant!', 'Well done!', 'Fantastic!', 'Awesome!'];
 let streak = 0, best = 0;
 
 async function mysteryBox() {
@@ -671,7 +671,7 @@ async function mysteryBox() {
     box.onclick = () => {
       if (box.dataset.done) return; box.dataset.done = 1;
       box.textContent = '✨'; box.style.animation = 'none'; pr.hidden = false; go.hidden = false;
-      sfx.win(); SI.voice('box'); confetti(40); addScore(prize); say(T(`Wow! You won <b>${prize}</b> bonus points!`, `واو! كسبت <b>${prize}</b> نقطة زيادة!`), 'celebrate');
+      sfx.win(); SI.voice('box'); confetti(40); addScore(prize); say(T(`Wow! You won <b>${prize}</b> bonus points!`, G(`واو! كسبت <b>${prize}</b> نقطة زيادة!`, `واو! كسبتي <b>${prize}</b> نقطة زيادة!`)), 'celebrate');
       go.focus();
     };
     go.onclick = () => { o.remove(); res(); };
@@ -699,11 +699,11 @@ async function playList(list, label) {
       say(T('A bonus question from the chapter’s extra reading. Extra points!', 'سؤال إضافي من الجزء الإثرائي في الكتاب. نقط زيادة!'), 'point');
     } else if (q.mode === 'boss' && list[i - 1] && list[i - 1].mode !== 'boss') {
       sfx.boss(); SI.voice('boss'); await banner(T('Get ready', 'استعد'), T('Boss Round!', 'التحدي الكبير!'), 'boss');
-      say(T('Boss questions mix two ideas. Take your time!', 'أسئلة التحدي الكبير بتجمع فكرتين. خد وقتك!'), 'point');
+      say(T('Boss questions mix two ideas. Take your time!', G('أسئلة التحدي الكبير بتجمع فكرتين. خد وقتك!', 'أسئلة التحدي الكبير بتجمع فكرتين. خدي وقتك!')), 'point');
     } else if (i === 0) {
-      say(label === 'review' ? T('Let’s practise the tricky ones again!', 'يلّا نراجع الأسئلة الصعبة تاني!') : label === 'daily' ? T('Five quick ones. Let’s go!', 'خمسة سريعين. يلّا بينا!') : T('Read carefully and have fun!', 'اقرأ كويس واستمتع!'), 'point');
+      say(label === 'review' ? T('Let’s practise the tricky ones again!', 'يلّا نراجع الأسئلة الصعبة تاني!') : label === 'daily' ? T('Five quick ones. Let’s go!', 'خمسة سريعين. يلّا بينا!') : T('Read carefully and have fun!', G('اقرأ كويس واستمتع!', 'اقري كويس واستمتعي!')), 'point');
     } else {
-      say(q.mode === 'timed' ? T('Quick one! Watch the timer.', 'سؤال سريع! خلّي بالك من الوقت.') : q.style === 'story' ? T('Read the story first.', 'اقرأ القصة الأول.') : T('You can do it!', 'إنت تقدر!'), 'think');
+      say(q.mode === 'timed' ? T('Quick one! Watch the timer.', 'سؤال سريع! خلّي بالك من الوقت.') : q.style === 'story' ? T('Read the story first.', G('اقرأ القصة الأول.', 'اقري القصة الأول.')) : T('You can do it!', G('إنت تقدر!', 'إنتي تقدري!')), 'think');
     }
     header(q, i, list.length, results);
     window.__cur = q;
@@ -725,7 +725,7 @@ async function playList(list, label) {
       ex.className = 'explain ok'; ex.innerHTML = `✓ ${esc(q.explain)}`; ex.hidden = false;
     } else {
       streak = 0; sfx.bad(); SI.voice('bad'); if (q.src !== 'bonus' || label !== 'quest') missed.push(q);
-      say(r.timeout ? T('Time’s up! Here is the answer.', 'الوقت خلص! دي الإجابة.') : T('Good try! Look at the right answer.', 'محاولة حلوة! بص على الإجابة الصح.'), 'sad');
+      say(r.timeout ? T('Time’s up! Here is the answer.', 'الوقت خلص! دي الإجابة.') : T('Good try! Look at the right answer.', G('محاولة حلوة! بص على الإجابة الصح.', 'محاولة حلوة! بصّي على الإجابة الصح.')), 'sad');
       ex.className = 'explain no'; ex.innerHTML = `${r.timeout ? T('⏱ Time’s up. ', '⏱ الوقت خلص. ') : ''}${esc(q.explain)}`; ex.hidden = false;
       const card = $('#qcard'); card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
     }
@@ -782,8 +782,8 @@ async function results(kind, res, total, extraXP = 0) {
   const levelUp = gain.after.n > gain.before.n;
   sfx.win(); confetti(60); SI.voice('finish');
   const me = SI.player();
-  say(stars === 3 ? T(`Amazing, ${esc(me.name)}! You are a real expert on ${esc(CH.title)}!`, `مذهل يا ${esc(me.name)}! إنت خبير حقيقي في ${esc(SI.chTitle(CH))}!`) : T(`Nice work, ${esc(me.name)}! Play again to get more stars.`, `شغل حلو يا ${esc(me.name)}! العب تاني علشان تاخد نجوم أكتر.`), 'celebrate');
-  const titles = AR ? { quest: 'خلّصت التحدي!', daily: 'خلّصت خماسية اليوم!', review: 'خلّصت المراجعة!' } : { quest: 'Quest complete!', daily: 'Daily 5 done!', review: 'Review done!' };
+  say(stars === 3 ? T(`Amazing, ${esc(me.name)}! You are a real expert on ${esc(CH.title)}!`, G(`مذهل يا ${esc(me.name)}! إنت خبير حقيقي في ${esc(SI.chTitle(CH))}!`, `مذهل يا ${esc(me.name)}! إنتي خبيرة حقيقية في ${esc(SI.chTitle(CH))}!`)) : T(`Nice work, ${esc(me.name)}! Play again to get more stars.`, G(`شغل حلو يا ${esc(me.name)}! العب تاني علشان تاخد نجوم أكتر.`, `شغل حلو يا ${esc(me.name)}! العبي تاني علشان تاخدي نجوم أكتر.`)), 'celebrate');
+  const titles = AR ? { quest: G('خلّصت التحدي!', 'خلّصتي التحدي!'), daily: G('خلّصت خماسية اليوم!', 'خلّصتي خماسية اليوم!'), review: G('خلّصت المراجعة!', 'خلّصتي المراجعة!') } : { quest: 'Quest complete!', daily: 'Daily 5 done!', review: 'Review done!' };
   const o = mk('div', 'overlay', `<div class="panel">
     <img class="hero" src="assets/parrot_${stars >= 2 ? 'celebrate' : 'thumbs'}.png" alt="">
     <h2>${titles[kind]}</h2>
@@ -791,7 +791,7 @@ async function results(kind, res, total, extraXP = 0) {
     <div class="stats"><span>${T('Score', 'النقاط')}: ${score}</span><span>${T('Right first time', 'صح من أول مرة')}: ${res.firstRight} / ${total}</span>${kind === 'quest' ? `<span>${T('Best', 'أعلى نتيجة')}: ${bestScore}</span>` : ''}${extraXP ? `<span>🔥 ${T('Daily bonus', 'مكافأة اليوم')} +${extraXP}</span>` : ''}</div>
     ${levelBlock(gain)}
     ${kind === 'quest' ? `<p class="rank" id="rank">${T('Saving your score…', 'بنحفظ نتيجتك…')}</p>` : ''}
-    <p>${res.missed.length ? T(`Reesho saved <b>${res.missed.length}</b> tricky question${res.missed.length > 1 ? 's' : ''} for your review.`, `ريشو حفظ لك <b>${res.missed.length}</b> سؤال صعب علشان تراجعه.`) : T('Perfect! Come back tomorrow for your Daily 5.', 'ممتاز! ارجع بكرة لخماسية اليوم.')}</p>
+    <p>${res.missed.length ? T(`Reesho saved <b>${res.missed.length}</b> tricky question${res.missed.length > 1 ? 's' : ''} for your review.`, `ريشو حفظ لك <b>${res.missed.length}</b> سؤال صعب علشان تراجعه.`) : T('Perfect! Come back tomorrow for your Daily 5.', G('ممتاز! ارجع بكرة لخماسية اليوم.', 'ممتاز! ارجعي بكرة لخماسية اليوم.'))}</p>
     <div class="row acts">
       ${res.missed.length ? `<a class="btn primary" href="quiz.html#review">${T('Review now', 'راجع دلوقتي')}</a>` : ''}
       ${kind === 'quest' ? `<a class="btn" href="champions.html">🏆 ${T('Champions', 'الأبطال')}</a>` : ''}
@@ -871,13 +871,13 @@ async function main() {
     const N = window.IDEAS.filter(I => !I.bonus).length;
     set(T('Chapter Quest', 'تحدي الفصل'), T(`${CH.title} · ${N} questions`, `${TITLE} · ${N} سؤال`));
     const list = buildQuest(); rememberVariants(list);
-    await intro(T(`Ready, ${esc(me.name)}?`, `جاهز يا ${esc(me.name)}؟`), T(`Chapter ${CH.n} Quest · ${N} questions`, `تحدي الفصل ${CH.n} · ${N} سؤال`),
+    await intro(T(`Ready, ${esc(me.name)}?`, G(`جاهز يا ${esc(me.name)}؟`, `جاهزة يا ${esc(me.name)}؟`)), T(`Chapter ${CH.n} Quest · ${N} questions`, `تحدي الفصل ${CH.n} · ${N} سؤال`),
       T('Some questions have a timer ⏱. The last ones are Boss questions ★. Get 5 right in a row for a mystery box 🎁. Your best score goes on the Champions board 🏆!',
-        'بعض الأسئلة ليها وقت ⏱. وآخر الأسئلة هي التحدي الكبير ★. جاوب ٥ صح ورا بعض وخد صندوق المفاجآت 🎁. وأعلى نتيجة ليك بتدخل لوحة الأبطال 🏆!'));
+        G('بعض الأسئلة ليها وقت ⏱. وآخر الأسئلة هي التحدي الكبير ★. جاوب ٥ صح ورا بعض وخد صندوق المفاجآت 🎁. وأعلى نتيجة ليك بتدخل لوحة الأبطال 🏆!', 'بعض الأسئلة ليها وقت ⏱. وآخر الأسئلة هي التحدي الكبير ★. جاوبي ٥ صح ورا بعض وخدي صندوق المفاجآت 🎁. وأعلى نتيجة ليكي بتدخل لوحة الأبطال 🏆!')));
     const res = await playList(list, 'quest');
     const retry = res.missed.filter(q => q.mode !== 'boss');
     if (retry.length) {
-      await banner(T('Second chance', 'فرصة تانية'), T('Try them again!', 'جرّبهم تاني!'));
+      await banner(T('Second chance', 'فرصة تانية'), T('Try them again!', G('جرّبهم تاني!', 'جرّبيهم تاني!')));
       await playList(retry.map(q => Object.assign({}, q, { mode: 'normal' })), 'retry');
     }
     await results('quest', res, list.filter(q => q.src !== 'bonus').length);
@@ -885,7 +885,7 @@ async function main() {
     set(T('Daily 5', 'خماسية اليوم'), T(`${CH.title} · five quick questions every day`, `${TITLE} · خمس أسئلة سريعة كل يوم`));
     const st = SI.dailyState();
     if (st.done) {
-      const o = notice(T('Done for today!', 'خلّصت النهارده!'), T(`You already did today’s Daily 5. 🔥 Your streak: <b>${st.streak} day${st.streak === 1 ? '' : 's'}</b>. Come back tomorrow!`, `إنت حليت خماسية النهارده خلاص. 🔥 سلسلتك: <b>${st.streak} يوم</b>. ارجع بكرة!`),
+      const o = notice(T('Done for today!', G('خلّصت النهارده!', 'خلّصتي النهارده!')), T(`You already did today’s Daily 5. 🔥 Your streak: <b>${st.streak} day${st.streak === 1 ? '' : 's'}</b>. Come back tomorrow!`, G(`إنت حليت خماسية النهارده خلاص. 🔥 سلسلتك: <b>${st.streak} يوم</b>. ارجع بكرة!`, `إنتي حليتي خماسية النهارده خلاص. 🔥 سلسلتك: <b>${st.streak} يوم</b>. ارجعي بكرة!`)),
         `<button class="btn primary" type="button" id="practise">${T('Practise anyway', 'اتمرّن برضه')}</button><a class="btn" href="map.html">${T('Map', 'الخريطة')}</a>`);
       await new Promise(r => { $('#practise', o).onclick = () => { o.remove(); r(); }; });
       const list = buildDaily(); rememberVariants(list);
@@ -904,12 +904,12 @@ async function main() {
       const cards = SI.chProf().cards || {};
       const next = Object.values(cards).map(c => c.due).sort((a, b) => a - b)[0];
       const when = next ? Math.max(1, Math.round((next - Date.now()) / DAY)) : 0;
-      notice(T('All caught up!', 'مفيش حاجة متأخرة!'), next ? T(`Nothing to review right now. Come back in about <b>${when} day${when > 1 ? 's' : ''}</b>.`, `مفيش مراجعة دلوقتي. ارجع بعد حوالي <b>${when} يوم</b>.`) : T('Play the Chapter Quest first. Reesho will save the tricky questions here.', 'العب تحدي الفصل الأول، وريشو هيحفظ لك الأسئلة الصعبة هنا.'),
+      notice(T('All caught up!', 'مفيش حاجة متأخرة!'), next ? T(`Nothing to review right now. Come back in about <b>${when} day${when > 1 ? 's' : ''}</b>.`, G(`مفيش مراجعة دلوقتي. ارجع بعد حوالي <b>${when} يوم</b>.`, `مفيش مراجعة دلوقتي. ارجعي بعد حوالي <b>${when} يوم</b>.`)) : T('Play the Chapter Quest first. Reesho will save the tricky questions here.', 'العب تحدي الفصل الأول، وريشو هيحفظ لك الأسئلة الصعبة هنا.'),
         `<a class="btn primary" href="map.html">${T('Map', 'الخريطة')}</a>`);
       return;
     }
     rememberVariants(list);
-    await intro(T('Review time', 'وقت المراجعة'), T(`${list.length} question${list.length > 1 ? 's' : ''} to practise`, `${list.length} سؤال للتمرين`), T('These were tricky before. Get them right to move them further away!', 'الأسئلة دي كانت صعبة عليك قبل كده. جاوبها صح علشان تبعد عنك!'), T('Go!', 'يلّا!'));
+    await intro(T('Review time', 'وقت المراجعة'), T(`${list.length} question${list.length > 1 ? 's' : ''} to practise`, `${list.length} سؤال للتمرين`), T('These were tricky before. Get them right to move them further away!', G('الأسئلة دي كانت صعبة عليك قبل كده. جاوبها صح علشان تبعد عنك!', 'الأسئلة دي كانت صعبة عليكي قبل كده. جاوبيها صح علشان تبعد عنك!')), T('Go!', 'يلّا!'));
     const res = await playList(list, 'review');
     await results('review', res, list.length);
   }
