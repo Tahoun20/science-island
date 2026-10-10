@@ -2,6 +2,10 @@
    Each item: text (Arabic), and optional links [{label, href}] that open the change directly.
    Preview links: quiz.html#preview=ID.n&lang=ar|en  ·  game stages: arm.html#stage2 / #stage3 */
 window.CHANGES = [
+  { date: '2026-10-10', title: 'واجهة الصفحة الرئيسية الجديدة',
+    items: [
+      { text: 'صورة «متفوّق» الجديدة مع ريشو بدل العنوان القديم، بنسخة أصغر للموبايل علشان تفتح بسرعة.', links: [{ label: 'الصفحة الرئيسية', href: 'index.html' }] }
+    ] },
   { date: '2026-10-10', title: 'ريشو بيكلم الولد والبنت صح، وبيرحّب ويودّع',
     items: [
       { text: 'سؤال «بطل ولا بطلة؟» عند تسجيل لاعب جديد، واللاعب القديم بيتسأل مرة واحدة لما يدوس على اسمه.', links: [{ label: 'الصفحة الرئيسية', href: 'index.html' }] },
