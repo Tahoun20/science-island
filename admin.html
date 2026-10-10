@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>متفوّق · لوحة الأدمن</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="common.css">
+<style>
+/* Owner's page: what changed, and every question in English and Arabic side by side.
+   "New" and "changed" are worked out on this device: each phrasing's content is remembered once you have seen it. */
+body{font-family:"Cairo","Nunito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1060px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.en{font-family:"Nunito","Cairo",system-ui,sans-serif;direction:ltr;unicode-bidi:isolate;text-align:left}
+h2{margin:0 0 10px;font-size:21px;font-weight:900}
+.log{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.log>li{background:#fff;border:2px solid var(--line);border-radius:16px;padding:10px 14px}
+.log .d{font-size:13px;font-weight:800;color:var(--ink)}
+.log b{display:block;font-size:17px;margin:2px 0 4px}
+.log ul{margin:0;padding:0 18px 0 0;display:grid;gap:4px;font-weight:700;font-size:15px;line-height:1.5}
+.lk{display:inline-block;margin:0 4px;padding:1px 10px;border-radius:999px;background:#e3f1f7;color:var(--primary-d);font-weight:900;font-size:13.5px;text-decoration:none;white-space:nowrap}
+.lk:hover{background:#cfe9f4}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.bar .btn{min-height:42px;font-size:15px;padding:8px 14px}
+.bar .btn[aria-pressed="true"]{background:var(--primary);color:#fff;box-shadow:0 4px 0 var(--primary-d)}
+.bar select{font:inherit;font-weight:800;font-size:15px;border:3px solid var(--line);border-radius:14px;padding:6px 10px;background:#fff;color:var(--navy)}
+.sum{font-weight:800;font-size:14.5px;color:var(--ink)}
+.idea{background:#fff;border:2px solid var(--line);border-radius:18px;padding:10px 12px;margin-bottom:10px}
+.idea h3{margin:0 0 8px;font-size:16.5px;font-weight:900;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center}
+.idea h3 .en{font-weight:800;color:var(--ink);font-size:14.5px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.cell{border-radius:14px;padding:8px 10px;background:#f7fbfd;border:2px solid transparent;font-size:15px;line-height:1.5;min-width:0}
+.cell.new{border-color:#2e9e6b;background:#effaf4}
+.cell.chg{border-color:#f2b134;background:#fff9e8}
+.cell .q{font-weight:800}
+.cell .a{font-weight:700;color:#237047;margin-top:2px;overflow-wrap:anywhere}
+.cell .meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:4px}
+.tag{font-size:12px;font-weight:900;border-radius:999px;padding:1px 9px;background:#e3f1f7;color:var(--primary-d);white-space:nowrap}
+.tag.new{background:#2e9e6b;color:#fff}
+.tag.chg{background:#f2b134;color:#4a3200}
+.tag.boss{background:#3a2a5e;color:#ffe08a}
+.tag.bonus{background:#fdf2c4;color:#8a6400}
+.empty{font-weight:800;color:var(--ink);padding:10px}
+@media (max-width:720px){ .row{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <a class="brand" href="index.html">
+      <div class="logo" aria-hidden="true">🛠️</div>
+      <div><h1>لوحة الأدمن</h1><p>متفوّق · Motafawek</p></div>
+    </a>
+    <div class="hud">
+      <a class="pill" href="quiz.html#preview">المعاينة</a>
+      <a class="pill" href="reviews.html">التقييمات</a>
+      <a class="pill" href="index.html">الموقع</a>
+    </div>
+  </header>
+  <main class="wrap">
+    <section class="card">
+      <h2>آخر التعديلات</h2>
+      <ul class="log" id="log"></ul>
+    </section>
+    <section class="card">
+      <h2>الأسئلة: عربي وإنجليزي</h2>
+      <div class="bar">
+        <select id="ch" aria-label="الفصل"></select>
+        <button class="btn" type="button" id="fNew" aria-pressed="true">الجديد والمعدّل</button>
+        <button class="btn" type="button" id="fAll" aria-pressed="false">الكل</button>
+        <button class="btn" type="button" id="seen">علّمت الكل كمتشاف ✓</button>
+        <span class="sum" id="sum"></span>
+      </div>
+      <div id="list"><p class="empty">جاري التحميل…</p></div>
+    </section>
+  </main>
+</div>
+<script src="chapters.js"></script>
+<script src="changes.js"></script>
+<script src="common.js"></script>
+<script>
+(() => {
+  'use strict';
+  const $ = s => document.querySelector(s), esc = SI.esc;
+  const KEY = 'si.admin.seen';
+  const loadSeen = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } };
+  const saveSeen = o => { try { localStorage.setItem(KEY, JSON.stringify(o)); } catch (e) {} };
+  const hash = o => { const s = JSON.stringify(o); let h = 5381; for (let i = 0; i < s.length; i++) h = (h * 33 + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
+
+  /* ---------- what changed ---------- */
+  $('#log').innerHTML = (window.CHANGES || []).map(c => `<li><span class="d">${esc(c.date)}</span><b>${esc(c.title)}</b><ul>${
+    c.items.map(it => `<li>${esc(it.text)} ${(it.links || []).map(l => `<a class="lk" href="${esc(l.href)}">${esc(l.label)} ◂</a>`).join('')}</li>`).join('')}</ul></li>`).join('');
+
+  /* preview links need a player and the chapter; the owner gets a player called Admin if this device has none */
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a[href^="quiz.html"], a[href^="arm.html"]'); if (!a) return;
+    if (!SI.player()) SI.addPlayer({ name: 'Admin', grade: 'g5', track: 'lang' });
+    SI.setChapter($('#ch').value || 'ch1');
+    const k = a.dataset.seen; if (k) { const s = loadSeen(); s[k] = a.dataset.h; saveSeen(s); }
+  });
+
+  /* ---------- questions in both languages ---------- */
+  const load = src => new Promise(res => {
+    window.IDEAS = undefined;
+    const el = document.createElement('script'); el.src = src + '?v=' + Date.now();   // always the newest file
+    el.onload = () => res(window.IDEAS || []); el.onerror = () => res([]);
+    document.head.appendChild(el);
+  });
+  const TYPES = { tf: 'صح أم خطأ', fill: 'أكمل', order: 'رتّب', match: 'صِل', tap: 'اضغط على الصورة', mc: 'اختر', odd: 'الشاذ', spot: 'اكتشف الخطأ', story: 'قصة' };
+  const TAP = { in: 'العضلة الأمامية', out: 'العضلة الخلفية', shoulder: 'الكتف', elbow: 'الكوع', wrist: 'المعصم', skull: 'الجمجمة', ribs: 'الضلوع', backbone: 'العمود الفقري' };
+  function answer(v, ar) {
+    if (v.type === 'tf') return v.answer === 0 ? (ar ? 'صح' : 'True') : (ar ? 'خطأ' : 'False');
+    if (v.type === 'mc' || v.type === 'fill') return v.options[v.answer];
+    if (v.type === 'order') return v.answer.map(i => v.items[i]).join(ar ? ' ← ' : ' → ');
+    if (v.type === 'match') return v.left.map((l, i) => `${l} ${ar ? '←' : '→'} ${v.right[v.answer[i]]}`).join(' · ');
+    if (v.type === 'tap') return (ar ? '' : '') + (TAP[v.answer] || v.answer);
+    return '';
+  }
+  let data = { en: [], ar: [] }, onlyNew = true;
+  function status(lang, id, vi, v) {
+    const s = loadSeen(), k = `${lang}:${id}.${vi + 1}`, h = hash(v);
+    return { k, h, st: !(k in s) ? 'new' : s[k] !== h ? 'chg' : '' };
+  }
+  function cell(lang, I, v, vi) {
+    if (!v) return `<div class="cell"><span class="tag">${lang === 'ar' ? 'عربي' : 'English'}</span> — مش موجود</div>`;
+    const ar = lang === 'ar', S = status(lang, I.id, vi, v);
+    const tags = `<span class="tag">${ar ? 'عربي' : 'English'}</span><span class="tag">${TYPES[v.style] || TYPES[v.type]}</span>${v.mode === 'timed' ? `<span class="tag">⏱ ${v.seconds}</span>` : ''}${S.st === 'new' ? '<span class="tag new">جديد</span>' : S.st === 'chg' ? '<span class="tag chg">معدّل</span>' : ''}`;
+    const href = `quiz.html#preview=${I.id}.${vi + 1}&lang=${lang}`;
+    return `<div class="cell ${S.st}"><div class="meta">${tags}<a class="lk" href="${href}" data-seen="${S.k}" data-h="${S.h}">جرّب ◂</a></div>
+      <div class="q ${ar ? '' : 'en'}">${esc(v.q)}</div><div class="a ${ar ? '' : 'en'}">✓ ${esc(answer(v, ar))}</div></div>`;
+  }
+  function render() {
+    const byId = (list, id) => list.find(I => I.id === id);
+    const ids = []; [...data.en, ...data.ar].forEach(I => { if (!ids.includes(I.id)) ids.push(I.id); });
+    let nNew = 0, nChg = 0, html = '';
+    ids.forEach(id => {
+      const E = byId(data.en, id), A = byId(data.ar, id), I = E || A;
+      const n = Math.max(E ? E.variants.length : 0, A ? A.variants.length : 0);
+      let rows = '', show = !onlyNew;
+      for (let vi = 0; vi < n; vi++) {
+        const ev = E && E.variants[vi], av = A && A.variants[vi];
+        const se = ev ? status('en', id, vi, ev).st : 'new', sa = av ? status('ar', id, vi, av).st : 'new';
+        [se, sa].forEach(s => { if (s === 'new') nNew++; else if (s === 'chg') nChg++; });
+        if (onlyNew && !se && !sa) continue;
+        show = true;
+        rows += `<div class="row">${cell('en', I, ev, vi)}${cell('ar', I, av, vi)}</div>`;
+      }
+      if (!show || !rows) return;
+      html += `<div class="idea"><h3>${esc(id)} · ${esc(A ? A.concept : '')} <span class="en">${esc(E ? E.concept : '')}</span>
+        <span class="tag">الدرس ${I.lesson}</span>${I.boss ? '<span class="tag boss">التحدي الكبير</span>' : ''}${I.bonus ? '<span class="tag bonus">إضافي</span>' : ''}</h3>${rows}</div>`;
+    });
+    $('#list').innerHTML = html || `<p class="empty">${onlyNew ? 'مفيش أسئلة جديدة أو معدّلة من آخر مرة. ✓' : 'مفيش أسئلة.'}</p>`;
+    $('#sum').textContent = `${nNew} جديد · ${nChg} معدّل`;
+  }
+  async function loadChapter(id) {
+    const c = SI.chapterById(id) || {};
+    $('#list').innerHTML = '<p class="empty">جاري التحميل…</p>';
+    data.en = c.questions ? await load(c.questions) : [];
+    data.ar = c.questionsAr ? await load(c.questionsAr) : [];
+    render();
+  }
+  const sel = $('#ch');
+  SI.chapters().filter(c => c.ready).forEach(c => { const o = document.createElement('option'); o.value = c.id; o.textContent = `الفصل ${c.n} · ${c.titleAr || c.title}`; sel.appendChild(o); });
+  sel.onchange = () => loadChapter(sel.value);
+  const setF = v => { onlyNew = v; $('#fNew').setAttribute('aria-pressed', v); $('#fAll').setAttribute('aria-pressed', !v); render(); };
+  $('#fNew').onclick = () => setF(true); $('#fAll').onclick = () => setF(false);
+  $('#seen').onclick = () => {
+    const s = loadSeen();
+    ['en', 'ar'].forEach(l => data[l].forEach(I => I.variants.forEach((v, vi) => { s[`${l}:${I.id}.${vi + 1}`] = hash(v); })));
+    saveSeen(s); render();
+  };
+  window.addEventListener('pageshow', e => { if (e.persisted) render(); });   // coming back from a preview: refresh the badges
+  loadChapter(sel.value || 'ch1');
+})();
+</script>
+</body>
+</html>

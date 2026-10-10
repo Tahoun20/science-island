@@ -841,12 +841,12 @@ async function preview(set) {
   all.forEach((q, i) => { const o = mk('option'); o.value = i; o.textContent = `${q.id}.${q.vi + 1} · ${TYPE_LABEL[q.style] || TYPE_LABEL[q.type]} · ${q.concept}${q.src === 'bonus' ? ' ★' : ''}`; sel.appendChild(o); });
   bar.append(prev, sel, next); $('#qcard').prepend(bar);
   let k = 0, token = 0;
-  const m = /^#preview=([A-Z]\d+)\.(\d+)$/.exec(location.hash);
+  const m = /^#preview=([A-Z]\d+)\.(\d+)/.exec(location.hash), langTag = (/&lang=(ar|en)/.exec(location.hash) || [''])[0];
   if (m) { const f = all.findIndex(q => q.id === m[1] && q.vi === +m[2] - 1); if (f >= 0) k = f; }
   async function show(i) {
     k = (i + all.length) % all.length; sel.value = k; const run = ++token, q = all[k];
     if (timerStop) timerStop(); hideTimer(); $('#actions').innerHTML = '';
-    history.replaceState(null, '', `#preview=${q.id}.${q.vi + 1}`);
+    history.replaceState(null, '', `#preview=${q.id}.${q.vi + 1}${langTag}`);
     header(q, 0, 0, []); $('#countPill').textContent = `${k + 1} / ${all.length}`;
     say(`<b>${q.id}.${q.vi + 1}</b> · ${esc(q.concept)}`, 'point');
     const r = await ask(q);

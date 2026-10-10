@@ -21,7 +21,8 @@
   /* ---------- language: an Arabic-track player sees the site in Arabic, right to left ----------
      T(en, ar) picks the text for the current player; static HTML carries data-ar (inner HTML),
      data-ar-label (aria-label + title) and data-ar-ph (placeholder), swapped in by applyLang(). */
-  const isAr = () => ((player() || {}).track === 'ar');
+  const LANG_OVR = (/[#&]lang=(ar|en)\b/.exec(location.hash) || [])[1];   // owner preview links can force a language: #preview=M1.1&lang=ar
+  const isAr = () => (LANG_OVR ? LANG_OVR === 'ar' : ((player() || {}).track === 'ar'));
   const T = (en, ar) => (isAr() && ar != null ? ar : en);
   const chTitle = c => (c ? (isAr() && c.titleAr) || c.title : '');
   const RTL_CSS = `
